@@ -1,0 +1,19 @@
+
+> web@1.0.0 dev /Users/leotrimhalimi/Developer/hr-tool/apps/web
+> next dev --port 3001
+
+   [1m[38;2;173;127;168m▲ Next.js 16.0.0[39m[22m (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.10.10.153:3001
+
+ [32m[1m✓[22m[39m Starting...
+ [32m[1m✓[22m[39m Ready in 645ms
+ GET /dashboard [32m200[39m in 1400ms[2m (compile: 1215ms, render: 185ms)[22m
+[33m [33m[1m⚠[22m[39m Found a change in next.config.ts. Restarting the server to apply the changes...[39m
+   [1m[38;2;173;127;168m▲ Next.js 16.0.0[39m[22m (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.10.10.153:3001
+
+ [32m[1m✓[22m[39m Starting...
+ [32m[1m✓[22m[39m Ready in 469ms
+ GET /dashboard [33m404[39m in 1082ms[2m (compile: 989ms, render: 93ms)[22m

@@ -1,0 +1,23 @@
+
+
+> web@1.0.0 build /Users/leotrimhalimi/Developer/hr-tool/apps/web
+> next build
+
+   [1m[38;2;173;127;168m▲ Next.js 16.0.0[39m[22m (Turbopack)
+
+ [37m[1m [22m[39m Creating an optimized production build ...
+ [32m[1m✓[22m[39m Compiled successfully in 1275.7ms
+ [37m[1m [22m[39m Skipping validation of types
+[?25l [37m[1m [22m[39m Collecting page data  [36m.[39m[2K[1G [37m[1m [22m[39m Collecting page data  [36m..[39m[2K[1G[?25h [37m[1m [22m[39m Collecting page data in 205.7ms     [32m[1m✓[22m[39m Collecting page data in 205.7ms 
+[?25l [37m[1m [22m[39m Generating static pages (0/5)  [36m[    ][39m[2K[1G [37m[1m [22m[39m Generating static pages (0/5)  [36m[=   ][39m[2K[1G[?25h [32m[1m✓[22m[39m Generating static pages (5/5) in 265.3ms
+[?25l [37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[?25h [37m[1m [22m[39m Finalizing page optimization in 5.3ms     [32m[1m✓[22m[39m Finalizing page optimization in 5.3ms 
+
+[4mRoute (app)[24m
+┌ ○ /
+├ ○ /_not-found
+└ ○ /dashboard
+
+
+○  (Static)  prerendered as static content
+
+[?25h
