@@ -31,9 +31,9 @@ export function BreadcrumbLayout() {
             <React.Fragment key={href}>
               <BreadcrumbItem>
                 {isLast ? (
-                  <span className="font-bold text-sidebar-primary">{capitalizeFirst(segment)}</span>
+                  <span className="font-bold text-sidebar-foreground">{capitalizeFirst(segment)}</span>
                 ) : (
-                  <BreadcrumbLink href={href} className="text-sidebar-accent">
+                  <BreadcrumbLink href={href} className="text-sidebar-foreground">
                     {capitalizeFirst(segment)}
                   </BreadcrumbLink>
                 )}

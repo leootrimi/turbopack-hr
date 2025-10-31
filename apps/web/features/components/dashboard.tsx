@@ -115,7 +115,7 @@ const Dashboard = () => {
   const paginatedCheckIns = paginateData(checkIns, checkInPage);
 
   return (
-    <div className="min-h-screen md:p-6">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-7xl space-y-4">
         <div className="flex gap-4 items-center">
           <img
@@ -124,8 +124,8 @@ const Dashboard = () => {
             alt=""
           />
           <div className="">
-            <h1 className="text-4xl font-bold text-sidebar-accent">Hi, Leotrim</h1>
-            <h3 className="text-lg font-light text-gray-500">Glad to see you back here!</h3>
+            <h1 className="text-4xl font-bold text-foreground">Hi, Leotrim</h1>
+            <h3 className="text-lg font-light text-secondary-foreground">Glad to see you back here!</h3>
           </div>
         </div>
         <div className="grid gap-6 lg:grid-cols-3">

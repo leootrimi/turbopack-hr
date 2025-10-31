@@ -127,7 +127,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <h1 className="text-sidebar-primary-foreground"> Bamboo </h1>
       </SidebarHeader>
 
-      <SidebarContent className="flex-1 overflow-y-auto px-2 bg-sidebar dark:bg-amber-700">
+      <SidebarContent className="flex-1 overflow-y-auto px-2 bg-card">
         {data.navMain.map((group, index) => (
           <div key={group.title}>
             <SidebarGroup className="rounded-lg">
@@ -143,8 +143,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors
                                     ${
                                       pathname === item.url
-                                        ? "bg-sidebar-accent text-sidebar-primary-foreground dark:bg-amber-500"
-                                        : "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground dark:hover:bg-amber-600"
+                                        ? "bg-sidebar-primary text-sidebar-primary-foreground "
+                                        : "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground "
                                     }`}
                       >
                         {item.title}
@@ -156,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroup>
 
             {index !== data.navMain.length - 1 && (
-              <hr className="border-t border-sidebar-accent dark:border-amber-700" />
+              <hr className="border-t border-sidebar-accent opacity-7 " />
             )}
           </div>
         ))}

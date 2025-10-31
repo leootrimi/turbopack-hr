@@ -9,6 +9,7 @@ import {
 } from "@/components/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import { Geist } from "next/font/google";
+import ThemeToggle from "@/components/components/themeTogle";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -23,7 +24,7 @@ export default function RootLayout({
       <body className={geist.className}>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset className="bg-gray-50">
+          <SidebarInset className="bg-background">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
@@ -31,8 +32,9 @@ export default function RootLayout({
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
               <BreadcrumbLayout />
+              <ThemeToggle />
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+            <div className="flex flex-1 flex-col gap-4 p-6">{children}</div>
           </SidebarInset>
         </SidebarProvider>
       </body>
