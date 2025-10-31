@@ -1,7 +1,8 @@
-import * as React from "react"
+"use client";
 
-import { SearchForm } from "@/components/components/search-form"
-import { VersionSwitcher } from "@/components/components/version-switcher"
+import * as React from "react";
+import { SearchForm } from "@/components/components/search-form";
+import { VersionSwitcher } from "@/components/components/version-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -10,173 +11,159 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/components/ui/sidebar"
+} from "@/components/components/ui/sidebar";
+import { usePathname } from "next/navigation";
 
-// This is sample data.
-const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
+export const data = {
+  versions: ["1.0.0", "1.1.0-beta", "2.0.0"],
   navMain: [
     {
-      title: "Getting Started",
-      url: "#",
+      title: "Dashboard",
+      url: "/dashboard",
       items: [
         {
-          title: "Installation",
-          url: "#",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Building Your Application",
-      url: "#",
-      items: [
-        {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
+          title: "Overview",
+          url: "/dashboard/overview",
           isActive: true,
         },
         {
-          title: "Rendering",
-          url: "#",
-        },
-        {
-          title: "Caching",
-          url: "#",
-        },
-        {
-          title: "Styling",
-          url: "#",
-        },
-        {
-          title: "Optimizing",
-          url: "#",
-        },
-        {
-          title: "Configuring",
-          url: "#",
-        },
-        {
-          title: "Testing",
-          url: "#",
-        },
-        {
-          title: "Authentication",
-          url: "#",
-        },
-        {
-          title: "Deploying",
-          url: "#",
-        },
-        {
-          title: "Upgrading",
-          url: "#",
-        },
-        {
-          title: "Examples",
-          url: "#",
+          title: "Reports",
+          url: "/dashboard/reports",
         },
       ],
     },
     {
-      title: "API Reference",
-      url: "#",
+      title: "Employees",
+      url: "/employees",
       items: [
         {
-          title: "Components",
-          url: "#",
+          title: "Active Employees",
+          url: "/employees/active",
         },
         {
-          title: "File Conventions",
-          url: "#",
+          title: "Former Employees",
+          url: "/employees/former",
         },
         {
-          title: "Functions",
-          url: "#",
-        },
-        {
-          title: "next.config.js Options",
-          url: "#",
-        },
-        {
-          title: "CLI",
-          url: "#",
-        },
-        {
-          title: "Edge Runtime",
-          url: "#",
+          title: "Teams & Departments",
+          url: "/employees/teams",
         },
       ],
     },
     {
-      title: "Architecture",
-      url: "#",
+      title: "Equipment",
+      url: "/equipment",
       items: [
         {
-          title: "Accessibility",
-          url: "#",
+          title: "Assigned Equipment",
+          url: "/equipment/assigned",
         },
         {
-          title: "Fast Refresh",
-          url: "#",
+          title: "New Equipment",
+          url: "/equipment/new",
         },
         {
-          title: "Next.js Compiler",
-          url: "#",
+          title: "Archived Equipment",
+          url: "/equipment/archived",
+        },
+      ],
+    },
+    {
+      title: "Requests",
+      url: "/requests",
+      items: [
+        {
+          title: "Holiday Requests",
+          url: "/requests/holiday",
         },
         {
-          title: "Supported Browsers",
-          url: "#",
+          title: "Work From Home",
+          url: "/requests/wfh",
         },
         {
-          title: "Turbopack",
-          url: "#",
+          title: "Sick Leave",
+          url: "/requests/sick-leave",
+        },
+        {
+          title: "Vacation Requests",
+          url: "/requests/vacation",
+        },
+      ],
+    },
+    {
+      title: "Administration",
+      url: "/admin",
+      items: [
+        {
+          title: "Settings",
+          url: "/admin/settings",
+        },
+        {
+          title: "Access Control",
+          url: "/admin/access",
+        },
+        {
+          title: "System Logs",
+          url: "/admin/logs",
         },
       ],
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>
+    <Sidebar
+      {...props}
+      className="bg-white dark:bg-gray-900 shadow-lg overflow-hidden"
+    >
+      <SidebarHeader className="flex flex-col gap-4 p-4 bg-sidebar-accent">
         <VersionSwitcher
           versions={data.versions}
-          defaultVersion={data.versions[0]}
+          defaultVersion={data.versions[0] ?? ""}
         />
-        <SearchForm />
       </SidebarHeader>
-      <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
-        {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {item.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+
+      <SidebarContent className="flex-1 overflow-y-auto px-2 bg-sidebar dark:bg-amber-700">
+        {data.navMain.map((group, index) => (
+          <div key={group.title}>
+            <SidebarGroup className="rounded-lg">
+              <SidebarGroupLabel className="text-gray-700 dark:text-gray-200 font-semibold text-sm px-3 py-2">
+                {group.title}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-1">
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <a
+                        href={item.url}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors
+                                    ${
+                                      pathname === item.url
+                                        ? "bg-sidebar-accent text-sidebar-primary-foreground dark:bg-amber-500"
+                                        : "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground dark:hover:bg-amber-600" 
+                                    }`}
+                      >
+                        {item.title}
+                      </a>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {index !== data.navMain.length - 1 && (
+              <hr className="border-t border-sidebar-accent dark:border-amber-700" />
+            )}
+          </div>
         ))}
       </SidebarContent>
+
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
