@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={geist.className}>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="bg-gray-50">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator

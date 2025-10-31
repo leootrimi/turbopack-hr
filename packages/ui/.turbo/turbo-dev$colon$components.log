@@ -2,15 +2,7 @@
 > @repo/ui@0.0.0 dev:components /Users/leotrimhalimi/Developer/hr-tool/packages/ui
 > tsc --watch
 
-[2J[3J[H[[90m2:13:22 PM[0m] Starting compilation in watch mode...
+[2J[3J[H[[90m8:31:27 PM[0m] Starting compilation in watch mode...
 
-[[90m2:13:23 PM[0m] Found 0 errors. Watching for file changes.
-
-[2J[3J[H[[90m2:14:21 PM[0m] File change detected. Starting incremental compilation...
-
-[[90m2:14:21 PM[0m] Found 0 errors. Watching for file changes.
-
-[2J[3J[H[[90m2:14:23 PM[0m] File change detected. Starting incremental compilation...
-
-[[90m2:14:23 PM[0m] Found 0 errors. Watching for file changes.
+[[90m8:31:28 PM[0m] Found 0 errors. Watching for file changes.
 

@@ -1,9 +1,10 @@
 import React from 'react'
+import Dashboard from '../../../features/components/dashboard'
 
 const page = () => {
   return (
     <div>
-      overview
+      <Dashboard />
     </div>
   )
 }

@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { SearchForm } from "@/components/components/search-form";
-import { VersionSwitcher } from "@/components/components/version-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +13,7 @@ import {
   SidebarRail,
 } from "@/components/components/ui/sidebar";
 import { usePathname } from "next/navigation";
+import { GalleryVerticalEnd } from "lucide-react";
 
 export const data = {
   versions: ["1.0.0", "1.1.0-beta", "2.0.0"],
@@ -121,11 +120,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {...props}
       className="bg-white dark:bg-gray-900 shadow-lg overflow-hidden"
     >
-      <SidebarHeader className="flex flex-col gap-4 p-4 bg-sidebar-accent">
-        <VersionSwitcher
-          versions={data.versions}
-          defaultVersion={data.versions[0] ?? ""}
-        />
+      <SidebarHeader className="flex flex-row items-center gap-4 p-4 bg-linear-to-t from-[#004466] to-sidebar-accent">
+        <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+          <GalleryVerticalEnd className="size-4" />
+        </div>
+        <h1 className="text-sidebar-primary-foreground"> Bamboo </h1>
       </SidebarHeader>
 
       <SidebarContent className="flex-1 overflow-y-auto px-2 bg-sidebar dark:bg-amber-700">
@@ -145,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     ${
                                       pathname === item.url
                                         ? "bg-sidebar-accent text-sidebar-primary-foreground dark:bg-amber-500"
-                                        : "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground dark:hover:bg-amber-600" 
+                                        : "hover:bg-sidebar-primary hover:text-sidebar-primary-foreground dark:hover:bg-amber-600"
                                     }`}
                       >
                         {item.title}
