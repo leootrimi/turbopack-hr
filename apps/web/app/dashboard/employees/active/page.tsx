@@ -1,10 +1,10 @@
 import React from 'react'
-import Dashboard from '../../../features/dashboard/components/dashboard'
+import { EmployeeTable } from '../../../../features/employees/components/table'
 
 const page = () => {
   return (
     <div>
-      <Dashboard />
+      <EmployeeTable />
     </div>
   )
 }

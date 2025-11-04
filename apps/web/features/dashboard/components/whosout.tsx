@@ -15,7 +15,7 @@ import {
 import { Separator } from "@radix-ui/react-separator";
 import { UserX } from "lucide-react";
 import React, { useState } from "react";
-import { AbsentUser } from "../types";
+import { AbsentUser } from "../../types";
 const ITEMS_PER_PAGE = 4;
 const WhosOut = ({ absentUsers }: { absentUsers: AbsentUser[] }) => {
   const [absentPage, setAbsentPage] = useState(1);

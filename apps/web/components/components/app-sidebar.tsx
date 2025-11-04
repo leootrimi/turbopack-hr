@@ -39,7 +39,7 @@ export const data = {
       items: [
         {
           title: "Active Employees",
-          url: "/employees/active",
+          url: "/dashboard/employees/active",
         },
         {
           title: "Former Employees",

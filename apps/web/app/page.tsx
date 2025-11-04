@@ -1,8 +1,9 @@
+import { LoginForm } from "../features/auth/loginForm";
 
 export default function Page() {
   return (
-    <main className="flex flex-col items-center justify-between min-h-screen p-24">
-        Test
+    <main>
+        <LoginForm />
     </main>
   );
 }

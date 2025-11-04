@@ -15,7 +15,7 @@ import {
 import { Separator } from "@radix-ui/react-separator";
 import { Bell, Calendar } from "lucide-react";
 import React, { useState } from "react";
-import { Announcement } from "../types";
+import { Announcement } from "../../types";
 
 const ITEMS_PER_PAGE = 4;
 

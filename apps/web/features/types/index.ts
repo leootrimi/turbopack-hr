@@ -18,3 +18,10 @@ export interface CheckIn {
   time: string;
   department: string;
 }
+
+export type Employee = {
+  id: number;
+  name: string;
+  position: string;
+  department: string;
+};

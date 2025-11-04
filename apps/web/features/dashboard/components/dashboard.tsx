@@ -17,7 +17,7 @@ import {
   PaginationNext,
 } from "@/components/components/ui/pagination";
 import { Separator } from "@/components/components/ui/separator";
-import { AbsentUser, Announcement, CheckIn } from "../types";
+import { AbsentUser, Announcement, CheckIn } from "../../types";
 import AnnouncementComponent from "./announcement";
 import WhosOut from "./whosout";
 
@@ -135,13 +135,14 @@ const Dashboard = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="rounded-2xl shadow-sm">
+            <Card className="rounded-2xl shadow-sm gap-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <UserCheck className="h-5 w-5 text-success" />
                   Check-in Summary
                 </CardTitle>
               </CardHeader>
+              <hr />
               <CardContent className="space-y-4">
                 {paginatedCheckIns.map((checkIn, index) => (
                   <div key={checkIn.id}>
@@ -153,7 +154,7 @@ const Dashboard = () => {
                         </h3>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
-                          {checkIn.time}
+                          {checkIn.time} 🟢
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
