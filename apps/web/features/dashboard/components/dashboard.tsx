@@ -115,7 +115,7 @@ const Dashboard = () => {
   const paginatedCheckIns = paginateData(checkIns, checkInPage);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl space-y-4">
         <div className="flex gap-4 items-center">
           <img

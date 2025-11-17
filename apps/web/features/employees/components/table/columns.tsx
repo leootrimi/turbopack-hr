@@ -1,8 +1,8 @@
 import { Button } from "@/components/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/components/ui/dropdown-menu"
+import { Employee } from "@repo/types"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-import { Employee } from "../table"
 
 export const columns: ColumnDef<Employee>[] = [
   {

@@ -33,44 +33,9 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/components/ui/checkbox";
+import { Employee, mockEmployee } from "@repo/types";
 
-export type Employee = {
-  id: number;
-  name: string;
-  position: string;
-  department: string;
-};
-
-const data: Employee[] = [
-  { id: 1, name: "John Doe", position: "Manager", department: "HR" },
-  { id: 2, name: "Jane Smith", position: "Developer", department: "IT" },
-  { id: 3, name: "Alex Brown", position: "Designer", department: "Marketing" },
-  { id: 4, name: "Sophia Lee", position: "QA Tester", department: "IT" },
-  {
-    id: 5,
-    name: "Michael Chen",
-    position: "Product Manager",
-    department: "Product",
-  },
-  {
-    id: 6,
-    name: "Emma Wilson",
-    position: "Data Analyst",
-    department: "Analytics",
-  },
-  {
-    id: 7,
-    name: "James Taylor",
-    position: "DevOps Engineer",
-    department: "IT",
-  },
-  {
-    id: 8,
-    name: "Olivia Martinez",
-    position: "UX Researcher",
-    department: "Design",
-  },
-];
+const data: Employee[] = mockEmployee;
 
 export function EmployeeTable() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -81,7 +46,6 @@ export function EmployeeTable() {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
-  // Add a "selection" column at the start
   const columns = React.useMemo(
     () => [
       {
@@ -128,7 +92,7 @@ export function EmployeeTable() {
   });
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 p-6">
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="relative flex-1 w-full sm:max-w-sm">

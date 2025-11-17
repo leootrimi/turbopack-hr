@@ -15,102 +15,105 @@ import {
 import { usePathname } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
 
+const BASE_PATH = "/dashboard";
+
 export const data = {
   versions: ["1.0.0", "1.1.0-beta", "2.0.0"],
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: `${BASE_PATH}`,
       items: [
         {
           title: "Overview",
-          url: "/dashboard/overview",
+          url: `${BASE_PATH}/overview`,
           isActive: true,
         },
         {
           title: "Reports",
-          url: "/dashboard/reports",
+          url: `${BASE_PATH}/reports`,
         },
       ],
     },
     {
       title: "Employees",
-      url: "/employees",
+      url: `${BASE_PATH}/employees`,
       items: [
         {
           title: "Active Employees",
-          url: "/dashboard/employees/active",
+          url: `${BASE_PATH}/employees/active`,
         },
         {
           title: "Former Employees",
-          url: "/employees/former",
+          url: `${BASE_PATH}/employees/former`,
         },
         {
           title: "Teams & Departments",
-          url: "/employees/teams",
+          url: `${BASE_PATH}/employees/teams`,
         },
       ],
     },
     {
       title: "Equipment",
-      url: "/equipment",
+      url: `${BASE_PATH}/equipment`,
       items: [
         {
           title: "Assigned Equipment",
-          url: "/equipment/assigned",
+          url: `${BASE_PATH}/equipment/assigned`,
         },
         {
           title: "New Equipment",
-          url: "/equipment/new",
+          url: `${BASE_PATH}/equipment/new`,
         },
         {
           title: "Archived Equipment",
-          url: "/equipment/archived",
+          url: `${BASE_PATH}/equipment/archived`,
         },
       ],
     },
     {
       title: "Requests",
-      url: "/requests",
+      url: `${BASE_PATH}/requests`,
       items: [
         {
           title: "Holiday Requests",
-          url: "/requests/holiday",
+          url: `${BASE_PATH}/requests/holiday`,
         },
         {
           title: "Work From Home",
-          url: "/requests/wfh",
+          url: `${BASE_PATH}/requests/wfh`,
         },
         {
           title: "Sick Leave",
-          url: "/requests/sick-leave",
+          url: `${BASE_PATH}/requests/sick-leave`,
         },
         {
           title: "Vacation Requests",
-          url: "/requests/vacation",
+          url: `${BASE_PATH}/requests/vacation`,
         },
       ],
     },
     {
       title: "Administration",
-      url: "/admin",
+      url: `${BASE_PATH}/admin`,
       items: [
         {
           title: "Settings",
-          url: "/admin/settings",
+          url: `${BASE_PATH}/admin/settings`,
         },
         {
           title: "Access Control",
-          url: "/admin/access",
+          url: `${BASE_PATH}/admin/access`,
         },
         {
           title: "System Logs",
-          url: "/admin/logs",
+          url: `${BASE_PATH}/admin/logs`,
         },
       ],
     },
   ],
 };
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
