@@ -1,4 +1,3 @@
-'use client'
 
 import { AppSidebar } from "@/components/components/app-sidebar";
 import { BreadcrumbLayout } from "@/components/components/breadcrumb";
@@ -20,8 +19,7 @@ export default function RootLayout({
 }) {
 
   return (
-    <html lang="en">
-      <body className={geist.className}>
+
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset className="bg-background">
@@ -37,7 +35,5 @@ export default function RootLayout({
             <div className="flex flex-1 flex-col gap-4 p-6">{children}</div>
           </SidebarInset>
         </SidebarProvider>
-      </body>
-    </html>
   );
 }

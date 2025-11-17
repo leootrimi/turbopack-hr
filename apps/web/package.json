@@ -19,6 +19,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@repo/ui": "workspace:*",
+    "@repo/types": "workspace:*",
     "@tanstack/react-query": "^5.90.6",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-table-devtools": "^8.21.3",

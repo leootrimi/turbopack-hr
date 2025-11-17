@@ -1,3 +1,5 @@
+import type { UserFrame } from "@repo/types"
 export default function Page() {
-  return <div>hello</div>;
+  const user: UserFrame = { id: "hellosa"}
+  return <div>{user?.id}</div>;
 }
