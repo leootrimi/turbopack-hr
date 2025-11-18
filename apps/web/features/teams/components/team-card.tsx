@@ -24,12 +24,12 @@ export function TeamCard({ team }: TeamCardProps) {
     .join("");
 
   return (
-    <Card className="group hover:shadow-lg hover:border-blue-200/50 transition-all duration-300 border-slate-200/60 bg-white/80 backdrop-blur-sm overflow-hidden cursor-pointer">
+    <Card className="group bg-card hover:shadow-lg hover:border-blue-200/50 transition-all duration-300 border-slate-200/60 backdrop-blur-sm overflow-hidden cursor-pointer">
       <div className="px-4">
         {/* Top Section: Icon and Department */}
         <div className="flex items-start justify-between mb-5">
           {/* Team Name */}
-          <h3 className="text-lg font-semibold text-slate-900 mb-4 text-balance group-hover:text-blue-600 transition-colors">
+          <h3 className="text-lg font-semibold text-foreground mb-4 text-balance group-hover:text-blue-600 transition-colors">
             {team.name}
           </h3>
           <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100/60">
@@ -40,7 +40,7 @@ export function TeamCard({ team }: TeamCardProps) {
         {/* Team Lead Info */}
         <div className="flex items-center gap-3 mb-5 pb-5 border-b border-slate-100">
           <Avatar className="h-10 w-10 border border-slate-200">
-            <AvatarImage
+            <AvatarImage className=""
               src={team.lead.avatar || "/placeholder.svg"}
               alt={team.lead.name}
             />
@@ -49,7 +49,7 @@ export function TeamCard({ team }: TeamCardProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <p className="text-sm font-medium text-slate-900">Lead</p>
+            <p className="text-sm font-medium text-foreground">Lead</p>
             <p className="text-xs text-slate-500">{team.lead.name}</p>
           </div>
         </div>

@@ -77,7 +77,7 @@ export const data = {
       items: [
         {
           title: "Holiday Requests",
-          url: `${BASE_PATH}/requests/holiday`,
+          url: `${BASE_PATH}/timeoff/requests`,
         },
         {
           title: "Work From Home",

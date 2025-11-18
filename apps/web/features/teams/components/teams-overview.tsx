@@ -113,15 +113,15 @@ export function TeamsOverview() {
   }, [searchQuery, selectedDepartment, sortBy]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-h-screen bg-linear-to-br bg-background">
       {/* Header Section */}
-      <div className="border-b border-slate-200/60 bg-white/70 backdrop-blur-xl sticky top-0 z-10">
+      <div className="border-b border-slate-200/60 bg-background backdrop-blur-xl sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="text-slate-400 flex gap-2 items-center">
                 <Users size={24} />
-                <h1 className="text-3xl font-bold text-slate-900">Teams</h1>
+                <h1 className="text-3xl font-bold text-foreground">Teams</h1>
               </div>
               <p className="text-slate-500 text-sm mt-1">
                 Manage and view all company teams
