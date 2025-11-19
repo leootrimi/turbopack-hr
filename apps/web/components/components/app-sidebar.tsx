@@ -62,13 +62,13 @@ export const data = {
           url: `${BASE_PATH}/equipment/assigned`,
         },
         {
-          title: "New Equipment",
-          url: `${BASE_PATH}/equipment/new`,
-        },
-        {
           title: "Archived Equipment",
           url: `${BASE_PATH}/equipment/archived`,
         },
+        {
+          title: "Add Equpiment",
+          url: `${BASE_PATH}/equipment/add`
+        }
       ],
     },
     {
@@ -104,6 +104,10 @@ export const data = {
         {
           title: "Access Control",
           url: `${BASE_PATH}/admin/access`,
+        },
+        {
+          title: "Check-in's",
+          url: `${BASE_PATH}/admin/check-in`,
         },
         {
           title: "System Logs",

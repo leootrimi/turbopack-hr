@@ -34,7 +34,7 @@ export function LeaveRequestCard({
     <Card className="bg-card p-6 gap-2">
       <div className="mb-6 flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12">
+          <Avatar className="h-12 w-12 border-blue-900 border-1">
             <AvatarImage src={avatar || "/placeholder.svg"} alt={employeeName} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>

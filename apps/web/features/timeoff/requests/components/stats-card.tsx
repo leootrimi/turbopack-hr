@@ -29,7 +29,7 @@ export function StatCard({
   return (
     <Card className="bg-card p-8 flex flex-col items-center gap-2">
       <div
-        className={`w-16 h-16 rounded-full border-2 ${colorMap[color]} flex items-center justify-center`}
+        className={`w-16 h-16 rounded-full border-2 ${colorMap[color]} shadow-md flex items-center justify-center`}
       >
         {icon}
       </div>
