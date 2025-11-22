@@ -16,6 +16,6 @@
     "next-env.d.ts",
     "next.config.ts",
     ".next/types/**/*.ts"
-  ],
+, "features/employees/components/mock.ts"  ],
   "exclude": ["node_modules"]
 }
