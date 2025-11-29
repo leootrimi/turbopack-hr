@@ -4,18 +4,8 @@ import {
   AvatarImage,
 } from "@/components/components/ui/avatar";
 import { Card } from "@/components/components/ui/card";
+import { TeamCardProps } from "@repo/types";
 import { Users, ArrowRight } from "lucide-react";
-
-interface TeamCardProps {
-  team: {
-    id: number;
-    name: string;
-    lead: { name: string; avatar: string };
-    members: number;
-    department: string;
-    icon: string;
-  };
-}
 
 export function TeamCard({ team }: TeamCardProps) {
   const initials = team.lead.name

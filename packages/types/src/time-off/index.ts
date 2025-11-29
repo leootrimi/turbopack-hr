@@ -1,0 +1,52 @@
+export type RequestStatus = "Pending" | "Approved" | "Rejected";
+export type RequestType = "Work from home" | "Vacation" | "Sick Leave" | "Personal";
+
+export interface TimeOffRequestRow {
+  id: number;
+  request_type: RequestType;
+  date_from: string;
+  date_to: string;
+  amount_of_days: number;
+  status: RequestStatus;
+  created_at: string;
+}
+
+
+export const sampleData: TimeOffRequestRow[] = [
+  {
+    id: 1,
+    request_type: "Vacation",
+    date_from: "2025-12-15",
+    date_to: "2025-12-20",
+    amount_of_days: 5,
+    status: "Pending",
+    created_at: "2025-11-20",
+  },
+  {
+    id: 2,
+    request_type: "Work from home",
+    date_from: "2025-12-01",
+    date_to: "2025-12-01",
+    amount_of_days: 1,
+    status: "Approved",
+    created_at: "2025-11-15",
+  },
+  {
+    id: 3,
+    request_type: "Vacation",
+    date_from: "2025-08-10",
+    date_to: "2025-08-20",
+    amount_of_days: 10,
+    status: "Approved",
+    created_at: "2025-07-01",
+  },
+  {
+    id: 4,
+    request_type: "Sick Leave",
+    date_from: "2025-09-05",
+    date_to: "2025-09-06",
+    amount_of_days: 2,
+    status: "Approved",
+    created_at: "2025-09-05",
+  },
+];
