@@ -3,9 +3,10 @@ import { TeamsModule } from './teams/teams.module';
 import { EmployeeModule } from './employee/employee.module';
 import { EquipmentsModule } from './equipments/equipments.module';
 import { CheckinModule } from './checkin/checkin.module';
+import { DrizzleModule } from './database/drizzle.module';
 
 @Module({
-  imports: [CheckinModule ,EmployeeModule, EquipmentsModule, TeamsModule],
+  imports: [CheckinModule ,EmployeeModule, EquipmentsModule, DrizzleModule, TeamsModule],
   controllers: [],
   providers: [],
 })
