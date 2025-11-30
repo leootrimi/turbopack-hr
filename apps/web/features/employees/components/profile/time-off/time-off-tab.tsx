@@ -23,7 +23,7 @@ const mockCardStates = [
 export default function TimeOffTab() {
   return (
     <div className="p-6">
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-4 ">
         <DaysOffCarousel cardStates={mockCardStates} />
         <UsedTimeOffCard
           used={{

@@ -21,11 +21,6 @@ import {
   TableRow,
   TableCell,
 } from "@/components/components/ui/table";
-
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/components/ui/toggle-group";
 import { Button } from "@/components/components/ui/button";
 import { ButtonGroup } from "@/components/components/ui/button-group";
 
@@ -65,7 +60,7 @@ export function TimeOffRequestsTable() {
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-0">
         {displayedRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Clock className="h-12 w-12 text-gray-400 mb-4" />

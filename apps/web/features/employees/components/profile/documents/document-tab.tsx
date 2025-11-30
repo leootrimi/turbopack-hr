@@ -154,7 +154,7 @@ export function DocumentsTab() {
     <div className="flex h-[calc(100vh-200px)] gap-6">
       {/* Sidebar */}
       <aside className="w-64 flex-shrink-">
-        <Card className="h-full border-none shadow-lg">
+        <Card className="h-full border-none rounded-none shadow-lg">
           <CardContent className="p-0">
             <nav className="space-y-1 px-3 pb-4">
               {categories.map((category) => (

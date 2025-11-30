@@ -10,7 +10,7 @@ interface UsedTimeOffProps {
 
 export function UsedTimeOffCard({ used }: UsedTimeOffProps) {
     return (
-        <Card className="w-full max-w-xs h-45 flex flex-col justify-center py-0">
+        <Card className="w-full h-45 flex flex-col justify-center py-0">
             <CardContent className="flex flex-col gap-4">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-800">Used Time Off</h3>
