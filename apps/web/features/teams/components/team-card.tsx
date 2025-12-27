@@ -8,7 +8,7 @@ import { TeamCardProps } from "@repo/types";
 import { Users, ArrowRight } from "lucide-react";
 
 export function TeamCard({ team }: TeamCardProps) {
-  const initials = team.lead.name
+  const initials = "Leotrim Halimi"
     .split(" ")
     .map((n) => n[0])
     .join("");
@@ -23,7 +23,7 @@ export function TeamCard({ team }: TeamCardProps) {
             {team.name}
           </h3>
           <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100/60">
-            {team.department}
+            {team.team_type}
           </span>
         </div>
 
@@ -31,8 +31,8 @@ export function TeamCard({ team }: TeamCardProps) {
         <div className="flex items-center gap-3 mb-5 pb-5 border-b border-slate-100">
           <Avatar className="h-10 w-10 border border-slate-200">
             <AvatarImage className=""
-              src={team.lead.avatar || "/placeholder.svg"}
-              alt={team.lead.name}
+              src={"Leader image"}
+              alt={"Leader image"}
             />
             <AvatarFallback className="bg-linear-to-br from-blue-100 to-slate-100 text-blue-700 font-semibold">
               {initials}
@@ -40,7 +40,7 @@ export function TeamCard({ team }: TeamCardProps) {
           </Avatar>
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">Lead</p>
-            <p className="text-xs text-slate-500">{team.lead.name}</p>
+            <p className="text-xs text-slate-500">{team.leaderId}</p>
           </div>
         </div>
 
@@ -48,7 +48,7 @@ export function TeamCard({ team }: TeamCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-600">
             <Users size={16} className="text-slate-400" />
-            <span className="text-sm font-medium">{team.members} members</span>
+            <span className="text-sm font-medium">{10} members</span>
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ArrowRight size={18} className="text-blue-500" />

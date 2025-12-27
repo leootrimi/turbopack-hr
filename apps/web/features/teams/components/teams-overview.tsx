@@ -12,105 +12,16 @@ import {
   SelectValue,
 } from "@/components/components/ui/select";
 import { TeamCard } from "./team-card";
+import { useTeams } from "../hooks/queries";
 
-const teamsData = [
-  {
-    id: 1,
-    name: "Product Design",
-    lead: { name: "Sarah Chen", avatar: "/avatar-sarah.png" },
-    members: 8,
-    department: "Design",
-    icon: "🎨",
-  },
-  {
-    id: 2,
-    name: "Frontend Engineering",
-    lead: { name: "Alex Rodriguez", avatar: "/avatar-alex.png" },
-    members: 12,
-    department: "Engineering",
-    icon: "⚛️",
-  },
-  {
-    id: 3,
-    name: "Backend Services",
-    lead: { name: "Jordan Kim", avatar: "/avatar-jordan.jpg" },
-    members: 10,
-    department: "Engineering",
-    icon: "🔧",
-  },
-  {
-    id: 4,
-    name: "Marketing Growth",
-    lead: { name: "Emma Wilson", avatar: "/avatar-emma.jpg" },
-    members: 6,
-    department: "Marketing",
-    icon: "📈",
-  },
-  {
-    id: 5,
-    name: "Customer Success",
-    lead: { name: "Michael Torres", avatar: "/avatar-michael.png" },
-    members: 9,
-    department: "Operations",
-    icon: "💬",
-  },
-  {
-    id: 6,
-    name: "Data Analytics",
-    lead: { name: "Lisa Zhang", avatar: "/avatar-lisa.jpg" },
-    members: 7,
-    department: "Engineering",
-    icon: "📊",
-  },
-  {
-    id: 7,
-    name: "Security & Compliance",
-    lead: { name: "James Patterson", avatar: "/avatar-james.jpg" },
-    members: 5,
-    department: "Operations",
-    icon: "🔐",
-  },
-  {
-    id: 8,
-    name: "HR & People Ops",
-    lead: { name: "Nina Patel", avatar: "/avatar-nina.jpg" },
-    members: 4,
-    department: "Operations",
-    icon: "👥",
-  },
-];
 
 export function TeamsOverview() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [sortBy, setSortBy] = useState("name");
-
-  const departments = [
-    "all",
-    ...new Set(teamsData.map((team) => team.department)),
-  ];
-
-  const filteredAndSortedTeams = useMemo(() => {
-    let filtered = teamsData.filter((team) => {
-      const matchesSearch =
-        team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        team.lead.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesDepartment =
-        selectedDepartment === "all" || team.department === selectedDepartment;
-      return matchesSearch && matchesDepartment;
-    });
-
-    // Sort
-    if (sortBy === "name") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "members") {
-      filtered.sort((a, b) => b.members - a.members);
-    } else if (sortBy === "department") {
-      filtered.sort((a, b) => a.department.localeCompare(b.department));
-    }
-
-    return filtered;
-  }, [searchQuery, selectedDepartment, sortBy]);
+  const { data: teams } = useTeams();
+  console.log(teams);
+  
 
   return (
     <div className="min-h-screen bg-linear-to-br bg-background">
@@ -153,9 +64,9 @@ export function TeamsOverview() {
                 <SelectValue placeholder="Department" />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept === "all" ? "All Departments" : dept}
+                {teams?.map((dept) => (
+                  <SelectItem key={dept.id} value={dept.team_type ?? "all"}>
+                    {dept.team_type === "all" ? "All Departments" : dept.team_type}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -177,9 +88,9 @@ export function TeamsOverview() {
 
       {/* Teams Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {filteredAndSortedTeams.length > 0 ? (
+        {teams?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAndSortedTeams.map((team) => (
+            {teams?.map((team) => (
               <TeamCard key={team.id} team={team} />
             ))}
           </div>

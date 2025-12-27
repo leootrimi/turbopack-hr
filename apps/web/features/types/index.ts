@@ -25,3 +25,12 @@ export type Employee = {
   position: string;
   department: string;
 };
+
+export interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  leaderId?: number | null;
+  team_type?: string | null;
+  createdAt: string;
+}

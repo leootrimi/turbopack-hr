@@ -2,13 +2,10 @@ export interface TeamCardProps {
     team: {
         id: number;
         name: string;
-        lead: {
-            name: string;
-            avatar: string;
-        };
-        members: number;
-        department: string;
-        icon: string;
+        description?: string;
+        createdAt: string;
+        leaderId?: number | null;
+        team_type?: string | null;
     };
 }
 //# sourceMappingURL=index.d.ts.map

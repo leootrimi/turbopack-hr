@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
+import { DrizzleService } from 'src/database/drizzle.provider';
+import { checkinLogs } from 'src/database/schema';
 
 @Injectable()
 export class CheckinService {
-  create(createCheckinDto: CreateCheckinDto) {
-    return 'This action adds a new checkin';
+  constructor(private readonly drizzle: DrizzleService) {}
+
+  async create(createCheckinDto: CreateCheckinDto) {
+    return await this.drizzle.db.insert(checkinLogs).values(createCheckinDto).returning();
   }
 
   findAll() {

@@ -1,1 +1,3 @@
-export class CreateCheckinDto {}
+export class CreateCheckinDto {
+    employeeId: number;
+}

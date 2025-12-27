@@ -1,1 +1,4 @@
-export class CreateEmployeeDto {}
+export class CreateEmployeeDto {
+    name: string;
+    email: string;
+}

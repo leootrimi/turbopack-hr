@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { DrizzleService } from 'src/database/drizzle.provider';
+import { employee } from 'src/database/schema';
 
 @Injectable()
 export class EmployeeService {
-  create(createEmployeeDto: CreateEmployeeDto) {
-    return 'This action adds a new employee';
+  constructor(private readonly drizzle: DrizzleService) {}
+
+  async create(createEmployeeDto: CreateEmployeeDto) {
+    return await this.drizzle.db.insert(employee).values(createEmployeeDto).returning();
   }
 
   findAll() {
