@@ -67,6 +67,7 @@ const navItems = [
       { title: "Access Control", url: `${BASE_PATH}/admin/access`   },
       { title: "Check-ins",      url: `${BASE_PATH}/admin/check-in` },
       { title: "System Logs",    url: `${BASE_PATH}/admin/logs`     },
+      { title: "Announcements",    url: `${BASE_PATH}/admin/announcements`},
     ],
   },
 ];
