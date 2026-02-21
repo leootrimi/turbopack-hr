@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Search, Users, Filter } from "lucide-react";
 import { Input } from "@/components/components/ui/input";
-import { Button } from "@/components/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,7 +18,7 @@ export function TeamsOverview() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [sortBy, setSortBy] = useState("name");
-  const { data: teams } = useTeams();
+  const { data: teams = [] } = useTeams();
   console.log(teams);
   
 
