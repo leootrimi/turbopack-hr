@@ -1,9 +1,9 @@
 import React from 'react'
-import { CheckInTables } from '../../../../features/check-in/components/check-in-table'
+import { CheckInPage } from '../../../../features/check-in/check-in'
 
 const page = () => {
   return (
-    <CheckInTables />
+    <CheckInPage />
   )
 }
 
