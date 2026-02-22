@@ -13,5 +13,8 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }

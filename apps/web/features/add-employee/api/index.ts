@@ -1,4 +1,4 @@
-import { EmployeeForm } from "../components/types";
+import { EmployeeForm } from "@repo/types";
 
 export async function postEmployee(employee: EmployeeForm) {
   try {
