@@ -38,6 +38,7 @@ const navItems = [
       { title: "Active Employees",    url: `${BASE_PATH}/employees/active` },
       { title: "Former Employees",    url: `${BASE_PATH}/employees/former` },
       { title: "Teams & Departments", url: `${BASE_PATH}/employees/teams`  },
+      { title: "Add New Employee",    url: `${BASE_PATH}/admin/add-employer`},
     ],
   },
   {
@@ -68,6 +69,7 @@ const navItems = [
       { title: "Check-ins",      url: `${BASE_PATH}/admin/check-in` },
       { title: "System Logs",    url: `${BASE_PATH}/admin/logs`     },
       { title: "Announcements",    url: `${BASE_PATH}/admin/announcements`},
+      { title: "Positions/Jobs",    url: `${BASE_PATH}/admin/jobs`},
     ],
   },
 ];
