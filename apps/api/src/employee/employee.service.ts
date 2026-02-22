@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { DrizzleService } from 'src/database/drizzle.provider';
 import { compensation, employee, jobInfo } from 'src/database/schema';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
+import { CreateEmployeeDto } from '@repo/types';
 
 @Injectable()
 export class EmployeeService {
