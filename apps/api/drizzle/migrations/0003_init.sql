@@ -1,1 +1,0 @@
-ALTER TABLE "teams" ADD COLUMN "team_type" varchar(128);

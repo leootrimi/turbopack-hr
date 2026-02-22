@@ -1,6 +1,7 @@
 import { JobInfo, DEPARTMENTS, TEAMS, MANAGERS } from "./types";
 import { Field, Input, Select, SegmentControl } from "../components/FormFields";
 import { Briefcase, Calendar, Users, UserCheck } from "lucide-react";
+import { useTeamSelect } from "../hooks/queries";
 
 interface Props {
   data: JobInfo;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function StepJob({ data, onChange }: Props) {
+  const { data: teams } = useTeamSelect();
   return (
     <div className="space-y-6">
       <div>
@@ -43,7 +45,7 @@ export function StepJob({ data, onChange }: Props) {
             <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <Select value={data.team} onChange={(e) => onChange("team", e.target.value)} className="pl-9">
               <option value="">Select team…</option>
-              {TEAMS.map((t) => <option key={t}>{t}</option>)}
+              {teams?.map((t) => <option key={t.teamId}>{t.teamName}</option>)}
             </Select>
           </div>
         </Field>
@@ -52,7 +54,7 @@ export function StepJob({ data, onChange }: Props) {
             <UserCheck size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <Select value={data.manager} onChange={(e) => onChange("manager", e.target.value)} className="pl-9">
               <option value="">Select manager…</option>
-              {MANAGERS.map((m) => <option key={m}>{m}</option>)}
+              {teams?.map((m) => <option key={m.leaderId}>{m.leaderName}</option>)}
             </Select>
           </div>
         </Field>

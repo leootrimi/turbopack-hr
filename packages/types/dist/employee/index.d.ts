@@ -1,8 +1,7 @@
-export type Employee = {
+export type EmployeeRow = {
     id: number;
-    name: string;
-    position: string;
+    fullName: string;
+    jobTitle: string;
     department: string;
 };
-export declare const mockEmployee: Employee[];
 //# sourceMappingURL=index.d.ts.map

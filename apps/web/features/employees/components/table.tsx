@@ -33,9 +33,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/components/ui/checkbox";
-import { Employee, mockEmployee } from "@repo/types";
-
-const data: Employee[] = mockEmployee;
+import { useEmployees } from "../hooks/queries";
 
 export function EmployeeTable() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -45,6 +43,7 @@ export function EmployeeTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const { data } = useEmployees();
 
   const columns = React.useMemo(
     () => [
@@ -73,7 +72,7 @@ export function EmployeeTable() {
   );
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     state: {
       sorting,
@@ -99,9 +98,9 @@ export function EmployeeTable() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search employees..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("fullName")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("fullName")?.setFilterValue(event.target.value)
             }
             className="pl-9 bg-card border-border transition-smooth focus:ring-2 focus:ring-primary/20"
           />

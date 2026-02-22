@@ -6,7 +6,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 
 export const columns: ColumnDef<Employee>[] = [
   {
-    accessorKey: 'name',
+    accessorKey: 'fullName',
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -16,10 +16,10 @@ export const columns: ColumnDef<Employee>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue('name')}</div>,
+    cell: ({ row }) => <div>{row.getValue('fullName')}</div>,
   },
   {
-    accessorKey: 'position',
+    accessorKey: 'jobTitle',
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -29,7 +29,7 @@ export const columns: ColumnDef<Employee>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue('position')}</div>,
+    cell: ({ row }) => <div>{row.getValue('jobTitle')}</div>,
   },
   {
     accessorKey: 'department',

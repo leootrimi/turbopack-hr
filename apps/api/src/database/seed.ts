@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { teams, employee, checkinLogs } from './schema';
+import { teams, employee, jobInfo, compensation, checkinLogs } from './schema';
 import { eq } from 'drizzle-orm';
 
 async function seed() {
@@ -20,18 +20,33 @@ async function seed() {
     const insertedTeams = await db
       .insert(teams)
       .values([
-        { name: 'Engineering Team', description: 'Handles all software development', team_type: 'Engineering' },
-        { name: 'Operations Team', description: 'Manages operations and logistics', team_type: 'Operations' },
-        { name: 'Marketing Team', description: 'Responsible for marketing campaigns', team_type: 'Marketing' },
-        { name: 'HR Team', description: 'Handles human resources', team_type: 'HR' },
+        {
+          name: 'Engineering Team',
+          description: 'Handles all software development',
+          team_type: 'Engineering',
+        },
+        {
+          name: 'Operations Team',
+          description: 'Manages operations and logistics',
+          team_type: 'Operations',
+        },
+        {
+          name: 'Marketing Team',
+          description: 'Responsible for marketing campaigns',
+          team_type: 'Marketing',
+        },
+        {
+          name: 'HR Team',
+          description: 'Handles human resources',
+          team_type: 'HR',
+        },
       ])
-      .returning(); // Returns full inserted rows including 'id'
+      .returning();
 
-    // Safely extract teams by name or index (index is safe here since we control order)
-    const engineering = insertedTeams[0]
-    const operations = insertedTeams[1]
-    const marketing = insertedTeams[2]
-    const hr = insertedTeams[3]
+    const engineering = insertedTeams[0];
+    const operations = insertedTeams[1];
+    const marketing = insertedTeams[2];
+    const hr = insertedTeams[3];
 
     console.log('🟢 Seeding Employees...');
 
@@ -39,32 +54,40 @@ async function seed() {
       .insert(employee)
       .values([
         {
-          name: 'Alice Johnson',
+          firstName: 'Alice',
+          lastName: 'Johnson',
           email: 'alice@gmail.com',
-          work_email: 'alice@company.com',
           phone: '555-1111',
-          teamId: engineering.id,
+          personalNumber: 'PN-001',
+          address: '123 Engineering St',
+          emergencyContact: 'John Johnson',
         },
         {
-          name: 'Bob Smith',
+          firstName: 'Bob',
+          lastName: 'Smith',
           email: 'bob@gmail.com',
-          work_email: 'bob@company.com',
           phone: '555-2222',
-          teamId: operations.id,
+          personalNumber: 'PN-002',
+          address: '456 Operations Ave',
+          emergencyContact: 'Anna Smith',
         },
         {
-          name: 'Carol Williams',
+          firstName: 'Carol',
+          lastName: 'Williams',
           email: 'carol@gmail.com',
-          work_email: 'carol@company.com',
           phone: '555-3333',
-          teamId: marketing.id,
+          personalNumber: 'PN-003',
+          address: '789 Marketing Blvd',
+          emergencyContact: 'Mark Williams',
         },
         {
-          name: 'Dave Brown',
+          firstName: 'Dave',
+          lastName: 'Brown',
           email: 'dave@gmail.com',
-          work_email: 'dave@company.com',
           phone: '555-4444',
-          teamId: hr.id,
+          personalNumber: 'PN-004',
+          address: '101 HR Road',
+          emergencyContact: 'Sarah Brown',
         },
       ])
       .returning();
@@ -74,12 +97,103 @@ async function seed() {
     const carol = insertedEmployees[2];
     const dave = insertedEmployees[3];
 
-    console.log('🟢 Updating team leaders...');
+    console.log('🟢 Seeding Job Info...');
+
+    await db.insert(jobInfo).values([
+      {
+        employeeId: alice.id,
+        jobTitle: 'Software Engineer',
+        department: 'Engineering',
+        teamId: engineering.id,
+        employmentType: 'Full-time',
+        startDate: new Date(),
+        workLocation: 'Office',
+      },
+      {
+        employeeId: bob.id,
+        jobTitle: 'Operations Manager',
+        department: 'Operations',
+        teamId: operations.id,
+        employmentType: 'Full-time',
+        startDate: new Date(),
+        workLocation: 'Hybrid',
+      },
+      {
+        employeeId: carol.id,
+        jobTitle: 'Marketing Specialist',
+        department: 'Marketing',
+        teamId: marketing.id,
+        employmentType: 'Full-time',
+        startDate: new Date(),
+        workLocation: 'Remote',
+      },
+      {
+        employeeId: dave.id,
+        jobTitle: 'HR Manager',
+        department: 'HR',
+        teamId: hr.id,
+        employmentType: 'Full-time',
+        startDate: new Date(),
+        workLocation: 'Office',
+      },
+    ]);
+
+    console.log('🟢 Seeding Compensation...');
+
+    await db.insert(compensation).values([
+      {
+        employeeId: alice.id,
+        salaryAmount: 4500,
+        salaryType: 'Gross',
+        currency: 'EUR',
+        paymentFrequency: 'Monthly',
+        bankAccount: 'DE123456789',
+        bonusEligible: true,
+      },
+      {
+        employeeId: bob.id,
+        salaryAmount: 5000,
+        salaryType: 'Gross',
+        currency: 'EUR',
+        paymentFrequency: 'Monthly',
+        bankAccount: 'DE987654321',
+        bonusEligible: true,
+      },
+      {
+        employeeId: carol.id,
+        salaryAmount: 4000,
+        salaryType: 'Gross',
+        currency: 'EUR',
+        paymentFrequency: 'Monthly',
+        bankAccount: 'DE111111111',
+        bonusEligible: false,
+      },
+      {
+        employeeId: dave.id,
+        salaryAmount: 4800,
+        salaryType: 'Gross',
+        currency: 'EUR',
+        paymentFrequency: 'Monthly',
+        bankAccount: 'DE222222222',
+        bonusEligible: true,
+      },
+    ]);
+
+    console.log('🟢 Updating Team Leaders...');
 
     await Promise.all([
-      db.update(teams).set({ leaderId: alice.id }).where(eq(teams.id, engineering.id)),
-      db.update(teams).set({ leaderId: bob.id }).where(eq(teams.id, operations.id)),
-      db.update(teams).set({ leaderId: carol.id }).where(eq(teams.id, marketing.id)),
+      db
+        .update(teams)
+        .set({ leaderId: alice.id })
+        .where(eq(teams.id, engineering.id)),
+      db
+        .update(teams)
+        .set({ leaderId: bob.id })
+        .where(eq(teams.id, operations.id)),
+      db
+        .update(teams)
+        .set({ leaderId: carol.id })
+        .where(eq(teams.id, marketing.id)),
       db.update(teams).set({ leaderId: dave.id }).where(eq(teams.id, hr.id)),
     ]);
 
@@ -95,7 +209,7 @@ async function seed() {
     console.log('✅ Seeding complete!');
   } catch (err) {
     console.error('❌ Seeding failed:', err);
-    throw err; // Re-throw to ensure process exits with error code
+    throw err;
   } finally {
     await pool.end();
   }

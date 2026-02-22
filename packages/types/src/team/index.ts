@@ -8,3 +8,10 @@ export interface TeamCardProps {
     team_type?: string | null; // optional, matches team_type column
   };
 }
+
+export interface TeamSelect {
+  teamId: number;
+  teamName: string;
+  leaderId: number;
+  leaderName: string
+}

@@ -8,6 +8,7 @@ import { StepPersonal }     from "./components/StepPersonal";
 import { StepJob }          from "./components/StepJob";
 import { StepCompensation } from "./components/StepCompensation";
 import { StepReview }       from "./components/StepReview";
+import { postEmployee } from "./api";
 
 // Minimal validation per step
 function isStepValid(step: number, form: EmployeeForm): boolean {
@@ -51,6 +52,7 @@ export function AddEmployeePage() {
   const handleBack = () => setStep((s) => Math.max(1, s - 1));
   const handleSubmit = () => {
     console.log("Submitting employee:", form);
+    postEmployee(form)
     setSubmitted(true);
   };
 
