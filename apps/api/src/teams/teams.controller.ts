@@ -17,6 +17,16 @@ export class TeamsController {
     return this.teamsService.findAllTeams();
   }
 
+  @Get('overview')
+  teamsOverview() {
+    return this.teamsService.getTeamsOverview();
+  }
+
+  @Get('overview/:id')
+  teamsOverviewForEmployee() {
+    return this.teamsService.getTeamForEmployee(1)
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teamsService.findOne(+id);

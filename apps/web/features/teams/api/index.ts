@@ -1,13 +1,21 @@
 import { request } from "@/components/lib/api";
-import { Team } from "../../types";
+import { TeamCard } from "@repo/types";
 
 export async function fetchTeams() {
-  const teams = await request<Team[]>({
-    url: 'http://localhost:3000/api/teams',
+  const teams = await request<TeamCard[]>({
+    url: 'http://localhost:3000/api/teams/overview',
     method: 'GET',
     params: { page: 1, limit: 10 },
   });
 
-  console.log(teams);
+  return teams
+}
+
+export async function getTeamForEmployee(employeeId: number) {
+  const teams = await request<TeamCard>({
+    url: `http://localhost:3000/api/teams/overview/${employeeId}`,
+    method: 'GET',
+  });
+
   return teams
 }

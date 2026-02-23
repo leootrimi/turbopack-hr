@@ -4,11 +4,15 @@ import {
   AvatarImage,
 } from "@/components/components/ui/avatar";
 import { Card } from "@/components/components/ui/card";
-import { TeamCardProps } from "@repo/types";
 import { Users, ArrowRight } from "lucide-react";
+import { TeamCard } from '@repo/types';
 
-export function TeamCard({ team }: TeamCardProps) {
-  const initials = "Leotrim Halimi"
+interface TeamCardProps {
+  team: TeamCard
+}
+
+export function TeamCardComponent({ team }: TeamCardProps) {
+  const initials = team.leaderName
     .split(" ")
     .map((n) => n[0])
     .join("");
@@ -20,10 +24,10 @@ export function TeamCard({ team }: TeamCardProps) {
         <div className="flex items-start justify-between mb-5">
           {/* Team Name */}
           <h3 className="text-lg font-semibold text-foreground mb-4 text-balance group-hover:text-blue-600 transition-colors">
-            {team.name}
+            {team.teamName}
           </h3>
           <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100/60">
-            {team.team_type}
+            {team.teamType}
           </span>
         </div>
 
@@ -40,7 +44,7 @@ export function TeamCard({ team }: TeamCardProps) {
           </Avatar>
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">Lead</p>
-            <p className="text-xs text-slate-500">{team.leaderId}</p>
+            <p className="text-xs text-slate-500">{team.leaderName}</p>
           </div>
         </div>
 
@@ -48,7 +52,7 @@ export function TeamCard({ team }: TeamCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-600">
             <Users size={16} className="text-slate-400" />
-            <span className="text-sm font-medium">{10} members</span>
+            <span className="text-sm font-medium">{team.teamMemberCount} members</span>
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ArrowRight size={18} className="text-blue-500" />
@@ -56,7 +60,6 @@ export function TeamCard({ team }: TeamCardProps) {
         </div>
       </div>
 
-      {/* Subtle Bottom Border on Hover */}
       <div className="h-1 bg-linear-to-r from-blue-400 via-blue-500 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
     </Card>
   );

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/components/ui/select";
-import { TeamCard } from "./team-card";
+import { TeamCardComponent } from "./team-card";
 import { useTeams } from "../hooks/queries";
 
 
@@ -19,8 +19,6 @@ export function TeamsOverview() {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const { data: teams = [] } = useTeams();
-  console.log(teams);
-  
 
   return (
     <div className="min-h-screen bg-linear-to-br bg-background">
@@ -63,9 +61,9 @@ export function TeamsOverview() {
                 <SelectValue placeholder="Department" />
               </SelectTrigger>
               <SelectContent className="bg-white border-slate-200">
-                {teams?.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.team_type ?? "all"}>
-                    {dept.team_type === "all" ? "All Departments" : dept.team_type}
+                {teams?.map((team) => (
+                  <SelectItem key={team.teamId} value={team.teamName ?? "all"}>
+                    {team.teamName  === "all" ? "All Departments" : team.teamName }
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -90,7 +88,7 @@ export function TeamsOverview() {
         {teams?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {teams?.map((team) => (
-              <TeamCard key={team.id} team={team} />
+              <TeamCardComponent key={team.teamId} team={team} />
             ))}
           </div>
         ) : (
