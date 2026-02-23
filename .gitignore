@@ -6,6 +6,7 @@
 .pnp.js
 **/node_modules/        # ignore node_modules in all packages
 **/node_modules/.bin/   # ignore bin folders inside node_modules
+/packages/eslint-config/node_modules
 
 # pnpm / yarn / npm store
 .pnpm-store/
