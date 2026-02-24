@@ -5,7 +5,7 @@ import {
   Select,
   SegmentControl,
   Toggle,
-} from "../components/FormFields";
+} from "../../../components/components/FormFields";
 import { DollarSign, Landmark } from "lucide-react";
 
 interface Props {

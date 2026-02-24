@@ -1,5 +1,5 @@
 import { JobInfo, DEPARTMENTS, TEAMS, MANAGERS } from "./types";
-import { Field, Input, Select, SegmentControl } from "../components/FormFields";
+import { Field, Input, Select, SegmentControl } from "../../../components/components/FormFields";
 import { Briefcase, Calendar, Users, UserCheck } from "lucide-react";
 import { useTeamSelect } from "../hooks/queries";
 

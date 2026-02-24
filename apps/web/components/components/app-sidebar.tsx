@@ -54,10 +54,8 @@ const navItems = [
     title: "Requests",
     icon: CalendarClock,
     items: [
-      { title: "Holiday Requests",   url: `${BASE_PATH}/timeoff/requests`   },
-      { title: "Work From Home",     url: `${BASE_PATH}/requests/wfh`       },
-      { title: "Sick Leave",         url: `${BASE_PATH}/requests/sick-leave` },
-      { title: "Vacation Requests",  url: `${BASE_PATH}/requests/vacation`  },
+      { title: "Time Off Requests",   url: `${BASE_PATH}/timeoff/requests`   },
+      { title: "Make a Request",  url: `${BASE_PATH}/timeoff`},
     ],
   },
   {

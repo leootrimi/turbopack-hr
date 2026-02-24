@@ -1,5 +1,5 @@
 import { PersonalInfo } from "./types";
-import { Field, Input, Textarea } from "../components/FormFields";
+import { Field, Input, Textarea } from "../../../components/components/FormFields";
 import { User, Mail, Phone, Calendar, CreditCard, MapPin, Heart } from "lucide-react";
 
 interface Props {
