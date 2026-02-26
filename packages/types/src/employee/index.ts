@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-/* =========================================================
-   ENUMS
-========================================================= */
-
 export const EmploymentTypeSchema = z.enum([
   "Full-time",
   "Part-time",
@@ -31,10 +27,6 @@ export const CurrencySchema = z.enum([
   "CHF",
 ]);
 
-/* =========================================================
-   EMPLOYEE TABLE ROW (for listing)
-========================================================= */
-
 export const EmployeeRowSchema = z.object({
   id: z.number(),
   fullName: z.string(),
@@ -43,10 +35,6 @@ export const EmployeeRowSchema = z.object({
 });
 
 export type EmployeeRow = z.infer<typeof EmployeeRowSchema>;
-
-/* =========================================================
-   CREATE EMPLOYEE DTO (Backend shape)
-========================================================= */
 
 export const CreateEmployeeDtoSchema = z.object({
   personal: z.object({
@@ -82,10 +70,6 @@ export const CreateEmployeeDtoSchema = z.object({
 });
 
 export type CreateEmployeeDto = z.infer<typeof CreateEmployeeDtoSchema>;
-
-/* =========================================================
-   FRONTEND FORM SHAPE (UI Model)
-========================================================= */
 
 export const PersonalInfoSchema = z.object({
   firstName: z.string(),
@@ -129,10 +113,6 @@ export type PersonalInfo = z.infer<typeof PersonalInfoSchema>;
 export type JobInfo = z.infer<typeof JobInfoSchema>;
 export type CompensationInfo = z.infer<typeof CompensationInfoSchema>;
 
-/* =========================================================
-   CONSTANTS (still safe to export)
-========================================================= */
-
 export const DEPARTMENTS = [
   "Engineering",
   "Design",
@@ -144,10 +124,6 @@ export const DEPARTMENTS = [
 ] as const;
 
 export const CURRENCIES = CurrencySchema.options;
-
-/* =========================================================
-   STEPS
-========================================================= */
 
 export const StepSchema = z.object({
   id: z.number(),
