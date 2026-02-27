@@ -1,6 +1,14 @@
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { teams, employee, jobInfo, compensation, checkinLogs } from './schema';
+import {
+  teams,
+  employee,
+  jobInfo,
+  compensation,
+  checkinLogs,
+  purchaseInfo,
+  equipment,
+} from './schema';
 import { eq } from 'drizzle-orm';
 
 async function seed() {
@@ -204,6 +212,73 @@ async function seed() {
       { employeeId: bob.id, checkinTime: new Date('2025-12-27T08:15:00Z') },
       { employeeId: carol.id, checkinTime: new Date('2025-12-27T08:30:00Z') },
       { employeeId: dave.id, checkinTime: new Date('2025-12-27T09:00:00Z') },
+    ]);
+
+    const [laptop, monitor, phone] = await db
+      .insert(equipment)
+      .values([
+        {
+          name: 'MacBook Pro 16',
+          category: 'Laptop',
+          brand: 'Apple',
+          model: 'M2 Pro',
+          serialNumber: 'MBP16-001',
+          assetTag: 'EQT-1001',
+          description: 'Development laptop',
+          location: 'Office',
+          notes: 'Assigned to dev team',
+        },
+        {
+          name: 'Dell UltraSharp',
+          category: 'Monitor',
+          brand: 'Dell',
+          model: 'U2723Q',
+          serialNumber: 'DLU-001',
+          assetTag: 'EQT-1002',
+          description: '27-inch 4K monitor',
+          location: 'Office',
+        },
+        {
+          name: 'iPhone 15',
+          category: 'Phone',
+          brand: 'Apple',
+          model: 'iPhone 15 Pro',
+          serialNumber: 'IP15-001',
+          assetTag: 'EQT-1003',
+          description: 'Company phone',
+          location: 'Remote',
+        },
+      ])
+      .returning();
+
+    await db.insert(purchaseInfo).values([
+      {
+        equipmentId: laptop.id,
+        purchaseDate: new Date('2025-01-10'),
+        purchaseCost: 3500,
+        supplier: 'Apple Store',
+        warrantyExpiration: new Date('2027-01-10'),
+        condition: 'New',
+        status: 'Assigned',
+      },
+      {
+        equipmentId: monitor.id,
+        purchaseDate: new Date('2025-03-15'),
+        purchaseCost: 500,
+        supplier: 'Dell',
+        warrantyExpiration: new Date('2026-03-15'),
+        condition: 'New',
+        status: 'Available',
+      },
+      {
+        equipmentId: phone.id,
+        purchaseDate: new Date('2025-05-20'),
+        purchaseCost: 1200,
+        supplier: 'Apple Store',
+        warrantyExpiration: new Date('2026-05-20'),
+        condition: 'New',
+        status: 'Assigned',
+      },
     ]);
 
     console.log('✅ Seeding complete!');

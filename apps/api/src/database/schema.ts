@@ -88,3 +88,58 @@ export const checkinLogs = pgTable('checkin_logs', {
   checkinTime: timestamp('checkin_time').defaultNow(),
   checkoutTime: timestamp('checkout_time'),
 });
+
+export const equipmentConditionEnum = pgEnum('equipment_condition', [
+  "New",
+  "Used",
+  "Refurbished",
+]);
+
+export const equipmentStatusEnum = pgEnum('equipment_status', [
+  "Available",
+  "Assigned",
+  "Under Repair",
+  "Retired",
+]);
+
+export const equipmentLocationEnum = pgEnum('equipment_location', [
+  "Office",
+  "Remote",
+  "Warehouse",
+]);
+
+export const equipmentCategoryEnum = pgEnum('equipment_category', [
+  "Laptop", "Monitor", "Phone", "Tablet", "Keyboard", "Mouse", "Headset", "Desk", "Chair", "Other",
+]);
+
+export const equipment = pgTable("equipment", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  category: equipmentCategoryEnum("category").notNull(),
+  brand: varchar("brand").notNull(),
+  model: varchar("model").notNull(),
+  serialNumber: varchar("serial_number").default(""),
+  assetTag: varchar("asset_tag").default(""),
+  description: varchar("description").default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  assignedTo: integer("assigned_to")
+      .references(() => employee.id, { onDelete: "cascade" }),
+  location: equipmentLocationEnum("location").notNull(),
+  notes: varchar("notes"),
+  assignmentDate: timestamp("assignment_date"),
+  returnDueDate: timestamp("return_due_date"),
+});
+
+export const purchaseInfo = pgTable("purchase_info", {
+  id: serial("id").primaryKey(),
+  equipmentId: integer("equipment_id")
+    .notNull()
+    .references(() => equipment.id, { onDelete: "cascade" }),
+  purchaseDate: timestamp("purchase_date"),
+  purchaseCost: integer("purchase_cost"),
+  supplier: varchar("supplier"),
+  warrantyExpiration: timestamp("warranty_expiration"),
+  condition: equipmentConditionEnum("condition").notNull(),
+  status: equipmentStatusEnum("status").notNull(),
+});

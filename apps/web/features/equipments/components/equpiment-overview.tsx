@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { EquipmentTable } from "./equpiment-table";
 import { Button } from "@/components/components/ui/button";
 import { Input } from "@/components/components/ui/input";
@@ -13,130 +13,8 @@ import {
   SelectValue,
 } from "@/components/components/ui/select";
 import { RefreshCw, Plus, Search } from "lucide-react";
+import { EquipmentRow } from "@repo/types";
 
-// Mock equipment data
-const mockEquipment = [
-  {
-    id: "EQUIP-001",
-    type: "Laptop",
-    model: 'MacBook Pro 16"',
-    serial: "C02ZN9LFMD6V",
-    assignedTo: { name: "Sarah Johnson", avatar: "/avatar-sarah.png" },
-    department: "Engineering",
-    status: "Working",
-    purchaseDate: "2023-03-15",
-    price: 2499,
-    warrantyExpiration: "2026-03-15",
-  },
-  {
-    id: "EQUIP-002",
-    type: "Monitor",
-    model: 'Dell UltraSharp 27"',
-    serial: "DES1234567890",
-    assignedTo: { name: "Alex Chen", avatar: "/avatar-alex.png" },
-    department: "Engineering",
-    status: "Working",
-    purchaseDate: "2022-11-20",
-    price: 599,
-    warrantyExpiration: "2025-11-20",
-  },
-  {
-    id: "EQUIP-003",
-    type: "Headphones",
-    model: "Sony WH-1000XM5",
-    serial: "SY7890ABC1234",
-    assignedTo: { name: "Jordan Martinez", avatar: "/avatar-jordan.jpg" },
-    department: "Marketing",
-    status: "Working",
-    purchaseDate: "2024-01-10",
-    price: 399,
-    warrantyExpiration: "2025-01-10",
-  },
-  {
-    id: "EQUIP-004",
-    type: "Laptop",
-    model: "ThinkPad X1 Carbon",
-    serial: "PF123ABC456DEF",
-    assignedTo: { name: "Emma Wilson", avatar: "/avatar-emma.jpg" },
-    department: "Sales",
-    status: "In Repair",
-    purchaseDate: "2023-06-05",
-    price: 1899,
-    warrantyExpiration: "2026-06-05",
-  },
-  {
-    id: "EQUIP-005",
-    type: "Keyboard",
-    model: "Keychron K8 Pro",
-    serial: "KC98765XY1234",
-    assignedTo: { name: "Michael Brown", avatar: "/avatar-michael.png" },
-    department: "Engineering",
-    status: "Working",
-    purchaseDate: "2024-02-14",
-    price: 149,
-    warrantyExpiration: "2026-02-14",
-  },
-  {
-    id: "EQUIP-006",
-    type: "Monitor",
-    model: 'LG UltraWide 34"',
-    serial: "LG5678910ABCD",
-    assignedTo: { name: "Lisa Anderson", avatar: "/avatar-lisa.jpg" },
-    department: "Design",
-    status: "Returned",
-    purchaseDate: "2023-09-20",
-    price: 799,
-    warrantyExpiration: "2025-09-20",
-  },
-  {
-    id: "EQUIP-007",
-    type: "Laptop",
-    model: "MacBook Air M2",
-    serial: "C02RW0ALMD71",
-    assignedTo: { name: "David Kim", avatar: "/diverse-avatars.png" },
-    department: "Product",
-    status: "Working",
-    purchaseDate: "2023-08-12",
-    price: 1299,
-    warrantyExpiration: "2026-08-12",
-  },
-  {
-    id: "EQUIP-008",
-    type: "Mouse",
-    model: "Logitech MX Master 3",
-    serial: "LG4567890XYZAB",
-    assignedTo: { name: "Rachel Green", avatar: "/diverse-avatars.png" },
-    department: "Engineering",
-    status: "Missing",
-    purchaseDate: "2023-12-01",
-    price: 99,
-    warrantyExpiration: "2024-12-01",
-  },
-  {
-    id: "EQUIP-009",
-    type: "Docking Station",
-    model: "CalDigit Thunderbolt",
-    serial: "CD111222333444",
-    assignedTo: { name: "James Wilson", avatar: "/diverse-avatars.png" },
-    department: "Engineering",
-    status: "Working",
-    purchaseDate: "2024-01-20",
-    price: 349,
-    warrantyExpiration: "2027-01-20",
-  },
-  {
-    id: "EQUIP-010",
-    type: "Monitor",
-    model: 'ASUS ProArt 32"',
-    serial: "AS9876543210XY",
-    assignedTo: { name: "Olivia Taylor", avatar: "/diverse-avatars.png" },
-    department: "Design",
-    status: "Working",
-    purchaseDate: "2023-07-08",
-    price: 1299,
-    warrantyExpiration: "2026-07-08",
-  },
-];
 
 export function EquipmentOverview() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -144,40 +22,30 @@ export function EquipmentOverview() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [equipments, setEquipments] = useState<EquipmentRow[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  
 
-  // Filter and search logic
-  const filteredData = useMemo(() => {
-    let filtered = mockEquipment.filter((item) => {
-      const matchesSearch =
-        item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.assignedTo.name.toLowerCase().includes(searchTerm.toLowerCase());
+   useEffect(() => {
+    const fetchEquipments = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:3000/equipments");
+        if (!response.ok) {
+          throw new Error("Failed to fetch equipments");
+        }
+        const data = await response.json();
 
-      const matchesType =
-        equipmentTypeFilter === "all" || item.type === equipmentTypeFilter;
-      const matchesStatus =
-        statusFilter === "all" || item.status === statusFilter;
-      const matchesDepartment =
-        departmentFilter === "all" || item.department === departmentFilter;
+        setEquipments(data); } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      return matchesSearch && matchesType && matchesStatus && matchesDepartment;
-    });
-
-    if (sortBy === "name") {
-      filtered.sort((a, b) =>
-        a.assignedTo.name.localeCompare(b.assignedTo.name)
-      );
-    } else if (sortBy === "type") {
-      filtered.sort((a, b) => a.type.localeCompare(b.type));
-    } else if (sortBy === "department") {
-      filtered.sort((a, b) => a.department.localeCompare(b.department));
-    }
-
-    return filtered;
-  }, [searchTerm, equipmentTypeFilter, statusFilter, departmentFilter, sortBy]);
-
+    fetchEquipments();
+  }, []);
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-secondary/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -280,7 +148,7 @@ export function EquipmentOverview() {
 
         {/* Table Card */}
         <Card className="border-border/50 shadow-sm py-0!">
-          <EquipmentTable data={filteredData} />
+          <EquipmentTable data={equipments} />
         </Card>
       </div>
     </div>

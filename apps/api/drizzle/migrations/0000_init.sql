@@ -1,4 +1,8 @@
 CREATE TYPE "public"."employment_type" AS ENUM('Full-time', 'Part-time', 'Contractor');--> statement-breakpoint
+CREATE TYPE "public"."equipment_category" AS ENUM('Laptop', 'Monitor', 'Phone', 'Tablet', 'Keyboard', 'Mouse', 'Headset', 'Desk', 'Chair', 'Other');--> statement-breakpoint
+CREATE TYPE "public"."equipment_condition" AS ENUM('New', 'Used', 'Refurbished');--> statement-breakpoint
+CREATE TYPE "public"."equipment_location" AS ENUM('Office', 'Remote', 'Warehouse');--> statement-breakpoint
+CREATE TYPE "public"."equipment_status" AS ENUM('Available', 'Assigned', 'Under Repair', 'Retired');--> statement-breakpoint
 CREATE TYPE "public"."payment_frequency" AS ENUM('Monthly', 'Weekly');--> statement-breakpoint
 CREATE TYPE "public"."salary_type" AS ENUM('Gross', 'Net');--> statement-breakpoint
 CREATE TYPE "public"."work_location" AS ENUM('Office', 'Remote', 'Hybrid');--> statement-breakpoint
@@ -36,6 +40,24 @@ CREATE TABLE "employee" (
 	CONSTRAINT "employee_personal_number_unique" UNIQUE("personal_number")
 );
 --> statement-breakpoint
+CREATE TABLE "equipment" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL,
+	"category" "equipment_category" NOT NULL,
+	"brand" varchar NOT NULL,
+	"model" varchar NOT NULL,
+	"serial_number" varchar DEFAULT '',
+	"asset_tag" varchar DEFAULT '',
+	"description" varchar DEFAULT '',
+	"created_at" timestamp DEFAULT now(),
+	"updated_at" timestamp DEFAULT now(),
+	"assigned_to" integer,
+	"location" "equipment_location" NOT NULL,
+	"notes" varchar,
+	"assignment_date" timestamp,
+	"return_due_date" timestamp
+);
+--> statement-breakpoint
 CREATE TABLE "job_info" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"employee_id" integer NOT NULL,
@@ -50,6 +72,17 @@ CREATE TABLE "job_info" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE "purchase_info" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"equipment_id" integer NOT NULL,
+	"purchase_date" timestamp,
+	"purchase_cost" integer,
+	"supplier" varchar,
+	"warranty_expiration" timestamp,
+	"condition" "equipment_condition" NOT NULL,
+	"status" "equipment_status" NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "teams" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(256) NOT NULL,
@@ -61,7 +94,9 @@ CREATE TABLE "teams" (
 --> statement-breakpoint
 ALTER TABLE "checkin_logs" ADD CONSTRAINT "checkin_logs_employee_id_employee_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employee"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "compensation" ADD CONSTRAINT "compensation_employee_id_employee_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employee"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "equipment" ADD CONSTRAINT "equipment_assigned_to_employee_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."employee"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job_info" ADD CONSTRAINT "job_info_employee_id_employee_id_fk" FOREIGN KEY ("employee_id") REFERENCES "public"."employee"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job_info" ADD CONSTRAINT "job_info_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job_info" ADD CONSTRAINT "job_info_manager_id_employee_id_fk" FOREIGN KEY ("manager_id") REFERENCES "public"."employee"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "purchase_info" ADD CONSTRAINT "purchase_info_equipment_id_equipment_id_fk" FOREIGN KEY ("equipment_id") REFERENCES "public"."equipment"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "teams" ADD CONSTRAINT "teams_leader_id_employee_id_fk" FOREIGN KEY ("leader_id") REFERENCES "public"."employee"("id") ON DELETE no action ON UPDATE no action;

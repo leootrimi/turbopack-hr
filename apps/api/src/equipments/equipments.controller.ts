@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { EquipmentsService } from './equipments.service';
-import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
+import { EquipmentForm } from '@repo/types';
 
 @Controller('equipments')
 export class EquipmentsController {
   constructor(private readonly equipmentsService: EquipmentsService) {}
 
   @Post()
-  create(@Body() createEquipmentDto: CreateEquipmentDto) {
+  create(@Body() createEquipmentDto: EquipmentForm) {
     return this.equipmentsService.create(createEquipmentDto);
   }
 

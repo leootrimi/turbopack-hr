@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/components/ui/dropdown-menu";
+import { EquipmentRow } from "@repo/types";
 
 interface Equipment {
   id: string;
@@ -60,128 +61,122 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-export const equipment_columns: ColumnDef<Equipment>[] = [
+export const equipment_columns: ColumnDef<EquipmentRow>[] = [
   {
     accessorKey: "id",
-    header: "Equipment ID",
+    header: "ID",
     cell: ({ row }) => (
-      <div className="font-semibold text-primary">{row.getValue("id")}</div>
+      <div className="font-semibold text-primary">
+        #{row.getValue("id")}
+      </div>
     ),
   },
   {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <div>{row.getValue("type")}</div>,
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => (
+      <Badge variant="secondary">
+        {row.getValue("category")}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "brand",
+    header: "Brand",
   },
   {
     accessorKey: "model",
     header: "Model",
     cell: ({ row }) => (
-      <div className="text-foreground text-sm">
+      <div className="text-sm text-muted-foreground">
         {row.getValue("model")}
       </div>
     ),
   },
   {
-    accessorKey: "serial",
-    header: "Serial Number",
-    cell: ({ row }) => (
-      <div className="font-mono text-xs text-foreground">
-        {row.getValue("serial")}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "assignedTo",
-    header: "Assigned To",
+    accessorKey: "assetTag",
+    header: "Asset Tag",
     cell: ({ row }) => {
-      const assignedTo = row.getValue("assignedTo") as {
-        name: string;
-        avatar: string;
-      };
+      const value = row.getValue("assetTag") as string | null;
       return (
-        <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={assignedTo.avatar || "/placeholder.svg"}
-              alt={assignedTo.name}
-            />
-            <AvatarFallback>{assignedTo.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="text-sm font-medium">{assignedTo.name}</div>
+        <div className="font-mono text-xs">
+          {value ?? "—"}
         </div>
       );
     },
   },
   {
-    accessorKey: "department",
-    header: "Department",
-    cell: ({ row }) => (
-      <Badge variant="secondary" className="font-normal">
-        {row.getValue("department")}
-      </Badge>
-    ),
+    accessorKey: "assignedTo",
+    header: "Assigned To",
+    cell: ({ row }) => {
+      const value = row.getValue("assignedTo") as number | null;
+
+      return (
+        <div className="text-sm">
+          {value ? `Employee #${value}` : "Unassigned"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      const value = row.getValue("status") as string | null;
+
+      return (
+        <Badge className={getStatusColor(value || "")}>
+          {value ?? "—"}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "condition",
+    header: "Condition",
     cell: ({ row }) => (
-      <Badge className={getStatusColor(row.getValue("status") as string)}>
-        {row.getValue("status")}
+      <Badge variant="outline">
+        {row.getValue("condition") ?? "—"}
       </Badge>
-    ),
-  },
-  {
-    accessorKey: "purchaseDate",
-    header: "Purchase Date",
-    cell: ({ row }) => (
-      <div>{formatDate(row.getValue("purchaseDate") as string)}</div>
-    ),
-  },
-  {
-    accessorKey: "price",
-    header: "Price",
-    cell: ({ row }) => (
-      <div className="font-semibold">
-        {formatPrice(row.getValue("price") as number)}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "warrantyExpiration",
-    header: "Warranty Expiration",
-    cell: ({ row }) => (
-      <div>{formatDate(row.getValue("warrantyExpiration") as string)}</div>
     ),
   },
   {
     id: "menu-actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const employee = row.original;
+      const equipment = row.original;
 
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-background">
+          <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(employee.serial)}
-              className="hover:bg-card!"
+              onClick={() =>
+                navigator.clipboard.writeText(
+                  equipment.assetTag ?? ""
+                )
+              }
             >
-              Copy Serial
+              Copy Asset Tag
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="hover:bg-card!">
-              View Profile
+            <DropdownMenuItem>
+              View Details
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-card!">
-              Edit Employee
+            <DropdownMenuItem>
+              Edit Equipment
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

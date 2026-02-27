@@ -1,5 +1,6 @@
-import { EquipmentForm, CATEGORY_ICONS, STATUS_CONFIG, CONDITION_CONFIG } from "../types";
 import { Package, ShoppingBag, UserCheck, CheckCircle2 } from "lucide-react";
+import { CATEGORY_ICONS, CONDITION_CONFIG, STATUS_CONFIG } from "../types";
+import { EquipmentForm } from "@repo/types";
 
 interface Props { form: EquipmentForm; }
 
@@ -39,7 +40,6 @@ export function StepReview({ form }: Props) {
         <p className="text-sm text-slate-500 mt-0.5">Check all details before saving this equipment record.</p>
       </div>
 
-      {/* hero preview card */}
       {(basic.name || basic.category) && (
         <div className="flex items-center gap-4 p-5 bg-slate-900 rounded-2xl text-white">
           <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl shrink-0">

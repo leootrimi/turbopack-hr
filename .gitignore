@@ -49,3 +49,12 @@ next-env.d.ts
 # Turborepo
 .turbo/
 **/.turbo/
+
+node_modules
+*.DS_Store
+.env
+.pnpm-store
+.turbo
+
+# For google drive json file.
+*.json

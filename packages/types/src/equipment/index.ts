@@ -122,3 +122,17 @@ export const ConditionConfigSchema = z.record(
     text: z.string(),
   })
 );
+
+export const EquipmentRowSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  category: EquipmentCategoryEnum,
+  brand: z.string(),
+  model: z.string(),
+  assetTag: z.string().nullable(),
+  assignedTo: z.number().nullable(),
+  status: z.string().nullable(),
+  condition: z.string().nullable(),
+});
+
+export type EquipmentRow = z.infer<typeof EquipmentRowSchema>;

@@ -11,22 +11,10 @@ import {
 import { useState } from 'react'
 import { equipment_columns } from './columns'
 import { ImageIcon, ChevronDown, ChevronUp } from 'lucide-react'
-
-interface Equipment {
-  id: string
-  type: string
-  model: string
-  serial: string
-  assignedTo: { name: string; avatar: string }
-  department: string
-  status: string
-  purchaseDate: string
-  price: number
-  warrantyExpiration: string
-}
+import { EquipmentRow } from '@repo/types'
 
 interface EquipmentTableProps {
-  data: Equipment[]
+  data: EquipmentRow[]
 }
 
 export function EquipmentTable({ data }: EquipmentTableProps) {
