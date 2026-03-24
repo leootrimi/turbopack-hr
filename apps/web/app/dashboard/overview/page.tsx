@@ -1,10 +1,10 @@
 import React from 'react'
-import Dashboard from '../../../features/dashboard/components/dashboard'
+import { EmployerDashboard } from '../../../features/dashboard/components/EmployerDashboard'
 
 const page = () => {
   return (
     <div>
-      <Dashboard />
+      <EmployerDashboard />
     </div>
   )
 }
