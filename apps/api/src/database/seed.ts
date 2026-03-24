@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import * as bcrypt from 'bcrypt';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import {
   teams,
@@ -108,32 +109,34 @@ async function seed() {
 
     console.log('🟢 Seeding Users...');
 
+    const passwordHash = await bcrypt.hash('password123', 10);
+
     await db.insert(users).values([
       {
         employeeId: alice.id,
         email: alice.email,
-        passwordHash: 'hashed_password_123',
+        passwordHash,
         role: 'admin',
         isActive: true,
       },
       {
         employeeId: bob.id,
         email: bob.email,
-        passwordHash: 'hashed_password_123',
+        passwordHash,
         role: 'employee',
         isActive: true,
       },
       {
         employeeId: carol.id,
         email: carol.email,
-        passwordHash: 'hashed_password_123',
+        passwordHash,
         role: 'employee',
         isActive: true,
       },
       {
         employeeId: dave.id,
         email: dave.email,
-        passwordHash: 'hashed_password_123',
+        passwordHash,
         role: 'hr',
         isActive: true,
       },
