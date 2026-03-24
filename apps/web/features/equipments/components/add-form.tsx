@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Package, CheckCircle2 } from "lucide-react";
+import { makeRequest } from "../../../lib/axios";
 import { StepIndicator } from "./steps/StepIndicator";
 import { StepBasic } from "./steps/StepBasic";
 import { StepPurchase } from "./steps/StepPurchase";
@@ -48,19 +49,12 @@ export function AddEquipmentPage() {
     try {
       setSubmitted(true);
 
-      const response = await fetch("http://localhost:3000/equipments", {
+      const data = await makeRequest({
+        url: "/equipments",
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
+        data: form,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create equipment");
-      }
-
-      const data = await response.json();
       console.log("Equipment created:", data);
     } catch (error) {
       console.error("Error submitting equipment:", error);

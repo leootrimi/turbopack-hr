@@ -14,33 +14,21 @@ import { Label } from "@radix-ui/react-dropdown-menu";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginBody } from "@repo/types";
+import { useLoginMutation } from "../hooks/queries";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const { mutateAsync: loginMutation, isPending } = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       const payload: LoginBody = { email, password };
-      const response = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Invalid credentials");
-      }
-
-      const data = await response.json();
+      const data = await loginMutation(payload);
       
       if (data.access_token) {
         localStorage.setItem("auth_token", data.access_token);
@@ -49,8 +37,6 @@ export function LoginForm() {
       }
     } catch (error) {
       console.error("Login failed:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -81,7 +67,7 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isPending}
                 className="placeholder:text-gray-300"
               />
             </div>
@@ -102,12 +88,12 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isPending}
                 className="placeholder:text-gray-300"
               />
             </div>
-            <Button type="submit" className="w-full text-white" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="w-full text-white" disabled={isPending}>
+              {isPending ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-white" />
                   Signing in...

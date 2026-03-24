@@ -1,17 +1,10 @@
 import { LoginBody } from "@repo/types";
+import { makeRequest } from "../../../lib/axios";
 
 export const loginApi = async (data: LoginBody) => {
-  const response = await fetch("http://localhost:3000/auth/login", {
+  return makeRequest<{ access_token: string }>({
+    url: "/auth/login",
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    data,
   });
-
-  if (!response.ok) {
-    throw new Error("Invalid credentials");
-  }
-
-  return response.json();
 };

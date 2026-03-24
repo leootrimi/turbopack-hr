@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { EquipmentTable } from "./equpiment-table";
+import { makeRequest } from "../../../lib/axios";
 import { Button } from "@/components/components/ui/button";
 import { Input } from "@/components/components/ui/input";
 import { Card } from "@/components/components/ui/card";
@@ -31,11 +32,10 @@ export function EquipmentOverview() {
     const fetchEquipments = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:3000/equipments");
-        if (!response.ok) {
-          throw new Error("Failed to fetch equipments");
-        }
-        const data = await response.json();
+        const data = await makeRequest<EquipmentRow[]>({
+          url: "/equipments",
+          method: "GET",
+        });
 
         setEquipments(data); } catch (err: any) {
         setError(err.message);
