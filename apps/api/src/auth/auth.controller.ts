@@ -1,5 +1,6 @@
 import { Controller, Post, Body, UnauthorizedException, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LoginBody } from '@repo/types';
 
 @Controller('auth')
 export class AuthController {
@@ -7,7 +8,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() body: any) {
+  async login(@Body() body: LoginBody) {
     if (!body.email || !body.password) {
       throw new UnauthorizedException('Email and password required');
     }

@@ -12,21 +12,43 @@ import {
 import { Input } from "@/components/components/ui/input";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { LoginBody } from "@repo/types";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
     try {
-      console.log("Login attempt:", { email, password });
-      // Add your authentication logic here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload: LoginBody = { email, password };
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid credentials");
+      }
+
+      const data = await response.json();
+      
+      if (data.access_token) {
+        localStorage.setItem("auth_token", data.access_token);
+        document.cookie = `auth_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
     } finally {
       setIsLoading(false);
     }
