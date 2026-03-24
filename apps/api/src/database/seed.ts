@@ -8,6 +8,7 @@ import {
   checkinLogs,
   purchaseInfo,
   equipment,
+  users,
 } from './schema';
 import { eq } from 'drizzle-orm';
 
@@ -104,6 +105,39 @@ async function seed() {
     const bob = insertedEmployees[1];
     const carol = insertedEmployees[2];
     const dave = insertedEmployees[3];
+
+    console.log('🟢 Seeding Users...');
+
+    await db.insert(users).values([
+      {
+        employeeId: alice.id,
+        email: alice.email,
+        passwordHash: 'hashed_password_123',
+        role: 'admin',
+        isActive: true,
+      },
+      {
+        employeeId: bob.id,
+        email: bob.email,
+        passwordHash: 'hashed_password_123',
+        role: 'employee',
+        isActive: true,
+      },
+      {
+        employeeId: carol.id,
+        email: carol.email,
+        passwordHash: 'hashed_password_123',
+        role: 'employee',
+        isActive: true,
+      },
+      {
+        employeeId: dave.id,
+        email: dave.email,
+        passwordHash: 'hashed_password_123',
+        role: 'hr',
+        isActive: true,
+      },
+    ]);
 
     console.log('🟢 Seeding Job Info...');
 

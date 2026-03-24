@@ -143,3 +143,18 @@ export const purchaseInfo = pgTable("purchase_info", {
   condition: equipmentConditionEnum("condition").notNull(),
   status: equipmentStatusEnum("status").notNull(),
 });
+
+export const userRoleEnum = pgEnum('user_role', ['admin', 'hr', 'employee']);
+
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id')
+    .notNull()
+    .unique()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  email: varchar('email', { length: 256 }).notNull().unique(),
+  passwordHash: varchar('password_hash', { length: 256 }),
+  role: userRoleEnum('role').default('employee').notNull(),
+  isActive: boolean('is_active').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});

@@ -9,10 +9,11 @@ async function resetDb() {
 
   await client.connect();
 
-  console.log("🧨 Dropping public schema...");
+  console.log("🧨 Dropping public and drizzle schemas...");
   await client.query(`
-    DROP SCHEMA public CASCADE;
+    DROP SCHEMA IF EXISTS public CASCADE;
     CREATE SCHEMA public;
+    DROP SCHEMA IF EXISTS drizzle CASCADE;
   `);
 
   await client.end();
