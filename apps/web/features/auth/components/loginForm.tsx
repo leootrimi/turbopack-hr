@@ -32,8 +32,8 @@ export function LoginForm() {
       const payload: LoginBody = { email, password };
       const data = await loginMutation(payload);
       
-      if (data.access_token) {
-        login(data.access_token);
+      if (data.access_token && data.refresh_token) {
+        login(data.access_token, data.refresh_token);
         router.push("/dashboard");
       }
     } catch (error) {

@@ -83,7 +83,7 @@ export class TimeOffService {
       items: items.map((item) => ({
         ...item,
         id: item.id.toString(),
-        status: item.status.toLowerCase(), // Frontend expects lowercase status based on prompt
+        status: item.status.toLowerCase(),
       })),
     };
   }

@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
@@ -34,15 +34,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {
         console.error("Invalid token on startup", err);
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("refresh_token");
       }
     }
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem("auth_token", token);
-    document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+  const login = (accessToken: string, refreshToken: string) => {
+    localStorage.setItem("auth_token", accessToken);
+    localStorage.setItem("refresh_token", refreshToken);
+    document.cookie = `auth_token=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
     try {
-      const decoded = jwtDecode<User>(token);
+      const decoded = jwtDecode<User>(accessToken);
       setUser(decoded);
       setIsAuthenticated(true);
     } catch (err) {
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("refresh_token");
     document.cookie = "auth_token=; path=/; max-age=0; SameSite=Lax";
     setUser(null);
     setIsAuthenticated(false);

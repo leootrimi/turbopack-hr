@@ -30,7 +30,21 @@ export class AuthService {
   async login(user: any) {
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
+      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
     };
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      const newPayload = { email: payload.email, sub: payload.sub, role: payload.role };
+      return {
+        access_token: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
+        refresh_token: this.jwtService.sign(newPayload, { expiresIn: '7d' }),
+      };
+    } catch (e) {
+      return null;
+    }
   }
 }
