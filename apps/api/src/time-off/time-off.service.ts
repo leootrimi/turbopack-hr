@@ -6,7 +6,7 @@ import { CreateTimeOffDto } from './dto/create-time-off.dto';
 
 @Injectable()
 export class TimeOffService {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(private readonly drizzle: DrizzleService) { }
 
   async getDashboardRequests(
     userId: number,
@@ -71,7 +71,7 @@ export class TimeOffService {
       })
       .from(leaveRequests)
       .innerJoin(employee, eq(leaveRequests.employeeId, employee.id))
-      .where(whereClause)
+      .where(and(whereClause, eq(leaveRequests.status, 'Pending')))
       .orderBy(desc(leaveRequests.createdAt))
       .limit(perPage)
       .offset(offset);
@@ -116,7 +116,10 @@ export class TimeOffService {
       })
       .from(leaveRequests)
       .leftJoin(employee, eq(leaveRequests.reviewedById, employee.id))
-      .where(eq(leaveRequests.employeeId, user.employeeId))
+      .where(and(
+        eq(leaveRequests.employeeId, user.employeeId),
+        eq(leaveRequests.status, "Pending")
+      ))
       .orderBy(desc(leaveRequests.createdAt));
 
     return results.map((req) => ({
