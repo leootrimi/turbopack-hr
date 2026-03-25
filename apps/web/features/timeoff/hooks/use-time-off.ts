@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTimeOffRequest, CreateTimeOffRequestDTO, getTimeOffRequests } from "../api";
+import {
+  createTimeOffRequest,
+  CreateTimeOffRequestDTO,
+  getTimeOffRequests,
+  getDashboardTimeOffRequests,
+} from "../api";
 
 export function useCreateTimeOff() {
   const queryClient = useQueryClient();
@@ -8,6 +13,7 @@ export function useCreateTimeOff() {
     mutationFn: (data: CreateTimeOffRequestDTO) => createTimeOffRequest(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["time-off"] });
+      queryClient.invalidateQueries({ queryKey: ["time-off-dashboard"] });
     },
   });
 }
@@ -18,3 +24,12 @@ export function useTimeOffRequests() {
     queryFn: getTimeOffRequests,
   });
 }
+
+export function useDashboardTimeOffRequests(page: number, perPage: number) {
+  return useQuery({
+    queryKey: ["time-off-dashboard", page, perPage],
+    queryFn: () => getDashboardTimeOffRequests({ page, perPage }),
+  });
+}
+
+

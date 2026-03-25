@@ -23,6 +23,27 @@ export interface LeaveRequest {
   managerNote?: string;
 }
 
+export interface TimeOffDashboardResponse {
+  summary: {
+    totalRequests: number;
+    newRequests: number;
+    approved: number;
+    rejected: number;
+    pending: number;
+  };
+  page: number;
+  perPage: number;
+  items: Array<{
+    id: string;
+    employeeName: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
 export const createTimeOffRequest = async (data: CreateTimeOffRequestDTO) => {
   return makeRequest({
     url: "/time-off",
@@ -37,3 +58,15 @@ export const getTimeOffRequests = async () => {
     method: "GET",
   });
 };
+
+export const getDashboardTimeOffRequests = async (params: {
+  page: number;
+  perPage: number;
+}) => {
+  return makeRequest<TimeOffDashboardResponse>({
+    url: "/dashboard/timeoff/requests",
+    method: "GET",
+    params,
+  });
+};
+

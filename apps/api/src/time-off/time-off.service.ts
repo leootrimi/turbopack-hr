@@ -1,12 +1,92 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
 import { leaveRequests, users, employee } from 'src/database/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql, and } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 
 @Injectable()
 export class TimeOffService {
   constructor(private readonly drizzle: DrizzleService) {}
+
+  async getDashboardRequests(
+    userId: number,
+    role: string,
+    page: number = 1,
+    perPage: number = 10,
+  ) {
+    const offset = (page - 1) * perPage;
+
+    // 1. Get employee data for the current user to double check
+    const userRecords = await this.drizzle.db
+      .select({
+        employeeId: users.employeeId,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const currentUser = userRecords[0];
+    if (!currentUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // 2. Build where clause based on role
+    // Admin and HR can see all requests
+    const isAdminOrHR = role === 'admin' || role === 'hr';
+    const whereClause = isAdminOrHR
+      ? undefined
+      : eq(leaveRequests.employeeId, currentUser.employeeId);
+
+    // 3. Perform Aggregations
+    const summaryResult = await this.drizzle.db
+      .select({
+        totalRequests: sql<number>`cast(count(*) as int)`,
+        newRequests: sql<number>`cast(count(*) filter (where ${leaveRequests.createdAt} > now() - interval '7 days') as int)`,
+        approved: sql<number>`cast(count(*) filter (where ${leaveRequests.status} = 'Approved') as int)`,
+        rejected: sql<number>`cast(count(*) filter (where ${leaveRequests.status} = 'Rejected') as int)`,
+        pending: sql<number>`cast(count(*) filter (where ${leaveRequests.status} = 'Pending') as int)`,
+      })
+      .from(leaveRequests)
+      .where(whereClause);
+
+    const summary = summaryResult[0] || {
+      totalRequests: 0,
+      newRequests: 0,
+      approved: 0,
+      rejected: 0,
+      pending: 0,
+    };
+
+    // 4. Fetch Paginated Items
+    const items = await this.drizzle.db
+      .select({
+        id: leaveRequests.id,
+        employeeName: sql<string>`concat(${employee.firstName}, ' ', ${employee.lastName})`,
+        type: leaveRequests.type,
+        startDate: leaveRequests.startDate,
+        endDate: leaveRequests.endDate,
+        status: leaveRequests.status,
+        createdAt: leaveRequests.createdAt,
+      })
+      .from(leaveRequests)
+      .innerJoin(employee, eq(leaveRequests.employeeId, employee.id))
+      .where(whereClause)
+      .orderBy(desc(leaveRequests.createdAt))
+      .limit(perPage)
+      .offset(offset);
+
+    return {
+      summary,
+      page,
+      perPage,
+      items: items.map((item) => ({
+        ...item,
+        id: item.id.toString(),
+        status: item.status.toLowerCase(), // Frontend expects lowercase status based on prompt
+      })),
+    };
+  }
 
   async findAll(userId: number) {
     const userRecords = await this.drizzle.db
@@ -20,8 +100,6 @@ export class TimeOffService {
       throw new NotFoundException('User not found');
     }
 
-    const reviewerAlias = employee; // In a more complex join we might need an alias, but for now this is fine if we only join once
-
     const results = await this.drizzle.db
       .select({
         id: leaveRequests.id,
@@ -32,7 +110,7 @@ export class TimeOffService {
         reason: leaveRequests.reason,
         status: leaveRequests.status,
         attachmentName: leaveRequests.attachmentName,
-        reviewedBy: employee.firstName, // Simple for now
+        reviewedBy: employee.firstName,
         managerNote: leaveRequests.managerNote,
         createdAt: leaveRequests.createdAt,
       })
@@ -41,7 +119,7 @@ export class TimeOffService {
       .where(eq(leaveRequests.employeeId, user.employeeId))
       .orderBy(desc(leaveRequests.createdAt));
 
-    return results.map(req => ({
+    return results.map((req) => ({
       ...req,
       id: req.id.toString(),
       days: parseFloat(req.days as string),
@@ -50,7 +128,6 @@ export class TimeOffService {
   }
 
   async create(userId: number, dto: CreateTimeOffDto) {
-    // 1. Map userId to employeeId
     const userRecords = await this.drizzle.db
       .select({ employeeId: users.employeeId })
       .from(users)
@@ -62,7 +139,6 @@ export class TimeOffService {
       throw new NotFoundException('User not found');
     }
 
-    // 2. Insert leave request
     const [newRequest] = await this.drizzle.db
       .insert(leaveRequests)
       .values({
@@ -79,3 +155,4 @@ export class TimeOffService {
     return newRequest;
   }
 }
+
