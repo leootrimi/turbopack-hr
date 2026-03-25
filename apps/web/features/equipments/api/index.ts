@@ -1,5 +1,5 @@
 import { makeRequest } from "../../../lib/axios";
-import { EquipmentRow } from "@repo/types";
+import { EquipmentRow, EquipmentDetail } from "@repo/types";
 
 export async function getEquipments() {
   return await makeRequest<EquipmentRow[]>({
@@ -9,7 +9,7 @@ export async function getEquipments() {
 }
 
 export async function getEquipment(id: string) {
-  return await makeRequest<EquipmentRow>({
+  return await makeRequest<EquipmentDetail>({
     url: `/equipments/${id}`,
     method: "GET",
   });

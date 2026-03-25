@@ -136,3 +136,35 @@ export const EquipmentRowSchema = z.object({
 });
 
 export type EquipmentRow = z.infer<typeof EquipmentRowSchema>;
+
+export const EquipmentDetailSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  category: EquipmentCategoryEnum,
+  brand: z.string(),
+  model: z.string(),
+  serialNumber: z.string().nullable(),
+  assetTag: z.string().nullable(),
+  description: z.string().nullable(),
+  location: EquipmentLocationEnum,
+  notes: z.string().nullable(),
+  assignmentDate: z.union([z.date(), z.string()]).nullable(),
+  returnDueDate: z.union([z.date(), z.string()]).nullable(),
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]),
+  assignedTo: z.object({
+    id: z.number(),
+    name: z.string(),
+    email: z.string(),
+  }).nullable(),
+  purchaseInfo: z.object({
+    purchaseDate: z.union([z.date(), z.string()]).nullable(),
+    purchaseCost: z.union([z.number(), z.string()]).nullable(),
+    supplier: z.string().nullable(),
+    warrantyExpiration: z.union([z.date(), z.string()]).nullable(),
+    condition: EquipmentConditionEnum,
+    status: EquipmentStatusEnum,
+  }).nullable(),
+});
+
+export type EquipmentDetail = z.infer<typeof EquipmentDetailSchema>;

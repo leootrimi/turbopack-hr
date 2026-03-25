@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentForm, EquipmentRow } from '@repo/types';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { equipment, purchaseInfo } from 'src/database/schema';
-import { eq } from 'drizzle-orm';
+import { equipment, purchaseInfo, employee } from 'src/database/schema';
+import { eq, sql } from 'drizzle-orm';
 
 @Injectable()
 export class EquipmentsService {
@@ -72,8 +72,52 @@ export class EquipmentsService {
     return equipments;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} equipment`;
+  async findOne(id: number) {
+    const result = await this.drizzle.db
+      .select({
+        equipment: {
+          id: equipment.id,
+          name: equipment.name,
+          category: equipment.category,
+          brand: equipment.brand,
+          model: equipment.model,
+          serialNumber: equipment.serialNumber,
+          assetTag: equipment.assetTag,
+          description: equipment.description,
+          location: equipment.location,
+          notes: equipment.notes,
+          assignmentDate: equipment.assignmentDate,
+          returnDueDate: equipment.returnDueDate,
+          createdAt: equipment.createdAt,
+          updatedAt: equipment.updatedAt,
+        },
+        purchaseInfo: {
+          purchaseDate: purchaseInfo.purchaseDate,
+          purchaseCost: purchaseInfo.purchaseCost,
+          supplier: purchaseInfo.supplier,
+          warrantyExpiration: purchaseInfo.warrantyExpiration,
+          condition: purchaseInfo.condition,
+          status: purchaseInfo.status,
+        },
+        assignedTo: {
+          id: employee.id,
+          name: sql<string>`${employee.firstName} || ' ' || ${employee.lastName}`,
+          email: employee.email,
+        },
+      })
+      .from(equipment)
+      .leftJoin(purchaseInfo, eq(purchaseInfo.equipmentId, equipment.id))
+      .leftJoin(employee, eq(equipment.assignedTo, employee.id))
+      .where(eq(equipment.id, id))
+      .limit(1);
+
+    if (!result[0]) return null;
+
+    return {
+      ...result[0].equipment,
+      purchaseInfo: result[0].purchaseInfo,
+      assignedTo: result[0].assignedTo?.id ? result[0].assignedTo : null,
+    };
   }
 
   update(id: number, updateEquipmentDto: UpdateEquipmentDto) {
