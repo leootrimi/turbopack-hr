@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Building2, Wifi } from "lucide-react";
 import { Avatar, SectionHeader } from "../components/shared";
-import { CheckInStatus, TODAY_CHECKINS } from "./mock";
+import { useCheckinDashboard } from "../hooks/queries";
 import { useRouter } from "next/navigation";
+
+type CheckInStatus = "in" | "late" | "absent" | "leave";
 
 const STATUS_COLOR: Record<CheckInStatus, string> = {
   in: "#22c55e",
@@ -33,6 +35,9 @@ const TABS: { key: Filter; label: string }[] = [
 export function CheckInPanel() {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
+  const { data: queryData, isLoading } = useCheckinDashboard();
+
+  const TODAY_CHECKINS = queryData || [];
 
   const counts = TABS.reduce<Record<Filter, number>>((acc, t) => {
     acc[t.key] =
@@ -77,7 +82,17 @@ export function CheckInPanel() {
 
       {/* employee rows */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-0.5">
-        {list.map((emp) => (
+        {isLoading && (
+          <div className="flex items-center justify-center p-4 text-slate-400 text-sm">
+            Loading check-ins...
+          </div>
+        )}
+        {!isLoading && list.length === 0 && (
+          <div className="flex items-center justify-center p-4 text-slate-400 text-sm">
+            No check-in records found.
+          </div>
+        )}
+        {!isLoading && list.map((emp) => (
           <div
             key={emp.id}
             className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"

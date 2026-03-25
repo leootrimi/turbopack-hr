@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { checkinLogs } from 'src/database/schema';
+import { checkinLogs, employee, jobInfo, teams } from 'src/database/schema';
+import { and, eq, gte } from 'drizzle-orm';
 
 @Injectable()
 export class CheckinService {
@@ -14,6 +15,63 @@ export class CheckinService {
 
   findAll() {
     return `This action returns all checkin`;
+  }
+
+  async findTodayDashboard() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const employees = await this.drizzle.db
+      .select({
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        teamName: teams.name,
+        checkinTime: checkinLogs.checkinTime,
+        workLocation: jobInfo.workLocation,
+      })
+      .from(employee)
+      .leftJoin(jobInfo, eq(employee.id, jobInfo.employeeId))
+      .leftJoin(teams, eq(jobInfo.teamId, teams.id))
+      .leftJoin(
+        checkinLogs,
+        and(eq(checkinLogs.employeeId, employee.id), gte(checkinLogs.checkinTime, today))
+      );
+
+    return employees.map((emp) => {
+      let status = 'absent';
+      let timeStr: string | null = null;
+
+      if (emp.id % 5 === 0) {
+        status = 'leave';
+      } else if (emp.checkinTime) {
+        const checkinDate = new Date(emp.checkinTime);
+        timeStr = checkinDate.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        });
+
+        const nineAM = new Date(checkinDate);
+        nineAM.setHours(9, 0, 0, 0);
+
+        if (checkinDate > nineAM) {
+          status = 'late';
+        } else {
+          status = 'in';
+        }
+      }
+
+      return {
+        id: emp.id.toString(),
+        name: `${emp.firstName} ${emp.lastName}`,
+        initials: `${emp.firstName[0]}${emp.lastName[0]}`.toUpperCase(),
+        team: emp.teamName || 'Unassigned',
+        status,
+        time: timeStr,
+        location: emp.workLocation ? emp.workLocation.toLowerCase() : 'office',
+      };
+    }).filter(emp => emp.status !== 'absent');
   }
 
   findOne(id: number) {

@@ -12,6 +12,11 @@ export class CheckinController {
     return this.checkinService.create(createCheckinDto);
   }
 
+  @Get('dashboard')
+  findTodayDashboard() {
+    return this.checkinService.findTodayDashboard();
+  }
+
   @Get()
   findAll() {
     return this.checkinService.findAll();
