@@ -3,7 +3,7 @@ import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
 import { DrizzleService } from 'src/database/drizzle.provider';
 import { checkinLogs, employee, jobInfo, teams } from 'src/database/schema';
-import { and, eq, gte } from 'drizzle-orm';
+import { and, eq, gte, lte } from 'drizzle-orm';
 
 @Injectable()
 export class CheckinService {
@@ -17,9 +17,12 @@ export class CheckinService {
     return `This action returns all checkin`;
   }
 
-  async findTodayDashboard() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  async findTodayDashboard(dateStr?: string, filterAbsent: boolean = false) {
+    const startOfDay = dateStr ? new Date(dateStr) : new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const employees = await this.drizzle.db
       .select({
@@ -35,10 +38,14 @@ export class CheckinService {
       .leftJoin(teams, eq(jobInfo.teamId, teams.id))
       .leftJoin(
         checkinLogs,
-        and(eq(checkinLogs.employeeId, employee.id), gte(checkinLogs.checkinTime, today))
+        and(
+          eq(checkinLogs.employeeId, employee.id),
+          gte(checkinLogs.checkinTime, startOfDay),
+          lte(checkinLogs.checkinTime, endOfDay)
+        )
       );
 
-    return employees.map((emp) => {
+    const result = employees.map((emp) => {
       let status = 'absent';
       let timeStr: string | null = null;
 
@@ -71,7 +78,9 @@ export class CheckinService {
         time: timeStr,
         location: emp.workLocation ? emp.workLocation.toLowerCase() : 'office',
       };
-    }).filter(emp => emp.status !== 'absent');
+    });
+
+    return filterAbsent ? result.filter(emp => emp.status !== 'absent') : result;
   }
 
   findOne(id: number) {

@@ -6,21 +6,48 @@ import { StatsRow }        from "./components/StatsRow";
 import { UserPanel }       from "./components/UserPanel";
 import { CheckedInRow }    from "./components/CheckedInRow";
 import { NotCheckedInRow } from "./components/NotCheckedInRow";
-import { checkedIn, notCheckedIn } from "./components/mock";
+import { useCheckinDashboard } from "../dashboard/hooks/queries";
 
 export function CheckInPage() {
   const [query, setQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toLocaleDateString("en-CA"));
 
-  const fIn = checkedIn.filter((u) =>
-    `${u.name} ${u.surname}`.toLowerCase().includes(query.toLowerCase())
-  );
-  const fOut = notCheckedIn.filter((u) =>
-    `${u.name} ${u.surname}`.toLowerCase().includes(query.toLowerCase())
-  );
+  const { data, isLoading } = useCheckinDashboard(selectedDate, false);
 
-  const attendanceRate = Math.round(
-    (checkedIn.length / (checkedIn.length + notCheckedIn.length)) * 100
-  );
+  const rawData = data || [];
+
+  const fIn = rawData
+    .filter((u) => u.status === "in" || u.status === "late")
+    .map((u) => ({
+      id: Number(u.id),
+      name: u.name.split(" ")[0] || u.name,
+      surname: u.name.split(" ").slice(1).join(" "),
+      team: u.team,
+      checkInTime: u.time || "—",
+      isOut: false,
+    }))
+    .filter((u) =>
+      `${u.name} ${u.surname}`.toLowerCase().includes(query.toLowerCase())
+    );
+
+  const fOut = rawData
+    .filter((u) => u.status === "absent" || u.status === "leave")
+    .map((u) => ({
+      id: Number(u.id),
+      name: u.name.split(" ")[0] || u.name,
+      surname: u.name.split(" ").slice(1).join(" "),
+      team: u.team,
+      role: "Employee",
+      avatar: "",
+      expectedTime: "09:00 AM",
+      status: "Absent" as const,
+    }))
+    .filter((u) =>
+      `${u.name} ${u.surname}`.toLowerCase().includes(query.toLowerCase())
+    );
+
+  const total = fIn.length + fOut.length;
+  const attendanceRate = total > 0 ? Math.round((fIn.length / total) * 100) : 0;
 
   return (
     <div
@@ -33,14 +60,12 @@ export function CheckInPage() {
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Check-in Monitor</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              {new Date().toLocaleDateString("en-GB", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="mt-2 text-sm text-slate-500 border border-slate-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-slate-400 font-medium cursor-pointer"
+            />
           </div>
           <SearchBar
             value={query}
@@ -51,9 +76,9 @@ export function CheckInPage() {
 
         {/* stats */}
         <StatsRow
-          total={checkedIn.length + notCheckedIn.length}
-          checkedInCount={checkedIn.length}
-          notCheckedInCount={notCheckedIn.length}
+          total={total}
+          checkedInCount={fIn.length}
+          notCheckedInCount={fOut.length}
           attendanceRate={attendanceRate}
         />
 

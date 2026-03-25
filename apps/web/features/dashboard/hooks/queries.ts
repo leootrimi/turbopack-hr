@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCheckinDashboard } from "../api";
+import { getCheckinDashboard, CheckinData } from "../api";
 
-export const useCheckinDashboard = () => {
-  return useQuery({
-    queryKey: ["checkin-dashboard"],
-    queryFn: getCheckinDashboard,
+export const useCheckinDashboard = (date?: string, filterAbsent?: boolean) => {
+  return useQuery<CheckinData[]>({
+    queryKey: ["checkin-dashboard", date, filterAbsent],
+    queryFn: () => getCheckinDashboard(date, filterAbsent),
   });
 };

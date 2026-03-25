@@ -35,7 +35,7 @@ const TABS: { key: Filter; label: string }[] = [
 export function CheckInPanel() {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
-  const { data: queryData, isLoading } = useCheckinDashboard();
+  const { data: queryData, isLoading } = useCheckinDashboard(undefined, true);
 
   const TODAY_CHECKINS = queryData || [];
 

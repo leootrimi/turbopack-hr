@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CheckinService } from './checkin.service';
 import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
@@ -13,8 +13,11 @@ export class CheckinController {
   }
 
   @Get('dashboard')
-  findTodayDashboard() {
-    return this.checkinService.findTodayDashboard();
+  findTodayDashboard(
+    @Query('date') date?: string,
+    @Query('filterAbsent') filterAbsent?: string
+  ) {
+    return this.checkinService.findTodayDashboard(date, filterAbsent === 'true');
   }
 
   @Get()

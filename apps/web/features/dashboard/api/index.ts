@@ -10,9 +10,13 @@ export interface CheckinData {
   location: "office" | "remote" | "—";
 }
 
-export const getCheckinDashboard = async () => {
+export const getCheckinDashboard = async (date?: string, filterAbsent?: boolean) => {
+  const queryParams = new URLSearchParams();
+  if (date) queryParams.append("date", date);
+  if (filterAbsent) queryParams.append("filterAbsent", "true");
+
   return makeRequest<CheckinData[]>({
-    url: "/api/checkin/dashboard",
+    url: `/api/checkin/dashboard?${queryParams.toString()}`,
     method: "GET",
   });
 };
