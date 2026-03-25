@@ -3,8 +3,11 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/components/ui/avatar'
 import { Button } from '@/components/components/ui/button'
 import { Card } from '@/components/components/ui/card'
+import { useUpdateLeaveRequestStatus } from '../../hooks/use-time-off'
+
 
 interface LeaveRequestCardProps {
+  id: string
   employeeName: string
   employeeId: string
   avatar: string
@@ -16,6 +19,7 @@ interface LeaveRequestCardProps {
 }
 
 export function LeaveRequestCard({
+  id,
   employeeName,
   employeeId,
   avatar,
@@ -25,6 +29,12 @@ export function LeaveRequestCard({
   reason,
   dateRange,
 }: LeaveRequestCardProps) {
+  const { mutate: updateStatus, isPending } = useUpdateLeaveRequestStatus()
+
+  const handleStatusUpdate = (status: 'Approved' | 'Rejected') => {
+    updateStatus({ id, status })
+  }
+
   const initials = employeeName
     .split(' ')
     .map((name) => name[0])
@@ -60,15 +70,19 @@ export function LeaveRequestCard({
           variant="outline"
           size="sm"
           className="bg-red-50 text-red-600 hover:bg-red-100"
+          onClick={() => handleStatusUpdate('Rejected')}
+          disabled={isPending}
         >
-          Deny
+          {isPending ? '...' : 'Deny'}
         </Button>
         <Button
           variant="outline"
           size="sm"
           className="bg-green-50 text-green-600 hover:bg-green-100"
+          onClick={() => handleStatusUpdate('Approved')}
+          disabled={isPending}
         >
-          Approve
+          {isPending ? '...' : 'Approve'}
         </Button>
         <Button
           variant="outline"
@@ -78,6 +92,7 @@ export function LeaveRequestCard({
           Detail
         </Button>
       </div>
+
     </Card>
   )
 }

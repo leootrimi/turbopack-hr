@@ -29,6 +29,7 @@ export function LeaveApprovalSection({ requests }: LeaveApprovalSectionProps) {
         {requests.map((request) => (
           <LeaveRequestCard 
             key={request.id} 
+            id={request.id}
             employeeName={request.employeeName}
             employeeId={request.id} // Using ID as fallback for employeeId if not provided
             avatar="" // Fallback for avatar
@@ -39,6 +40,7 @@ export function LeaveApprovalSection({ requests }: LeaveApprovalSectionProps) {
             dateRange={`${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}`}
           />
         ))}
+
 
       </div>
     </section>

@@ -154,5 +154,40 @@ export class TimeOffService {
 
     return newRequest;
   }
+
+  async updateStatus(
+    id: number,
+    userId: number,
+    status: 'Approved' | 'Rejected',
+  ) {
+    // 1. Get employeeId of the reviewer (current user)
+    const userRecords = await this.drizzle.db
+      .select({ employeeId: users.employeeId })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const reviewer = userRecords[0];
+    if (!reviewer) {
+      throw new NotFoundException('Reviewer not found');
+    }
+
+    // 2. Update the leave request
+    const [updatedRequest] = await this.drizzle.db
+      .update(leaveRequests)
+      .set({
+        status,
+        reviewedById: reviewer.employeeId,
+      })
+      .where(eq(leaveRequests.id, id))
+      .returning();
+
+    if (!updatedRequest) {
+      throw new NotFoundException(`Leave request with ID ${id} not found`);
+    }
+
+    return updatedRequest;
+  }
 }
+
 

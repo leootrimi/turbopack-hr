@@ -70,3 +70,15 @@ export const getDashboardTimeOffRequests = async (params: {
   });
 };
 
+export const updateLeaveRequestStatus = async (
+  id: string,
+  status: "Approved" | "Rejected",
+) => {
+  return makeRequest({
+    url: `/time-off/${id}/status`,
+    method: "PATCH",
+    data: { status },
+  });
+};
+
+
