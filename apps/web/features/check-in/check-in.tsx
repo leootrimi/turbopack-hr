@@ -7,14 +7,26 @@ import { UserPanel }       from "./components/UserPanel";
 import { CheckedInRow }    from "./components/CheckedInRow";
 import { NotCheckedInRow } from "./components/NotCheckedInRow";
 import { useCheckinDashboard } from "../dashboard/hooks/queries";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/components/lib/utils";
+import { Button } from "@/components/components/ui/button";
+import { Calendar } from "@/components/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/components/ui/popover";
 
 export function CheckInPage() {
   const [query, setQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toLocaleDateString("en-CA"));
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  
+  const selectedDate = date ? format(date, "yyyy-MM-dd") : new Date().toLocaleDateString("en-CA");
 
-  const { data, isLoading } = useCheckinDashboard(selectedDate, false);
+  const { data: rawQuery, isLoading } = useCheckinDashboard(selectedDate, false);
 
-  const rawData = data || [];
+  const rawData = rawQuery || [];
 
   const fIn = rawData
     .filter((u) => u.status === "in" || u.status === "late")
@@ -58,14 +70,31 @@ export function CheckInPage() {
 
         {/* header */}
         <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Check-in Monitor</h1>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="mt-2 text-sm text-slate-500 border border-slate-200 rounded-lg px-2 py-1 bg-white outline-none focus:border-slate-400 font-medium cursor-pointer"
-            />
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Check-in Monitor</h1>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground",
+                    "border-slate-200 text-slate-600 hover:bg-slate-50"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <SearchBar
             value={query}
