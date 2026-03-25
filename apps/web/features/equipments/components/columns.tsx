@@ -7,6 +7,7 @@ import {
 } from "@/components/components/ui/avatar";
 import { Badge } from "@/components/components/ui/badge";
 import { Button } from "@/components/components/ui/button";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -172,8 +173,10 @@ export const equipment_columns: ColumnDef<EquipmentRow>[] = [
               Copy Asset Tag
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              View Details
+            <DropdownMenuItem asChild className="hover:bg-card!">
+              <Link href={`/dashboard/equipments/${equipment.id}`}>
+                View Details
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               Edit Equipment

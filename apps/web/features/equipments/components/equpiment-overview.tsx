@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { EquipmentTable } from "./equpiment-table";
-import { makeRequest } from "../../../lib/axios";
+import { useEquipments } from "../hooks/queries";
 import { Button } from "@/components/components/ui/button";
 import { Input } from "@/components/components/ui/input";
 import { Card } from "@/components/components/ui/card";
@@ -23,29 +23,11 @@ export function EquipmentOverview() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
-  const [equipments, setEquipments] = useState<EquipmentRow[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   
-
-   useEffect(() => {
-    const fetchEquipments = async () => {
-      try {
-        setLoading(true);
-        const data = await makeRequest<EquipmentRow[]>({
-          url: "/equipments",
-          method: "GET",
-        });
-
-        setEquipments(data); } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEquipments();
-  }, []);
+  const { data: equipments = [], isLoading, error, refetch } = useEquipments();
+  
+  if (isLoading) return <div className="p-8 text-center">Loading equipments...</div>;
+  if (error) return <div className="p-8 text-center text-red-500">Error loading equipments: {error.message}</div>;
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-secondary/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -74,6 +56,7 @@ export function EquipmentOverview() {
               size="icon"
               className="h-10 w-10"
               title="Refresh equipment list"
+              onClick={() => refetch()}
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
