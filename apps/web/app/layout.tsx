@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import QueryProvider from "./providers/QueryProvider";
+import { AuthProvider } from "../features/auth/hooks/useAuth";
 
 export const metadata: Metadata = {
   title: "Create Turborepo",
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={spaceGrotesk.className}>
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

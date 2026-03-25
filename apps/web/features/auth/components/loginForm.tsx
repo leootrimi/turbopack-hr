@@ -15,12 +15,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginBody } from "@repo/types";
 import { useLoginMutation } from "../hooks/queries";
+import { useAuth } from "../hooks/useAuth";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const router = useRouter();
+  const { login } = useAuth();
   const { mutateAsync: loginMutation, isPending } = useLoginMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,8 +33,7 @@ export function LoginForm() {
       const data = await loginMutation(payload);
       
       if (data.access_token) {
-        localStorage.setItem("auth_token", data.access_token);
-        document.cookie = `auth_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+        login(data.access_token);
         router.push("/dashboard");
       }
     } catch (error) {

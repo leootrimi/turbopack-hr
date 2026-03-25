@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard,
@@ -11,14 +11,17 @@ import {
   ShieldCheck,
   ChevronRight,
   GalleryVerticalEnd,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarFooter,
   SidebarRail,
 } from "@/components/components/ui/sidebar";
 import { cn } from "@/components/lib/utils";
+import { useAuth } from "../../features/auth/hooks/useAuth";
 
 const BASE_PATH = "/dashboard";
 
@@ -151,6 +154,20 @@ function NavGroup({
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const filteredNavItems = navItems.filter((group) => {
+    if (group.title === "Administration" || group.title === "Requests") {
+      return user?.role === "hr" || user?.role === "admin";
+    }
+    return true;
+  });
 
   return (
     <Sidebar
@@ -170,10 +187,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-4 flex flex-col gap-0.5 overflow-y-auto bg-white">
-        {navItems.map((group) => (
+        {filteredNavItems.map((group) => (
           <NavGroup key={group.title} group={group} pathname={pathname} />
         ))}
       </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t border-slate-100 bg-white">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-150"
+        >
+          <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600">
+            <LogOut size={14} />
+          </span>
+          <span className="flex-1 text-left">Log out</span>
+        </button>
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
