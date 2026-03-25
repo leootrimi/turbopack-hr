@@ -72,6 +72,7 @@ export default function EquipmentDetailPage({
           {/* Assignment */}
           <div className="lg:col-span-1">
             <AssigneeCard
+              equipmentId={equipment.id}
               assignedTo={equipment.assignedTo ? {
                 name: equipment.assignedTo.name,
                 email: equipment.assignedTo.email,

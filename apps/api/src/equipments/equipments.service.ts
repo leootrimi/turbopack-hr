@@ -120,8 +120,33 @@ export class EquipmentsService {
     };
   }
 
-  update(id: number, updateEquipmentDto: UpdateEquipmentDto) {
-    return `This action updates a #${id} equipment`;
+  async update(id: number, updateEquipmentDto: UpdateEquipmentDto) {
+    const { assignedTo } = updateEquipmentDto;
+
+    return await this.drizzle.db.transaction(async (tx) => {
+      // Update equipment record
+      const [updatedEquipment] = await tx
+        .update(equipment)
+        .set({
+          assignedTo: assignedTo !== undefined ? (assignedTo === 0 ? null : assignedTo) : undefined,
+          assignmentDate: assignedTo !== undefined ? (assignedTo === 0 ? null : new Date()) : undefined,
+          updatedAt: new Date(),
+        })
+        .where(eq(equipment.id, id))
+        .returning();
+
+      // Update purchase status if assignedTo changed
+      if (assignedTo !== undefined) {
+        await tx
+          .update(purchaseInfo)
+          .set({
+            status: assignedTo === 0 || assignedTo === null ? 'Available' : 'Assigned',
+          })
+          .where(eq(purchaseInfo.equipmentId, id));
+      }
+
+      return updatedEquipment;
+    });
   }
 
   remove(id: number) {

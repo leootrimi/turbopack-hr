@@ -30,6 +30,7 @@ export const CurrencySchema = z.enum([
 export const EmployeeRowSchema = z.object({
   id: z.number(),
   fullName: z.string(),
+  email: z.string(),
   jobTitle: z.string(),
   department: z.string(),
 });

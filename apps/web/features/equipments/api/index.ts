@@ -14,3 +14,11 @@ export async function getEquipment(id: string) {
     method: "GET",
   });
 }
+
+export async function updateEquipment(id: number, data: Partial<EquipmentDetail>) {
+  return await makeRequest<EquipmentDetail>({
+    url: `/equipments/${id}`,
+    method: "PATCH",
+    data,
+  });
+}
