@@ -15,4 +15,9 @@ export class EmployeeController {
   findAll() {
     return this.employeeService.findAll();
   }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.employeeService.findOne(+id);
+  }
 }

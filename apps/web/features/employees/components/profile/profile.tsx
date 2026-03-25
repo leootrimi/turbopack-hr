@@ -15,10 +15,19 @@ import TeamTab from "./team-tab";
 import { DocumentsTab } from "./documents/document-tab";
 import TimeOffTab from "./time-off/time-off-tab";
 
-const UserProfile = () => {
+import { useEmployee } from "../../hooks/queries";
+
+const UserProfile = ({ id }: { id: string }) => {
+  const { data: employeeData, isLoading, error } = useEmployee(id);
   const [activeTab, setActiveTab] = useState("Activity");
 
   const tabs = ["Activity", "Team", "Time off", "Documents", "Reviews"];
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading profile</div>;
+  if (!employeeData) return <div>No employee data found</div>;
+
+  const { personal, job, compensation } = employeeData;
 
   // Render content based on active tab
   const renderTabContent = () => {
@@ -43,7 +52,10 @@ const UserProfile = () => {
           {/* Left Sidebar - User Info */}
           <div className="lg:col-span-1">
             <div className="bg-card rounded-lg shadow-sm p-6">
-              <ProfileHeader />
+              <ProfileHeader 
+                name={`${personal.firstName} ${personal.lastName}`}
+                jobTitle={`${job.jobTitle} - ${job.department}`}
+              />
 
               {/* Action Buttons */}
               <div className="grid grid-cols-3 gap-2 mb-6">
@@ -67,9 +79,7 @@ const UserProfile = () => {
                   <MapPin className="w-4 h-4 text-gray-400 mt-1" />
                   <div>
                     <p className="text-sm text-gray-600">Mailing Address</p>
-                    <p className="text-sm font-medium">134 Baker Street</p>
-                    <p className="text-sm font-medium">San Diego, CA 92093</p>
-                    <p className="text-sm font-medium">USA</p>
+                    <p className="text-sm font-medium">{personal.address || 'N/A'}</p>
                   </div>
                 </div>
 
@@ -78,10 +88,7 @@ const UserProfile = () => {
                   <div>
                     <p className="text-sm text-gray-600">Email</p>
                     <p className="text-sm font-medium text-blue-600">
-                      Work: denis.mendoza@email.com
-                    </p>
-                    <p className="text-sm font-medium text-blue-600">
-                      Home: denis.mendoza@email.com
+                      Work: {personal.email}
                     </p>
                   </div>
                 </div>
@@ -91,17 +98,16 @@ const UserProfile = () => {
                   <div>
                     <p className="text-sm text-gray-600">Phone Number</p>
                     <p className="text-sm font-medium">
-                      Mobile: +(555) 203 923
+                      Mobile: {personal.phone || 'N/A'}
                     </p>
-                    <p className="text-sm font-medium">Work: +(555) 323 232</p>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <Star className="w-4 h-4 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-600">Contact Stage</p>
-                    <p className="text-sm font-medium">Captured</p>
+                    <p className="text-sm text-gray-600">Employment Type</p>
+                    <p className="text-sm font-medium">{job.employmentType}</p>
                   </div>
                 </div>
 
@@ -109,23 +115,25 @@ const UserProfile = () => {
                   <Calendar className="w-4 h-4 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-600">Birthday</p>
-                    <p className="text-sm font-medium">19 Oct 1982</p>
+                    <p className="text-sm font-medium">
+                      {personal.dateOfBirth ? new Date(personal.dateOfBirth).toLocaleDateString() : 'N/A'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t">
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
                       <p className="text-xs text-gray-600">Registered</p>
-                      <p className="text-sm font-medium">17 Aug 2019</p>
+                      <p className="text-sm font-medium">
+                        {new Date(personal.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">Last Active</p>
-                      <p className="text-sm font-medium">1 month ago</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">Last Edited</p>
-                      <p className="text-sm font-medium">4 months ago</p>
+                      <p className="text-xs text-gray-600">Start Date</p>
+                      <p className="text-sm font-medium">
+                        {new Date(job.startDate).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 </div>

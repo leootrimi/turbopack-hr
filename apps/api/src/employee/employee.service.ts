@@ -82,4 +82,45 @@ async findAll(page = 1, pageSize = 10): Promise<EmployeeWithJob[]> {
   return results;
 }
 
+async findOne(id: number) {
+  const result = await this.drizzle.db
+    .select({
+      personal: {
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+        phone: employee.phone,
+        dateOfBirth: employee.dateOfBirth,
+        personalNumber: employee.personalNumber,
+        address: employee.address,
+        emergencyContact: employee.emergencyContact,
+        createdAt: employee.createdAt,
+      },
+      job: {
+        jobTitle: jobInfo.jobTitle,
+        department: jobInfo.department,
+        employmentType: jobInfo.employmentType,
+        startDate: jobInfo.startDate,
+        endDate: jobInfo.endDate,
+        workLocation: jobInfo.workLocation,
+      },
+      compensation: {
+        salaryAmount: compensation.salaryAmount,
+        salaryType: compensation.salaryType,
+        currency: compensation.currency,
+        paymentFrequency: compensation.paymentFrequency,
+        bankAccount: compensation.bankAccount,
+        bonusEligible: compensation.bonusEligible,
+      },
+    })
+    .from(employee)
+    .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id))
+    .leftJoin(compensation, eq(compensation.employeeId, employee.id))
+    .where(eq(employee.id, id))
+    .limit(1);
+
+  return result[0];
+}
+
 }

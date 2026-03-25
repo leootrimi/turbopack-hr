@@ -1,10 +1,11 @@
 import { Button } from "@/components/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/components/ui/dropdown-menu"
-import { Employee } from "@repo/types"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { EmployeeRow } from "@repo/types"
+import Link from "next/link"
 
-export const columns: ColumnDef<Employee>[] = [
+export const columns: ColumnDef<EmployeeRow>[] = [
   {
     accessorKey: 'fullName',
     header: ({ column }) => (
@@ -55,13 +56,15 @@ export const columns: ColumnDef<Employee>[] = [
           <DropdownMenuContent align="end" className="bg-background">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(employee.name)}
+              onClick={() => navigator.clipboard.writeText(employee.fullName)}
               className="hover:bg-card!"
             >
               Copy Name
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem  className="hover:bg-card!">View Profile</DropdownMenuItem>
+            <DropdownMenuItem className="hover:bg-card!" asChild>
+              <Link href={`/dashboard/employees/${employee.id}`}>View Profile</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem  className="hover:bg-card!">Edit Employee</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

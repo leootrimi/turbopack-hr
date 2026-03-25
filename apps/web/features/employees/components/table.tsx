@@ -44,7 +44,6 @@ export function EmployeeTable() {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const { data } = useEmployees();
-  console.log(data)
 
   const columns = React.useMemo(
     () => [
