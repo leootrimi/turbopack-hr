@@ -187,6 +187,7 @@ export const leaveTypeEnum = pgEnum('leave_type', [
   'Marriage',
   'Bereavement',
   'Unpaid',
+  'Personal Day',
 ]);
 
 export const leaveRequestStatusEnum = pgEnum('leave_request_status', [
@@ -210,4 +211,20 @@ export const leaveRequests = pgTable('leave_requests', {
   reviewedById: integer('reviewed_by_id').references(() => employee.id),
   managerNote: varchar('manager_note', { length: 1024 }),
   createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const timeOffBalance = pgTable('time_off_balance', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id')
+    .notNull()
+    .unique()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  vacationTotal: numeric('vacation_total', { precision: 4, scale: 1 }).default('20.0').notNull(),
+  vacationUsed: numeric('vacation_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
+  sickTotal: numeric('sick_total', { precision: 4, scale: 1 }).default('10.0').notNull(),
+  sickUsed: numeric('sick_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
+  personalTotal: numeric('personal_total', { precision: 4, scale: 1 }).default('5.0').notNull(),
+  personalUsed: numeric('personal_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });

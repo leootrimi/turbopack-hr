@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { leaveRequests, users, employee } from 'src/database/schema';
+import { leaveRequests, users, employee, timeOffBalance } from 'src/database/schema';
 import { desc, eq, sql, and } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 
@@ -163,33 +163,65 @@ export class TimeOffService {
     userId: number,
     status: 'Approved' | 'Rejected',
   ) {
-    // 1. Get employeeId of the reviewer (current user)
-    const userRecords = await this.drizzle.db
-      .select({ employeeId: users.employeeId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+    return await this.drizzle.db.transaction(async (tx) => {
+      // 1. Get employeeId of the reviewer (current user)
+      const userRecords = await tx
+        .select({ employeeId: users.employeeId })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
 
-    const reviewer = userRecords[0];
-    if (!reviewer) {
-      throw new NotFoundException('Reviewer not found');
-    }
+      const reviewer = userRecords[0];
+      if (!reviewer) {
+        throw new NotFoundException('Reviewer not found');
+      }
 
-    // 2. Update the leave request
-    const [updatedRequest] = await this.drizzle.db
-      .update(leaveRequests)
-      .set({
-        status,
-        reviewedById: reviewer.employeeId,
-      })
-      .where(eq(leaveRequests.id, id))
-      .returning();
+      // 2. Fetch the request to get employeeId, days, and type
+      const requestRecords = await tx
+        .select()
+        .from(leaveRequests)
+        .where(eq(leaveRequests.id, id))
+        .limit(1);
 
-    if (!updatedRequest) {
-      throw new NotFoundException(`Leave request with ID ${id} not found`);
-    }
+      const request = requestRecords[0];
+      if (!request) {
+        throw new NotFoundException(`Leave request with ID ${id} not found`);
+      }
 
-    return updatedRequest;
+      // 2. Update the leave request
+      const [updatedRequest] = await tx
+        .update(leaveRequests)
+        .set({
+          status,
+          reviewedById: reviewer.employeeId,
+        })
+        .where(eq(leaveRequests.id, id))
+        .returning();
+
+      if (!updatedRequest) {
+        throw new NotFoundException(`Leave request with ID ${id} not found`);
+      }
+
+      // 3. Update the balance if approved
+      if (status === 'Approved') {
+        let balanceField: keyof typeof timeOffBalance.$inferInsert | null = null;
+        if (request.type === 'Vacation') balanceField = 'vacationUsed';
+        else if (request.type === 'Sick Leave') balanceField = 'sickUsed';
+        else if (request.type === 'Personal Day') balanceField = 'personalUsed';
+
+        if (balanceField) {
+          await tx
+            .update(timeOffBalance)
+            .set({
+              [balanceField as string]: sql`${timeOffBalance[balanceField as any]} + ${request.days}`,
+              updatedAt: new Date(),
+            })
+            .where(eq(timeOffBalance.employeeId, request.employeeId));
+        }
+      }
+
+      return updatedRequest;
+    });
   }
 }
 

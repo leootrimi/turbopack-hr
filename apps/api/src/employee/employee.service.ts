@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { compensation, employee, jobInfo, users } from 'src/database/schema';
+import { compensation, employee, jobInfo, users, timeOffBalance, leaveRequests } from 'src/database/schema';
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
@@ -57,6 +57,10 @@ export class EmployeeService {
         passwordHash: defaultPasswordHash,
         role: 'employee',
         isActive: true,
+      });
+
+      await tx.insert(timeOffBalance).values({
+        employeeId: newEmployee.id,
       });
 
       return newEmployee;
@@ -120,7 +124,31 @@ async findOne(id: number) {
     .where(eq(employee.id, id))
     .limit(1);
 
-  return result[0];
+  if (!result[0]) return null;
+
+  const timeOffBalanceResult = await this.drizzle.db
+    .select()
+    .from(timeOffBalance)
+    .where(eq(timeOffBalance.employeeId, id))
+    .limit(1);
+
+  const leaveRequestsResult = await this.drizzle.db
+    .select()
+    .from(leaveRequests)
+    .where(eq(leaveRequests.employeeId, id));
+
+  return {
+    ...result[0],
+    timeOffBalance: timeOffBalanceResult[0] || {
+      vacationTotal: 20,
+      vacationUsed: 0,
+      sickTotal: 10,
+      sickUsed: 0,
+      personalTotal: 5,
+      personalUsed: 0,
+    },
+    leaveRequests: leaveRequestsResult,
+  };
 }
 
 }

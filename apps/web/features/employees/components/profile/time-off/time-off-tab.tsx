@@ -20,20 +20,61 @@ const mockCardStates = [
   },
 ];
 
-export default function TimeOffTab() {
+interface TimeOffTabProps {
+  timeOffBalance: {
+    vacationTotal: number;
+    vacationUsed: number;
+    sickTotal: number;
+    sickUsed: number;
+    personalTotal: number;
+    personalUsed: number;
+  };
+  leaveRequests: any[];
+}
+
+export default function TimeOffTab({ timeOffBalance, leaveRequests }: TimeOffTabProps) {
+  const vacationTotal = Number(timeOffBalance.vacationTotal);
+  const vacationUsed = Number(timeOffBalance.vacationUsed);
+  const sickTotal = Number(timeOffBalance.sickTotal);
+  const sickUsed = Number(timeOffBalance.sickUsed);
+  const personalTotal = Number(timeOffBalance.personalTotal);
+  const personalUsed = Number(timeOffBalance.personalUsed);
+
+  const annualLeaveRemaining = vacationTotal - vacationUsed;
+  const sickLeaveRemaining = sickTotal - sickUsed;
+  const personalRemaining = personalTotal - personalUsed;
+
+  const cardStates = [
+    {
+      days: annualLeaveRemaining,
+      title: "Annual Leave",
+      description: "Remaining vacation days for this year.",
+    },
+    {
+      days: sickLeaveRemaining,
+      title: "Sick Leave",
+      description: "Approved sick leave days.",
+    },
+    {
+      days: personalRemaining,
+      title: "Personal Day",
+      description: "A day reserved for personal matters.",
+    },
+  ];
+
   return (
     <div className="p-6">
       <div className="flex justify-between gap-4 ">
-        <DaysOffCarousel cardStates={mockCardStates} />
+        <DaysOffCarousel cardStates={cardStates} />
         <UsedTimeOffCard
           used={{
-            vacation: 5,
-            sick: 2,
-            personal: 0,
+            vacation: vacationUsed,
+            sick: sickUsed,
+            personal: personalUsed,
           }}
         />
       </div>
-      <TimeOffRequestsTable />
+      <TimeOffRequestsTable requests={leaveRequests} />
     </div>
   );
 }

@@ -27,7 +27,7 @@ const UserProfile = ({ id }: { id: string }) => {
   if (error) return <div>Error loading profile</div>;
   if (!employeeData) return <div>No employee data found</div>;
 
-  const { personal, job, compensation } = employeeData;
+  const { personal, job, compensation, timeOffBalance, leaveRequests } = employeeData;
 
   // Render content based on active tab
   const renderTabContent = () => {
@@ -39,7 +39,7 @@ const UserProfile = ({ id }: { id: string }) => {
       case "Documents":
         return <DocumentsTab />;
       case "Time off":
-        return <TimeOffTab />;
+        return <TimeOffTab timeOffBalance={timeOffBalance} leaveRequests={leaveRequests} />;
       default:
         return <ActivityContent activityData={activityData} />;
     }

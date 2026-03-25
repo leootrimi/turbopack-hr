@@ -11,6 +11,7 @@ import {
   equipment,
   users,
   announcements,
+  timeOffBalance,
 } from './schema';
 import { eq } from 'drizzle-orm';
 
@@ -223,6 +224,15 @@ async function seed() {
         bankAccount: 'DE222222222',
         bonusEligible: true,
       },
+    ]);
+
+    console.log('🟢 Seeding Time Off Balances...');
+
+    await db.insert(timeOffBalance).values([
+      { employeeId: alice.id },
+      { employeeId: bob.id },
+      { employeeId: carol.id },
+      { employeeId: dave.id },
     ]);
 
     console.log('🟢 Updating Team Leaders...');

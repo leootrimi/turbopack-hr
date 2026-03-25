@@ -36,6 +36,27 @@
       "when": 1774443360629,
       "tag": "0004_uneven_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774452729265,
+      "tag": "0005_gigantic_ogun",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774453214318,
+      "tag": "0006_hesitant_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774453589918,
+      "tag": "0007_pretty_venom",
+      "breakpoints": true
     }
   ]
 }

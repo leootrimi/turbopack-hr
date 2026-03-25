@@ -24,18 +24,32 @@ import {
 import { Button } from "@/components/components/ui/button";
 import { ButtonGroup } from "@/components/components/ui/button-group";
 
-export function TimeOffRequestsTable() {
+export function TimeOffRequestsTable({ requests }: { requests: any[] }) {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingRequests = sampleData.filter((request) => {
+  // Map backend requests to TimeOffRequestRow format
+  const mappedRequests: TimeOffRequestRow[] = requests.map(req => ({
+    id: req.id,
+    type: req.type,
+    request_type: req.type, // Map to request_type as well if used in columns
+    date_from: req.startDate,
+    date_to: req.endDate,
+    days: Number(req.days),
+    amount_of_days: Number(req.days),
+    reason: req.reason,
+    status: req.status,
+    created_at: req.createdAt || new Date().toISOString(),
+  }));
+
+  const upcomingRequests = mappedRequests.filter((request) => {
     const dateFrom = new Date(request.date_from);
     return dateFrom >= today;
   });
 
-  const pastRequests = sampleData.filter((request) => {
+  const pastRequests = mappedRequests.filter((request) => {
     const dateFrom = new Date(request.date_from);
     return dateFrom < today;
   });
