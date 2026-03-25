@@ -22,6 +22,7 @@ import {
 } from "@/components/components/ui/sidebar";
 import { cn } from "@/components/lib/utils";
 import { useAuth } from "../../features/auth/hooks/useAuth";
+import { canAccess } from "../../config/rbac";
 
 const BASE_PATH = "/dashboard";
 
@@ -162,12 +163,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     router.push("/");
   };
 
-  const filteredNavItems = navItems.filter((group) => {
-    if (group.title === "Administration" || group.title === "Requests") {
-      return user?.role === "hr" || user?.role === "admin";
-    }
-    return true;
-  });
+  const filteredNavItems = navItems.map((group) => {
+    return {
+      ...group,
+      items: group.items.filter((item) => canAccess(user?.role, item.url)),
+    };
+  }).filter((group) => group.items.length > 0);
 
   return (
     <Sidebar
