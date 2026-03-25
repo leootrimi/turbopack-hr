@@ -2,32 +2,20 @@
 
 import { useState } from "react";
 import { CalendarDays, History, Umbrella } from "lucide-react";
-import { LEAVE_BALANCES, MOCK_REQUESTS, LeaveRequest, LeaveType } from "./components/mock";
+import { LEAVE_BALANCES, LeaveType } from "./components/mock";
 import { BalanceCard }    from "./components/BalanceCard";
 import { RequestForm }    from "./components/RequestForm";
 import { RequestHistory } from "./components/RequestHistory";
+import { useTimeOffRequests } from "./hooks/use-time-off";
 
 type Tab = "request" | "history";
 
 export function TimeOffPage() {
-  const [tab, setTab]         = useState<Tab>("request");
-  const [requests, setRequests] = useState<LeaveRequest[]>(MOCK_REQUESTS);
+  const [tab, setTab] = useState<Tab>("request");
+  const { data: requests = [], isLoading } = useTimeOffRequests();
 
-  const handleSubmit = (data: {
-    type: LeaveType; startDate: string; endDate: string;
-    days: number; reason: string; halfDay: boolean; attachCertificate: boolean;
-  }) => {
-    const newReq: LeaveRequest = {
-      id: crypto.randomUUID(),
-      type: data.type,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      days: data.days,
-      reason: data.reason,
-      status: "Pending",
-      submittedAt: new Date(),
-    };
-    setRequests((prev) => [newReq, ...prev]);
+  const handleSubmit = () => {
+    setTab("history");
   };
 
   const pendingCount  = requests.filter((r) => r.status === "Pending").length;
@@ -95,10 +83,15 @@ export function TimeOffPage() {
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-              {tab === "request" ? (
-                <RequestForm onSubmit={(data) => { handleSubmit(data); setTab("history"); }} />
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                  <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                  <p className="text-sm text-slate-500 font-medium">Loading...</p>
+                </div>
+              ) : tab === "request" ? (
+                <RequestForm onSubmit={() => { handleSubmit(); }} />
               ) : (
-                <RequestHistory requests={requests} />
+                <RequestHistory requests={requests as any} />
               )}
             </div>
           </div>

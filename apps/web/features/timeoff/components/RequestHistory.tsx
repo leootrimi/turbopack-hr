@@ -1,15 +1,18 @@
-import { LeaveRequest, STATUS_CONFIG, LEAVE_CONFIG } from "./mock";
-import { CalendarDays, User, MessageSquare, Clock } from "lucide-react";
+import { STATUS_CONFIG, LEAVE_CONFIG } from "./mock";
+import { CalendarDays, User, MessageSquare, Clock, Loader2 } from "lucide-react";
+import { LeaveRequest } from "../api";
+import { useTimeOffRequests } from "../hooks/use-time-off";
 
 interface Props {
-  requests: LeaveRequest[];
+  requests?: LeaveRequest[];
 }
 
 function formatDate(s: string) {
   return new Date(s).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function timeAgo(d: Date) {
+function timeAgo(dateInput: string | Date) {
+  const d = new Date(dateInput);
   const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
   if (diff === 0) return "Today";
   if (diff === 1) return "Yesterday";
@@ -17,8 +20,8 @@ function timeAgo(d: Date) {
 }
 
 function RequestCard({ req }: { req: LeaveRequest }) {
-  const cfg    = LEAVE_CONFIG[req.type];
-  const status = STATUS_CONFIG[req.status];
+  const cfg    = LEAVE_CONFIG[req.type as keyof typeof LEAVE_CONFIG] || LEAVE_CONFIG["Vacation"];
+  const status = STATUS_CONFIG[req.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["Pending"];
   const isUpcoming = new Date(req.startDate) >= new Date();
 
   return (
@@ -73,20 +76,32 @@ function RequestCard({ req }: { req: LeaveRequest }) {
         </div>
       )}
 
-      {req.note && (
+      {req.managerNote && (
         <div className="flex items-start gap-2 px-3 py-2 bg-red-50 rounded-xl border border-red-100">
           <MessageSquare size={11} className="text-red-400 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-red-600">{req.note}</p>
+          <p className="text-[11px] text-red-600">{req.managerNote}</p>
         </div>
       )}
     </div>
   );
 }
 
-export function RequestHistory({ requests }: Props) {
+export function RequestHistory({ requests: propsRequests }: Props) {
+  const { data: hookRequests = [], isLoading } = useTimeOffRequests();
+  const requests = propsRequests || hookRequests;
+  
   const today = new Date().toISOString().split("T")[0];
   const upcoming = requests.filter((r) => r.startDate >= today).sort((a, b) => a.startDate.localeCompare(b.startDate));
   const past     = requests.filter((r) => r.startDate < today).sort((a, b) => b.startDate.localeCompare(a.startDate));
+
+  if (isLoading && !propsRequests) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 className="animate-spin text-indigo-500" size={30} />
+        <p className="text-sm text-slate-500 font-medium">Loading your requests...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-7">

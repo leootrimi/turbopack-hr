@@ -207,5 +207,7 @@ export const leaveRequests = pgTable('leave_requests', {
   reason: varchar('reason', { length: 1024 }),
   status: leaveRequestStatusEnum('status').default('Pending').notNull(),
   attachmentName: varchar('attachment_name', { length: 256 }),
+  reviewedById: integer('reviewed_by_id').references(() => employee.id),
+  managerNote: varchar('manager_note', { length: 1024 }),
   createdAt: timestamp('created_at').defaultNow(),
 });

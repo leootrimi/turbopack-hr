@@ -1,7 +1,7 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { TimeOffService } from './time-off.service';
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TimeOffService } from './time-off.service';
 
 @Controller('time-off')
 export class TimeOffController {
@@ -12,5 +12,12 @@ export class TimeOffController {
   async create(@Request() req: any, @Body() createTimeOffDto: CreateTimeOffDto) {
     const userId = req.user.id;
     return this.timeOffService.create(userId, createTimeOffDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async findAll(@Request() req: any) {
+    const userId = req.user.id;
+    return this.timeOffService.findAll(userId);
   }
 }

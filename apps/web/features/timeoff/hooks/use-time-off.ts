@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTimeOffRequest, CreateTimeOffRequestDTO } from "../api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createTimeOffRequest, CreateTimeOffRequestDTO, getTimeOffRequests } from "../api";
 
 export function useCreateTimeOff() {
   const queryClient = useQueryClient();
@@ -7,8 +7,14 @@ export function useCreateTimeOff() {
   return useMutation({
     mutationFn: (data: CreateTimeOffRequestDTO) => createTimeOffRequest(data),
     onSuccess: () => {
-      // Invalidate relevant queries if any (e.g., leave balances, request list)
-      // queryClient.invalidateQueries({ queryKey: ["leave-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["time-off"] });
     },
+  });
+}
+
+export function useTimeOffRequests() {
+  return useQuery({
+    queryKey: ["time-off"],
+    queryFn: getTimeOffRequests,
   });
 }
