@@ -6,6 +6,7 @@ import {
   integer,
   pgEnum,
   boolean,
+  numeric,
 } from 'drizzle-orm/pg-core';
 
 export const employee = pgTable('employee', {
@@ -176,5 +177,35 @@ export const announcements = pgTable('announcements', {
   authorId: integer('author_id')
     .notNull()
     .references(() => employee.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const leaveTypeEnum = pgEnum('leave_type', [
+  'Vacation',
+  'Work From Home',
+  'Sick Leave',
+  'Marriage',
+  'Bereavement',
+  'Unpaid',
+]);
+
+export const leaveRequestStatusEnum = pgEnum('leave_request_status', [
+  'Pending',
+  'Approved',
+  'Rejected',
+]);
+
+export const leaveRequests = pgTable('leave_requests', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id')
+    .notNull()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  type: leaveTypeEnum('type').notNull(),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date').notNull(),
+  days: numeric('days', { precision: 4, scale: 1 }).notNull(),
+  reason: varchar('reason', { length: 1024 }),
+  status: leaveRequestStatusEnum('status').default('Pending').notNull(),
+  attachmentName: varchar('attachment_name', { length: 256 }),
   createdAt: timestamp('created_at').defaultNow(),
 });

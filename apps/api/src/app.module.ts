@@ -6,9 +6,10 @@ import { CheckinModule } from './checkin/checkin.module';
 import { DrizzleModule } from './database/drizzle.module';
 import { AuthModule } from './auth/auth.module';
 import { AnnouncementModule } from './announcement/announcement.module';
+import { TimeOffModule } from './time-off/time-off.module';
 
 @Module({
-  imports: [CheckinModule, EmployeeModule, EquipmentsModule, DrizzleModule, TeamsModule, AuthModule, AnnouncementModule],
+  imports: [CheckinModule, EmployeeModule, EquipmentsModule, DrizzleModule, TeamsModule, AuthModule, AnnouncementModule, TimeOffModule],
   controllers: [],
   providers: [],
 })

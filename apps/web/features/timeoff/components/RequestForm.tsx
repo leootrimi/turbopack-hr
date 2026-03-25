@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Send, CalendarDays, Info } from "lucide-react";
 import { LeaveType, LEAVE_CONFIG, LEAVE_BALANCES } from "./mock";
 
+import { useCreateTimeOff } from "../hooks/use-time-off";
+
 interface FormState {
   type: LeaveType;
   startDate: string;
@@ -11,6 +13,7 @@ interface FormState {
   reason: string;
   attachCertificate: boolean;
   halfDay: boolean;
+  attachmentName?: string;
 }
 
 interface Props {
@@ -41,6 +44,7 @@ function formatDateDisplay(d: string) {
 
 export function RequestForm({ onSubmit }: Props) {
   const today = new Date().toISOString().split("T")[0];
+  const { mutate: createRequest, isPending: submitting } = useCreateTimeOff();
 
   const [form, setForm] = useState<FormState>({
     type: "Vacation",
@@ -49,8 +53,10 @@ export function RequestForm({ onSubmit }: Props) {
     reason: "",
     attachCertificate: false,
     halfDay: false,
+    attachmentName: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -65,12 +71,40 @@ export function RequestForm({ onSubmit }: Props) {
 
   const handleSubmit = () => {
     if (!isValid) return;
-    onSubmit({ ...form, days });
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setForm({ type: "Vacation", startDate: "", endDate: "", reason: "", attachCertificate: false, halfDay: false });
-    }, 2000);
+
+    createRequest(
+      {
+        ...form,
+        days,
+        attachmentName: selectedFile?.name,
+      },
+      {
+        onSuccess: () => {
+          onSubmit({ ...form, days, attachmentName: selectedFile?.name });
+          setSubmitted(true);
+          setTimeout(() => {
+            setSubmitted(false);
+            setForm({
+              type: "Vacation",
+              startDate: "",
+              endDate: "",
+              reason: "",
+              attachCertificate: false,
+              halfDay: false,
+              attachmentName: "",
+            });
+            setSelectedFile(null);
+          }, 2000);
+        },
+      }
+    );
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
 
   const inputCls = "w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 placeholder-slate-400 transition bg-white";
@@ -197,13 +231,31 @@ export function RequestForm({ onSubmit }: Props) {
         />
       </div>
 
-      {/* Certificate attachment for sick leave */}
       {form.type === "Sick Leave" && (
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Medical Certificate</label>
-          <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-slate-300 transition-colors cursor-pointer">
-            <p className="text-xs font-semibold text-slate-500">Click to upload or drag & drop</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">PDF, PNG or JPG up to 5MB</p>
+          <div 
+            className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-slate-300 transition-colors cursor-pointer relative"
+            onClick={() => document.getElementById('file-upload')?.click()}
+          >
+            <input
+              id="file-upload"
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              accept=".pdf,.png,.jpg,.jpeg"
+            />
+            {selectedFile ? (
+              <div>
+                <p className="text-xs font-semibold text-indigo-600">Selected: {selectedFile.name}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Click to change</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-semibold text-slate-500">Click to upload or drag & drop</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">PDF, PNG or JPG up to 5MB</p>
+              </>
+            )}
           </div>
         </div>
       )}
