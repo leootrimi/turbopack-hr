@@ -40,7 +40,7 @@ export function AssigneeCard({
   const filteredEmployees = React.useMemo(() => {
     if (!searchTerm) return employees;
     return employees.filter((emp) =>
-      `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [employees, searchTerm]);
 
@@ -187,7 +187,7 @@ export function AssigneeCard({
                           <p className="font-medium text-slate-900 truncate">
                             {employee.fullName}
                           </p>
-                          <p className="text-xs text-slate-500 truncate">{(employee as any).email}</p>
+                          <p className="text-xs text-slate-500 truncate">{employee.email}</p>
                         </div>
                       </button>
                     ))
