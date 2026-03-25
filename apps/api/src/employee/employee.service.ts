@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { compensation, employee, jobInfo } from 'src/database/schema';
+import { compensation, employee, jobInfo, users } from 'src/database/schema';
+import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
 import { CreateEmployeeDto } from '@repo/types';
@@ -47,6 +48,15 @@ export class EmployeeService {
         paymentFrequency: dto.compensation.paymentFrequency,
         bankAccount: dto.compensation.bankAccount,
         bonusEligible: dto.compensation.bonusEligible,
+      });
+
+      const defaultPasswordHash = await bcrypt.hash('password', 10);
+      await tx.insert(users).values({
+        employeeId: newEmployee.id,
+        email: dto.personal.email,
+        passwordHash: defaultPasswordHash,
+        role: 'employee',
+        isActive: true,
       });
 
       return newEmployee;
