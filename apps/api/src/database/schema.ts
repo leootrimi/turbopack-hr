@@ -158,3 +158,23 @@ export const users = pgTable('users', {
   isActive: boolean('is_active').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+export const announcementTagEnum = pgEnum('announcement_tag', [
+  'General',
+  'Urgent',
+  'HR',
+  'IT',
+  'Event',
+]);
+
+export const announcements = pgTable('announcements', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 256 }).notNull(),
+  body: varchar('body', { length: 2048 }).notNull(),
+  tag: announcementTagEnum('tag').notNull(),
+  pinned: boolean('pinned').default(false).notNull(),
+  authorId: integer('author_id')
+    .notNull()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow(),
+});

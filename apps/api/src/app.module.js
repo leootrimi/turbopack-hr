@@ -3,6 +3,7 @@ import { EmployeeModule } from './employee/employee.module';
 import { TeamsModule } from './teams/teams.module';
 import { EquipmentsModule } from './equipments/equipments.module';
 import { CheckinModule } from './checkin/checkin.module';
+import { AnnouncementModule } from './announcement/announcement.module';
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";

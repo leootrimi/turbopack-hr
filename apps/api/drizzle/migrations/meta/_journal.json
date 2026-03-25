@@ -15,6 +15,13 @@
       "when": 1774393632345,
       "tag": "0001_safe_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774400213563,
+      "tag": "0002_left_tomas",
+      "breakpoints": true
     }
   ]
 }

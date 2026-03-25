@@ -10,6 +10,7 @@ import {
   purchaseInfo,
   equipment,
   users,
+  announcements,
 } from './schema';
 import { eq } from 'drizzle-orm';
 
@@ -315,6 +316,46 @@ async function seed() {
         warrantyExpiration: new Date('2026-05-20'),
         condition: 'New',
         status: 'Assigned',
+      },
+    ]);
+
+    console.log('🟢 Seeding Announcements...');
+
+    await db.insert(announcements).values([
+      {
+        title: 'New HR Tool Launch!',
+        body: 'We are incredibly excited to officially roll out the first version of our internal HR Tool. Please feel free to explore the dashboard.',
+        tag: 'General',
+        pinned: true,
+        authorId: dave.id,
+      },
+      {
+        title: 'Q3 Townhall Meeting',
+        body: 'Just a reminder that the Q3 remote townhall will take place next Wednesday at 10 AM. Dial-in link will be shared via calendar.',
+        tag: 'Event',
+        pinned: false,
+        authorId: alice.id,
+      },
+      {
+        title: 'Phishing Awareness Training',
+        body: 'All employees are required to complete the mandatory IT phishing awareness module before the end of the month. Check your emails.',
+        tag: 'IT',
+        pinned: true,
+        authorId: bob.id,
+      },
+      {
+        title: 'Public Holiday Reminder',
+        body: 'Office will be closed this Friday for the public holiday. Enjoy your long weekend!',
+        tag: 'HR',
+        pinned: false,
+        authorId: dave.id,
+      },
+      {
+        title: 'Server Maintenance Window',
+        body: 'Downtime expected on Saturday from 2 AM to 4 AM for scheduled infrastructure patching.',
+        tag: 'Urgent',
+        pinned: false,
+        authorId: alice.id,
       },
     ]);
 
