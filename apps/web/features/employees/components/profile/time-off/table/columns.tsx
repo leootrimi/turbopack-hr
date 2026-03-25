@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/components/ui/badge";
-// (we create this below)
+import { formatDate } from "@/lib/utils";
 import { TimeOffRequestRow } from "@repo/types";
 
 import { RequestStatus } from "@repo/types";
@@ -32,14 +32,12 @@ export const columns: ColumnDef<TimeOffRequestRow>[] = [
   {
     accessorKey: "date_from",
     header: "Date From",
-    cell: ({ row }) =>
-      row.original.date_from,
+    cell: ({ row }) => formatDate(row.original.date_from),
   },
   {
     accessorKey: "date_to",
     header: "Date To",
-    cell: ({ row }) =>
-      row.original.date_to
+    cell: ({ row }) => formatDate(row.original.date_to),
   },
   {
     accessorKey: "amount_of_days",

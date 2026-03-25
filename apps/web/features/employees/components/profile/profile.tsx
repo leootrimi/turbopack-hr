@@ -14,6 +14,7 @@ import { activityData } from "../mock";
 import TeamTab from "./team-tab";
 import { DocumentsTab } from "./documents/document-tab";
 import TimeOffTab from "./time-off/time-off-tab";
+import { formatDate } from "@/lib/utils";
 
 import { useEmployee } from "../../hooks/queries";
 
@@ -116,7 +117,7 @@ const UserProfile = ({ id }: { id: string }) => {
                   <div>
                     <p className="text-sm text-gray-600">Birthday</p>
                     <p className="text-sm font-medium">
-                      {personal.dateOfBirth ? new Date(personal.dateOfBirth).toLocaleDateString() : 'N/A'}
+                      {formatDate(personal.dateOfBirth)}
                     </p>
                   </div>
                 </div>
@@ -126,13 +127,13 @@ const UserProfile = ({ id }: { id: string }) => {
                     <div>
                       <p className="text-xs text-gray-600">Registered</p>
                       <p className="text-sm font-medium">
-                        {new Date(personal.createdAt).toLocaleDateString()}
+                        {formatDate(personal.createdAt)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600">Start Date</p>
                       <p className="text-sm font-medium">
-                        {new Date(job.startDate).toLocaleDateString()}
+                        {formatDate(job.startDate)}
                       </p>
                     </div>
                   </div>
