@@ -32,6 +32,11 @@ export class TeamsController {
     return this.teamsService.findOne(+id);
   }
 
+  @Get(':id/members')
+  getTeamMembers(@Param('id') id: string) {
+    return this.teamsService.getTeamMembers(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
     return this.teamsService.update(+id, updateTeamDto);

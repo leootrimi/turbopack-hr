@@ -19,3 +19,11 @@ export async function getTeamForEmployee(employeeId: number) {
 
   return teams
 }
+
+export async function fetchTeamMembers(teamId: number) {
+  const members = await request<{ id: number; name: string; email: string; jobTitle: string; department: string }[]>({
+    url: `http://localhost:3000/api/teams/${teamId}/members`,
+    method: 'GET',
+  });
+  return members;
+}

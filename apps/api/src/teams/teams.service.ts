@@ -102,6 +102,29 @@ export class TeamsService {
     return `This action returns a #${id} team`;
   }
 
+  async getTeamMembers(teamId: number) {
+    const result = await this.drizzle.db
+      .select({
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        email: employee.email,
+        jobTitle: jobInfo.jobTitle,
+        department: jobInfo.department,
+      })
+      .from(jobInfo)
+      .innerJoin(employee, eq(employee.id, jobInfo.employeeId))
+      .where(eq(jobInfo.teamId, teamId));
+
+    return result.map((row) => ({
+      id: row.id,
+      name: `${row.firstName} ${row.lastName}`,
+      email: row.email,
+      jobTitle: row.jobTitle,
+      department: row.department,
+    }));
+  }
+
   update(id: number, updateTeamDto: UpdateTeamDto) {
     return `This action updates a #${id} team`;
   }

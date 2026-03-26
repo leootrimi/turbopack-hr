@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchTeams, getTeamForEmployee } from "../api";
+import { fetchTeams, getTeamForEmployee, fetchTeamMembers } from "../api";
 
 export const useTeams = () => {
   return useQuery({
@@ -13,5 +13,13 @@ export const useTeamEmployee = (employeeId: number) => {
     queryKey: ["team", employeeId],
     queryFn: () => getTeamForEmployee(employeeId),
     enabled: !!employeeId,
+  });
+};
+
+export const useTeamMembers = (teamId: number | undefined) => {
+  return useQuery({
+    queryKey: ["team", teamId, "members"],
+    queryFn: () => fetchTeamMembers(teamId!),
+    enabled: !!teamId,
   });
 };
