@@ -64,6 +64,13 @@
       "when": 1774483833522,
       "tag": "0008_cold_masked_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774484574495,
+      "tag": "0009_brave_chameleon",
+      "breakpoints": true
     }
   ]
 }

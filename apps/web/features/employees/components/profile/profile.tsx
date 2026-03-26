@@ -38,7 +38,7 @@ const UserProfile = ({ id }: { id: string }) => {
       case "Team":
         return <TeamTab />;
       case "Documents":
-        return <DocumentsTab />;
+        return <DocumentsTab employeeId={id} />;
       case "Time off":
         return <TimeOffTab timeOffBalance={timeOffBalance} leaveRequests={leaveRequests} />;
       default:

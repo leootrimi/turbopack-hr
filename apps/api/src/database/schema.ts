@@ -246,3 +246,24 @@ export const payments = pgTable('payments', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const documentCategoryEnum = pgEnum('document_category', [
+  'contracts',
+  'health',
+  'additional',
+  'other',
+]);
+
+export const documents = pgTable('documents', {
+  id: serial('id').primaryKey(),
+  employeeId: integer('employee_id')
+    .notNull()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 256 }).notNull(),
+  type: varchar('type', { length: 64 }).notNull(),
+  size: varchar('size', { length: 64 }).notNull(),
+  url: varchar('url', { length: 1024 }).notNull(),
+  category: documentCategoryEnum('category').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});

@@ -13,7 +13,10 @@ import {
   Trash2,
   Share2,
   FolderOpen,
+  Loader2,
+  X,
 } from "lucide-react";
+import { useDocuments, useUploadDocument, useDeleteDocument } from "../../../hooks/useDocuments";
 
 // ── tiny cn helper (no external dep) ──────────────────────────────────────────
 function cn(...classes: (string | undefined | null | false)[]): string {
@@ -24,7 +27,6 @@ interface Category {
   id: string;
   name: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  count: number;
 }
 
 interface Document {
@@ -32,60 +34,26 @@ interface Document {
   name: string;
   type: string;
   size: string;
-  uploadedAt: string;
-  color: string;
-}
-
-interface MenuItemProps {
-  label: string;
-  icon: React.ComponentType<{ size?: number }>;
-  danger?: boolean;
+  url: string;
+  category: string;
+  createdAt: string;
 }
 
 interface CategoryPillProps {
   category: Category;
   active: boolean;
   onClick: () => void;
+  count: number;
 }
 
-// ── sample data ───────────────────────────────────────────────────────────────
-const categories = [
-  { id: "all",        name: "All Documents",   icon: File,     count: 8 },
-  { id: "contracts",  name: "Contracts",        icon: FileText, count: 3 },
-  { id: "health",     name: "Health Insurance", icon: Heart,    count: 3 },
-  { id: "additional", name: "Additionals",      icon: Plus,     count: 2 },
+const categories: Category[] = [
+  { id: "all", name: "All Documents", icon: File },
+  { id: "contracts", name: "Contracts", icon: FileText },
+  { id: "health", name: "Health Insurance", icon: Heart },
+  { id: "additional", name: "Additionals", icon: Plus },
 ];
 
-interface DocumentData {
-  id: string;
-  name: string;
-  type: string;
-  size: string;
-  uploadedAt: string;
-  color: string;
-}
-
-const docs: Record<string, DocumentData[]> = {
-  contracts: [
-    { id: "1", name: "Employment Contract 2024", type: "PDF",  size: "2.4 MB", uploadedAt: "15 Jan 2024", color: "#6366f1" },
-    { id: "2", name: "NDA Agreement",            type: "PDF",  size: "1.2 MB", uploadedAt: "10 Jan 2024", color: "#6366f1" },
-    { id: "3", name: "Service Agreement",        type: "DOCX", size: "890 KB", uploadedAt: "20 Dec 2023", color: "#6366f1" },
-  ],
-  health: [
-    { id: "4", name: "Health Insurance Policy 2024", type: "PDF", size: "3.1 MB", uploadedAt: "01 Jan 2024", color: "#ec4899" },
-    { id: "5", name: "Medical Records",               type: "PDF", size: "5.6 MB", uploadedAt: "15 Nov 2023", color: "#ec4899" },
-    { id: "6", name: "Dental Coverage",               type: "PDF", size: "1.8 MB", uploadedAt: "05 Oct 2023", color: "#ec4899" },
-  ],
-  additional: [
-    { id: "7", name: "Tax Documents 2023",       type: "PDF", size: "4.2 MB", uploadedAt: "20 Jan 2024", color: "#14b8a6" },
-    { id: "8", name: "Certificate of Completion",type: "PDF", size: "650 KB", uploadedAt: "15 Dec 2023", color: "#14b8a6" },
-  ],
-  all: [],
-};
-docs.all = [...(docs.contracts ?? []), ...(docs.health ?? []), ...(docs.additional ?? [])];
-
-// ── sub-components ─────────────────────────────────────────────────────────────
-function CategoryPill({ category, active, onClick }: CategoryPillProps) {
+function CategoryPill({ category, active, onClick, count }: CategoryPillProps) {
   const Icon = category.icon;
   return (
     <button
@@ -105,26 +73,21 @@ function CategoryPill({ category, active, onClick }: CategoryPillProps) {
           active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
         )}
       >
-        {category.count}
+        {count}
       </span>
     </button>
   );
 }
 
-function DocRow({ doc }: { doc: Document }) {
+function DocRow({ doc, onDelete }: { doc: Document; onDelete: (id: string) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors duration-150 relative">
-      {/* icon */}
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: doc.color + "18" }}
-      >
-        <FileText size={16} style={{ color: doc.color }} />
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-indigo-50">
+        <FileText size={16} className="text-indigo-600" />
       </div>
 
-      {/* info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-slate-800 truncate">{doc.name}</p>
         <p className="text-xs text-slate-400 mt-0.5">
@@ -132,16 +95,14 @@ function DocRow({ doc }: { doc: Document }) {
           <span className="mx-1.5">·</span>
           {doc.size}
           <span className="mx-1.5">·</span>
-          {doc.uploadedAt}
+          {new Date(doc.createdAt).toLocaleDateString()}
         </p>
       </div>
 
-      {/* actions — visible on hover */}
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-        <ActionBtn icon={Eye} title="Preview" onClick={() => {}} />
-        <ActionBtn icon={Download} title="Download" onClick={() => {}} />
+        <ActionBtn icon={Eye} title="View" onClick={() => window.open(doc.url, "_blank")} />
+        <ActionBtn icon={Download} title="Download" onClick={() => window.open(doc.url, "_blank")} />
 
-        {/* more menu */}
         <div className="relative">
           <ActionBtn
             icon={MoreVertical}
@@ -150,31 +111,18 @@ function DocRow({ doc }: { doc: Document }) {
           />
           {menuOpen && (
             <>
-              {/* backdrop */}
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setMenuOpen(false)}
-              />
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-slate-100 rounded-xl shadow-lg overflow-hidden w-36 py-1">
-                {[
-                  { label: "Share",    icon: Share2  },
-                  { label: "Move to",  icon: FolderOpen },
-                  { label: "Delete",   icon: Trash2, danger: true },
-                ].map(({ label, icon: Icon, danger }) => (
-                  <button
-                    key={label}
-                    onClick={() => setMenuOpen(false)}
-                    className={cn(
-                      "flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium transition-colors",
-                      danger
-                        ? "text-red-500 hover:bg-red-50"
-                        : "text-slate-600 hover:bg-slate-50"
-                    )}
-                  >
-                    <Icon size={13} />
-                    {label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDelete(doc.id);
+                  }}
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 size={13} />
+                  Delete
+                </button>
               </div>
             </>
           )}
@@ -184,7 +132,7 @@ function DocRow({ doc }: { doc: Document }) {
   );
 }
 
-function ActionBtn({ icon: Icon, title, onClick }: { icon: React.ComponentType<{ size?: number }>; title: string; onClick: () => void }) {
+function ActionBtn({ icon: Icon, title, onClick }: { icon: any; title: string; onClick: () => void }) {
   return (
     <button
       title={title}
@@ -196,13 +144,138 @@ function ActionBtn({ icon: Icon, title, onClick }: { icon: React.ComponentType<{
   );
 }
 
-export function DocumentsTab() {
+function UploadModal({
+  isOpen,
+  onClose,
+  onUpload,
+  isUploading,
+  initialCategory,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onUpload: (file: File, category: string) => void;
+  isUploading: boolean;
+  initialCategory: string;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState(initialCategory === 'all' ? 'other' : initialCategory);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-slate-900">Upload Document</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 transition"
+            >
+              {categories.filter(c => c.id !== 'all').map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+              File
+            </label>
+            <div
+              className={cn(
+                "border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center gap-2 transition-colors cursor-pointer",
+                file ? "border-indigo-200 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-slate-50/50"
+              )}
+              onClick={() => document.getElementById("file-input")?.click()}
+            >
+              <input
+                id="file-input"
+                type="file"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400">
+                <File size={20} />
+              </div>
+              <p className="text-sm font-medium text-slate-600">
+                {file ? file.name : "Click to select a file"}
+              </p>
+              <p className="text-xs text-slate-400 truncate max-w-[200px]">
+                {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "PDF, DOCX, PNG up to 10MB"}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-white transition-colors border border-transparent hover:border-slate-200"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={!file || isUploading}
+            onClick={() => file && onUpload(file, category)}
+            className="flex-3 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          >
+            {isUploading && <Loader2 size={16} className="animate-spin" />}
+            {isUploading ? "Uploading..." : "Upload Now"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DocumentsTab({ employeeId }: { employeeId: string }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [query, setQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const list = (docs[selectedCategory] ?? []).filter((d) =>
+  const { data: documentsData, isLoading } = useDocuments(employeeId, selectedCategory);
+  const { mutateAsync: uploadDoc, isPending: isUploading } = useUploadDocument();
+  const { mutateAsync: deleteDoc } = useDeleteDocument();
+
+  const handleUpload = async (file: File, category: string) => {
+    try {
+      await uploadDoc({ employeeId, file, category });
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this document?")) {
+      try {
+        await deleteDoc({ employeeId, id });
+      } catch (error) {
+        console.error("Delete failed:", error);
+      }
+    }
+  };
+
+  const list = (documentsData || []).filter((d: any) =>
     d.name.toLowerCase().includes(query.toLowerCase())
   );
+
+  // Group counts
+  const counts: Record<string, number> = {
+    all: documentsData?.length || 0,
+    contracts: documentsData?.filter((d: any) => d.category === 'contracts').length || 0,
+    health: documentsData?.filter((d: any) => d.category === 'health').length || 0,
+    additional: documentsData?.filter((d: any) => d.category === 'additional').length || 0,
+  };
 
   return (
     <div className="flex gap-0 h-full" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -216,20 +289,22 @@ export function DocumentsTab() {
             category={cat}
             active={selectedCategory === cat.id}
             onClick={() => setSelectedCategory(cat.id)}
+            count={counts[cat.id] || 0}
           />
         ))}
 
         <div className="mt-auto pt-4">
-          <button className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 bg-slate-900 text-white hover:bg-slate-700 transition-colors justify-center">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-700 transition-colors justify-center shadow-lg shadow-slate-900/10"
+          >
             <Plus size={14} />
             Upload
           </button>
         </div>
       </aside>
 
-      {/* ── content ── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* top bar */}
         <div className="px-5 py-4 border-b border-slate-100">
           <div className="relative">
             <Search
@@ -245,32 +320,43 @@ export function DocumentsTab() {
           </div>
         </div>
 
-        {/* list */}
         <div className="flex-1 overflow-y-auto px-3 py-3">
-          {list.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-40 gap-3">
+              <Loader2 size={24} className="animate-spin text-slate-300" />
+              <p className="text-sm text-slate-400 font-medium">Loading documents...</p>
+            </div>
+          ) : list.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-center gap-2">
               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
                 <FileText size={20} className="text-slate-300" />
               </div>
               <p className="text-sm font-medium text-slate-500">No documents found</p>
-              <p className="text-xs text-slate-400">Try a different search or category</p>
+              <p className="text-xs text-slate-400">Try a different search or upload a new one</p>
             </div>
           ) : (
             <div className="flex flex-col">
-              {list.map((doc) => (
-                <DocRow key={doc.id} doc={doc} />
+              {list.map((doc: any) => (
+                <DocRow key={doc.id} doc={doc} onDelete={handleDelete} />
               ))}
             </div>
           )}
         </div>
 
-        {/* footer count */}
         <div className="px-5 py-3 border-t border-slate-100">
           <p className="text-xs text-slate-400">
             {list.length} document{list.length !== 1 ? "s" : ""}
           </p>
         </div>
       </div>
+
+      <UploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onUpload={handleUpload}
+        isUploading={isUploading}
+        initialCategory={selectedCategory}
+      />
     </div>
   );
 }
