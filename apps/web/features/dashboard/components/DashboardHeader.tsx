@@ -1,17 +1,31 @@
-import { Plus } from "lucide-react";
-import { TODAY_CHECKINS } from "./mock";
+import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useDashboardSummary } from "../hooks/useDashboard";
 
 export function DashboardHeader() {
   const router = useRouter();
+  const { data: summary, isLoading } = useDashboardSummary();
+
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
 
-  const working = TODAY_CHECKINS.filter((e) => e.status === "in").length;
-  const attendancePct = Math.round((working / TODAY_CHECKINS.length) * 100);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-between gap-4 mb-6 animate-pulse">
+        <div className="h-10 w-48 bg-slate-100 rounded-lg" />
+        <div className="h-10 w-64 bg-slate-100 rounded-lg" />
+      </div>
+    );
+  }
+
+  const { stats } = summary || { stats: { totalEmployees: 0, workingToday: 0 }};
+  const working = stats.workingToday;
+  const attendancePct = stats.totalEmployees > 0 
+    ? Math.round((working / stats.totalEmployees) * 100) 
+    : 0;
 
   return (
     <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">

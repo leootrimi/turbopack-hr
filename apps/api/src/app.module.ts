@@ -10,6 +10,7 @@ import { TimeOffModule } from './time-off/time-off.module';
 import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
 import { DocumentsModule } from './documents/documents.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DocumentsModule } from './documents/documents.module';
     UploadModule,
     PaymentsModule,
     DocumentsModule,
+    DashboardModule,
   ],
   controllers: [],
   providers: [],

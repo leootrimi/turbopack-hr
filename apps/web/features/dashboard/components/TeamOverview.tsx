@@ -1,40 +1,58 @@
-import { Users, UserCheck, CalendarOff, ClipboardList } from "lucide-react";
-import { TODAY_CHECKINS, INITIAL_REQUESTS } from "./mock";
-
-const tiles = [
-  {
-    label: "Total Employees",
-    value: 42,
-    icon: Users,
-    color: "#6366f1",
-    bg: "#eef2ff",
-  },
-  {
-    label: "Working Today",
-    value: TODAY_CHECKINS.filter((e) => e.status === "in").length,
-    icon: UserCheck,
-    color: "#22c55e",
-    bg: "#f0fdf4",
-  },
-  {
-    label: "On Leave / Absent",
-    value: TODAY_CHECKINS.filter(
-      (e) => e.status === "leave" || e.status === "absent"
-    ).length,
-    icon: CalendarOff,
-    color: "#f43f5e",
-    bg: "#fff1f2",
-  },
-  {
-    label: "Open Requests",
-    value: INITIAL_REQUESTS.filter((r) => r.status === "pending").length,
-    icon: ClipboardList,
-    color: "#f59e0b",
-    bg: "#fffbeb",
-  },
-];
+import { Users, UserCheck, CalendarOff, ClipboardList, Loader2 } from "lucide-react";
+import { useDashboardSummary } from "../hooks/useDashboard";
 
 export function TeamOverview() {
+  const { data: summary, isLoading, error } = useDashboardSummary();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8 w-full">
+        <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center p-8 w-full text-red-500 text-sm">
+        Error loading overview
+      </div>
+    );
+  }
+
+  const { stats } = summary;
+
+  const tiles = [
+    {
+      label: "Total Employees",
+      value: stats.totalEmployees,
+      icon: Users,
+      color: "#6366f1",
+      bg: "#eef2ff",
+    },
+    {
+      label: "Working Today",
+      value: stats.workingToday,
+      icon: UserCheck,
+      color: "#22c55e",
+      bg: "#f0fdf4",
+    },
+    {
+      label: "On Leave / Absent",
+      value: stats.onLeaveToday,
+      icon: CalendarOff,
+      color: "#f43f5e",
+      bg: "#fff1f2",
+    },
+    {
+      label: "Open Requests",
+      value: stats.pendingRequests,
+      icon: ClipboardList,
+      color: "#f59e0b",
+      bg: "#fffbeb",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-slate-100">
       {tiles.map((t, i) => {
