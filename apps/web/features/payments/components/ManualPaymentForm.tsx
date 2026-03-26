@@ -10,6 +10,7 @@ interface PaymentFormData {
   vendor: string;
   category: string;
   description: string;
+  file?: File;
 }
 
 interface ManualPaymentFormProps {
@@ -30,9 +31,10 @@ const PAYMENT_CATEGORIES = [
 ];
 
 export function ManualPaymentForm({ onSubmit, isLoading = false }: ManualPaymentFormProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<PaymentFormData>({
     amount: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')[0] ?? '',
     vendor: '',
     category: 'Office Supplies',
     description: '',
@@ -64,16 +66,31 @@ export function ManualPaymentForm({ onSubmit, isLoading = false }: ManualPayment
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type } = e.target as HTMLInputElement;
+    if (type === 'file') {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      setFormData(prev => ({
+        ...prev,
+        [name]: file,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
     if (errors[name as keyof PaymentFormData]) {
       setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData(prev => ({ ...prev, file: undefined }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -96,11 +113,14 @@ export function ManualPaymentForm({ onSubmit, isLoading = false }: ManualPayment
       });
       setFormData({
         amount: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split('T')[0] ?? '',
         vendor: '',
         category: 'Office Supplies',
         description: '',
       });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
       setTimeout(() => setFeedback(null), 3000);
     } catch (error) {
@@ -205,6 +225,44 @@ export function ManualPaymentForm({ onSubmit, isLoading = false }: ManualPayment
             placeholder="Add any additional notes..."
             rows={3}
           />
+        </Field>
+
+        <Field label="Receipt / Document" hint="Optionally attach a digital copy">
+          <div className="mt-1">
+            {!formData.file ? (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer border-2 border-dashed border-slate-200 rounded-lg p-4 text-center hover:border-indigo-400 hover:bg-slate-50 transition-all"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  name="file"
+                  onChange={handleChange}
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                />
+                <p className="text-xs text-slate-500 font-medium">Click to upload file</p>
+                <p className="text-[10px] text-slate-400 mt-1">PDF, JPG, or PNG</p>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                <div className="flex items-center gap-2 truncate">
+                  <div className="p-1.5 bg-indigo-100 rounded-md">
+                    <CheckCircle size={14} className="text-indigo-600" />
+                  </div>
+                  <p className="text-xs font-medium text-slate-900 truncate">{formData.file.name}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-red-50 px-2 py-1 rounded"
+                >
+                  REMOVE
+                </button>
+              </div>
+            )}
+          </div>
         </Field>
       </div>
 

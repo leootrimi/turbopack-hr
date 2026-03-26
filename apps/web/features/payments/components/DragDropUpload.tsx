@@ -47,7 +47,7 @@ export function DragDropUpload({ onFileSelect, acceptedFormats = ACCEPTED_FORMAT
     if (validFiles.length > 0) {
       const newFiles = [...uploadedFiles, ...validFiles];
       setUploadedFiles(newFiles);
-      onFileSelect(newFiles);
+      onFileSelect(validFiles); // Only send the new ones
     }
   };
 
@@ -56,14 +56,13 @@ export function DragDropUpload({ onFileSelect, acceptedFormats = ACCEPTED_FORMAT
     if (validFiles.length > 0) {
       const newFiles = [...uploadedFiles, ...validFiles];
       setUploadedFiles(newFiles);
-      onFileSelect(newFiles);
+      onFileSelect(validFiles); // Only send the new ones
     }
   };
 
   const removeFile = (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
-    onFileSelect(newFiles);
   };
 
   const triggerFileInput = () => {

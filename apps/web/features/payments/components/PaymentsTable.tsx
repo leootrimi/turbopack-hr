@@ -125,7 +125,7 @@ export function PaymentsTable({
                   <td className="px-6 py-4 text-sm text-slate-900">{payment.vendor}</td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${categoryStyle.bg} ${categoryStyle.text} ${categoryStyle.border}`}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${categoryStyle?.bg} ${categoryStyle?.text} ${categoryStyle?.border}`}
                     >
                       {payment.category}
                     </span>
@@ -234,7 +234,7 @@ export function PaymentsTable({
               </div>
 
               <span
-                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border mb-3 ${categoryStyle.bg} ${categoryStyle.text} ${categoryStyle.border}`}
+                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border mb-3 ${categoryStyle?.bg} ${categoryStyle?.text} ${categoryStyle?.border}`}
               >
                 {payment.category}
               </span>
