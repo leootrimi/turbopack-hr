@@ -6,7 +6,18 @@ export const TeamCardSchema = z.object({
   teamType: z.string().nullable(),
   teamMemberCount: z.number(),
   leaderName: z.string(),
-  createdAt: z.date().nullable()
+  leaderEmail: z.string().optional(),
+  createdAt: z.date().nullable(),
+  updatedAt: z.date().nullable().optional(),
+  description: z.string().optional(),
+  department: z.string().optional(),
+  members: z.array(z.object({
+    id: z.union([z.string(), z.number()]),
+    name: z.string(),
+    email: z.string(),
+    role: z.string(),
+    avatar: z.string().optional(),
+  })).optional()
 })
 
 export type TeamCard = z.infer<typeof TeamCardSchema>
