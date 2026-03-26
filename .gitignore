@@ -58,3 +58,8 @@ node_modules
 
 # For google drive json file.
 *.json
+
+.localstack/
+*.pem
+*.crt
+*.key

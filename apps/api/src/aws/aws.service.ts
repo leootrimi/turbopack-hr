@@ -19,8 +19,9 @@ export class AwsService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
-    const key = `${Date.now()}-${file.originalname}`;
+  async uploadFile(file: Express.Multer.File, path?: string): Promise<string> {
+    const fileName = `${Date.now()}-${file.originalname}`;
+    const key = path ? `${path}/${fileName}` : fileName;
     
     const parallelUploads3 = new Upload({
       client: this.s3Client,

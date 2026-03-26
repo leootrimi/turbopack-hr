@@ -1,14 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { uploadFile } from '../api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { uploadPayment, getPayments } from '../api';
 
 export const useUploadFile = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => uploadFile(file),
+    mutationFn: (data: any) => uploadPayment(data),
     onSuccess: () => {
-      // Invalidate relevant queries if needed
-      // queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
     },
+  });
+};
+
+export const usePayments = (page: number = 1, limit: number = 10) => {
+  return useQuery({
+    queryKey: ['payments', page, limit],
+    queryFn: () => getPayments(page, limit),
   });
 };

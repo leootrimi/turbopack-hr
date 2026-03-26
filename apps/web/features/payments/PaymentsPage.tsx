@@ -1,64 +1,48 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { PageHeader } from './components/PageHeader';
 import { DragDropUpload } from './components/DragDropUpload';
 import { ManualPaymentForm } from './components/ManualPaymentForm';
 import { PaymentsTable, PaymentRecord } from './components/PaymentsTable';
-import { Upload as UploadIcon, Loader2 } from 'lucide-react';
-import { useUploadFile } from './hooks/queries';
+import { Upload as UploadIcon, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useUploadFile, usePayments } from './hooks/queries';
 
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile();
-  const [activeTab, setActiveTab] = useState<'upload' | 'manual'>('upload');
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: paymentsData, isLoading } = usePayments(page, limit);
+  const { mutateAsync: uploadPayment, isPending: isUploading } = useUploadFile();
+  const [activeTab, setActiveTab ] = useState<'upload' | 'manual'>('upload');
 
-  const uploadFileToS3 = async (file: File) => {
-    const response = await uploadFile(file);
-    return response.url;
-  };
+  // Map backend record to frontend interface
+  const payments: PaymentRecord[] = paymentsData?.data.map((p: any) => ({
+    id: String(p.id),
+    date: new Date(p.date).toISOString().split('T')[0] ?? "",
+    amount: parseFloat(p.amount),
+    vendor: p.vendor,
+    category: p.category,
+    description: p.description,
+    source: p.source,
+    status: p.status,
+    document: p.documentUrl ? { name: p.documentName || 'Document', url: p.documentUrl } : undefined,
+  })) || [];
 
   // Handle uploaded files
   const handleFileUpload = async (files: File[]) => {
-    // We only want to process each file once. 
-    // DragDropUpload currently sends the full list, so we'll just take the new ones
-    // or we can change DragDropUpload to only send new ones. 
-    // For now, let's just process the files and clear the ones we handled.
-    
     for (const file of files) {
-      const paymentId = crypto.randomUUID();
-      
-      // Add initial pending record
-      const tempPayment: PaymentRecord = {
-        id: paymentId,
-        date: new Date().toISOString().split('T')[0] ?? "",
-        amount: 0,
-        vendor: file.name.replace(/\.[^.]+$/, ''),
-        category: 'Other',
-        source: 'upload',
-        status: 'pending',
-        document: {
-          name: file.name,
-          url: URL.createObjectURL(file), // Temporary local URL
-        },
-        uploadedFile: file,
-      };
-      
-      setPayments(prev => [tempPayment, ...prev]);
-
       try {
-        const s3Url = await uploadFileToS3(file);
-        
-        // Update record with actual S3 URL and status
-        setPayments(prev => prev.map(p => 
-          p.id === paymentId 
-            ? { ...p, status: 'processed' as const, document: { ...p.document!, url: s3Url } } 
-            : p
-        ));
+        await uploadPayment({
+          amount: '0',
+          date: new Date().toISOString(),
+          vendor: file.name.replace(/\.[^.]+$/, ''),
+          category: 'Other',
+          source: 'upload',
+          status: 'processed',
+          file,
+        });
       } catch (error) {
-        setPayments(prev => prev.map(p => 
-          p.id === paymentId ? { ...p, status: 'processed' as any, description: 'Upload failed' } : p
-        ));
+        console.error("Upload failed for file:", file.name, error);
       }
     }
   };
@@ -72,37 +56,14 @@ export default function PaymentsPage() {
     description: string;
     file?: File;
   }) => {
-    const paymentId = crypto.randomUUID();
-    
-    const newPayment: PaymentRecord = {
-      id: paymentId,
-      date: formData.date,
-      amount: parseFloat(formData.amount),
-      vendor: formData.vendor,
-      category: formData.category,
-      description: formData.description,
-      source: formData.file ? 'both' : 'manual',
-      status: 'pending',
-    };
-
-    setPayments(prev => [newPayment, ...prev]);
-
-    if (formData.file) {
-      try {
-        const s3Url = await uploadFileToS3(formData.file);
-        setPayments(prev => prev.map(p => 
-          p.id === paymentId 
-            ? { ...p, status: 'processed' as const, document: { name: formData.file!.name, url: s3Url } } 
-            : p
-        ));
-      } catch (error) {
-        setPayments(prev => prev.map(p => 
-          p.id === paymentId ? { ...p, status: 'processed' as any, description: 'Upload failed' } : p
-        ));
-      }
-    } else {
-      // If no file, just set to processed immediately (or leave as pending if that's the flow)
-      setPayments(prev => prev.map(p => p.id === paymentId ? { ...p, status: 'processed' as const } : p));
+    try {
+      await uploadPayment({
+        ...formData,
+        source: formData.file ? 'both' : 'manual',
+        status: 'processed',
+      });
+    } catch (error) {
+      console.error("Manual submission failed:", error);
     }
   };
 
@@ -112,7 +73,7 @@ export default function PaymentsPage() {
 
   // Handle delete payment
   const handleDelete = (id: string) => {
-    setPayments(prev => prev.filter(payment => payment.id !== id));
+    console.log('Delete payment:', id);
   };
 
   // Handle document view
@@ -120,10 +81,9 @@ export default function PaymentsPage() {
     window.open(document.url, '_blank');
   };
 
-  // Calculate totals
-  const totalPayments = payments.filter(p => p.status === 'processed');
-  const totalAmount = totalPayments.reduce((sum, payment) => sum + payment.amount, 0);
-  const recordCount = totalPayments.length;
+  // Calculate totals (ideally this should be an aggregate from backend, but for now we use the visible count/total)
+  const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
+  const recordCount = paymentsData?.total || 0;
 
   return (
     <div className="min-h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -166,52 +126,85 @@ export default function PaymentsPage() {
 
           {/* Tab Content */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Upload Section - Always Visible on Large Screens */}
+            {/* Upload Section */}
             <div className={`${activeTab === 'upload' ? '' : 'hidden lg:block'}`}>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-full">
                 <h2 className="text-lg font-bold text-slate-900 mb-4">Upload Receipt / Document</h2>
                 <DragDropUpload onFileSelect={handleFileUpload} />
               </div>
             </div>
 
-            {/* Manual Entry Section - Always Visible on Large Screens */}
+            {/* Manual Entry Section */}
             <div className={`${activeTab === 'manual' ? '' : 'hidden lg:block'}`}>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-full">
                 <h2 className="text-lg font-bold text-slate-900 mb-4">Add Payment Manually</h2>
-                <ManualPaymentForm onSubmit={handleManualSubmit} />
+                <ManualPaymentForm onSubmit={handleManualSubmit} isLoading={isUploading} />
               </div>
             </div>
-
-            {/* Mobile Tab Content */}
-            {activeTab === 'upload' && (
-              <div className="lg:hidden">
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                  <h2 className="text-lg font-bold text-slate-900 mb-4">Upload Receipt / Document</h2>
-                  <DragDropUpload onFileSelect={handleFileUpload} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'manual' && (
-              <div className="lg:hidden">
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                  <h2 className="text-lg font-bold text-slate-900 mb-4">Add Payment Manually</h2>
-                  <ManualPaymentForm onSubmit={handleManualSubmit} />
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Payments Table Section */}
         <div>
           <h2 className="text-xl font-bold text-slate-900 mb-4">Payment Records</h2>
-          <PaymentsTable
-            payments={payments}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onViewDocument={handleViewDocument}
-          />
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <Loader2 size={40} className="animate-spin text-indigo-600" />
+                <p className="text-slate-500 font-medium">Loading payments...</p>
+              </div>
+            ) : (
+              <>
+                <PaymentsTable
+                  payments={payments}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onViewDocument={handleViewDocument}
+                />
+                
+                {/* Pagination Controls */}
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                  <p className="text-sm text-slate-500">
+                    Showing <span className="font-medium text-slate-900">{(page - 1) * limit + 1}</span> to <span className="font-medium text-slate-900">{Math.min(page * limit, recordCount)}</span> of <span className="font-medium text-slate-900">{recordCount}</span> records
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, paymentsData?.totalPages || 0) }, (_, i) => {
+                        const pageNum = i + 1;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setPage(pageNum)}
+                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+                              page === pageNum
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-600 hover:bg-white hover:border-slate-200 border border-transparent'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={() => setPage(p => Math.min(paymentsData?.totalPages || 1, p + 1))}
+                      disabled={page >= (paymentsData?.totalPages || 1)}
+                      className="p-2 text-slate-600 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

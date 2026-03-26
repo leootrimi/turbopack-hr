@@ -8,9 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { AnnouncementModule } from './announcement/announcement.module';
 import { TimeOffModule } from './time-off/time-off.module';
 import { UploadModule } from './upload/upload.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
-  imports: [CheckinModule, EmployeeModule, EquipmentsModule, DrizzleModule, TeamsModule, AuthModule, AnnouncementModule, TimeOffModule, UploadModule],
+  imports: [CheckinModule, EmployeeModule, EquipmentsModule, DrizzleModule, TeamsModule, AuthModule, AnnouncementModule, TimeOffModule, UploadModule, PaymentsModule],
   controllers: [],
   providers: [],
 })

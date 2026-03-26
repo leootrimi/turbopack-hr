@@ -228,3 +228,21 @@ export const timeOffBalance = pgTable('time_off_balance', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'processed', 'error']);
+export const paymentSourceEnum = pgEnum('payment_source', ['manual', 'upload', 'both']);
+
+export const payments = pgTable('payments', {
+  id: serial('id').primaryKey(),
+  amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
+  date: timestamp('date').notNull(),
+  vendor: varchar('vendor', { length: 256 }).notNull(),
+  category: varchar('category', { length: 256 }).notNull(),
+  description: varchar('description', { length: 1024 }),
+  documentName: varchar('document_name', { length: 256 }),
+  documentUrl: varchar('document_url', { length: 1024 }),
+  source: paymentSourceEnum('source').notNull(),
+  status: paymentStatusEnum('status').default('pending').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
