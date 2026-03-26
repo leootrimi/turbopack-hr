@@ -242,7 +242,8 @@ export function DocumentsTab({ employeeId }: { employeeId: string }) {
   const [query, setQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: documentsData, isLoading } = useDocuments(employeeId, selectedCategory);
+  // Fetch all documents for this employee to get accurate counts across all categories
+  const { data: documentsData, isLoading } = useDocuments(employeeId, "all");
   const { mutateAsync: uploadDoc, isPending: isUploading } = useUploadDocument();
   const { mutateAsync: deleteDoc } = useDeleteDocument();
 
@@ -265,77 +266,85 @@ export function DocumentsTab({ employeeId }: { employeeId: string }) {
     }
   };
 
-  const list = (documentsData || []).filter((d: any) =>
-    d.name.toLowerCase().includes(query.toLowerCase())
-  );
+  // Local filtering for smoother UX
+  const fullList = documentsData || [];
+  const list = fullList.filter((d: any) => {
+    const matchesCategory = selectedCategory === "all" || d.category === selectedCategory;
+    const matchesQuery = d.name.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesQuery;
+  });
 
-  // Group counts
+  // Accurate group counts from the full data set
   const counts: Record<string, number> = {
-    all: documentsData?.length || 0,
-    contracts: documentsData?.filter((d: any) => d.category === 'contracts').length || 0,
-    health: documentsData?.filter((d: any) => d.category === 'health').length || 0,
-    additional: documentsData?.filter((d: any) => d.category === 'additional').length || 0,
+    all: fullList.length,
+    contracts: fullList.filter((d: any) => d.category === 'contracts').length,
+    health: fullList.filter((d: any) => d.category === 'health').length,
+    additional: fullList.filter((d: any) => d.category === 'additional').length,
   };
 
   return (
-    <div className="flex gap-0 h-full" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <aside className="w-48 shrink-0 border-r border-slate-100 px-3 py-4 flex flex-col gap-1">
-        <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase px-3 mb-2">
+    <div className="flex gap-0 h-[600px]" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <aside className="w-56 shrink-0 border-r border-slate-100 px-3 py-6 flex flex-col gap-1.5 bg-slate-50/30">
+        <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase px-3 mb-3">
           Categories
         </p>
-        {categories.map((cat) => (
-          <CategoryPill
-            key={cat.id}
-            category={cat}
-            active={selectedCategory === cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            count={counts[cat.id] || 0}
-          />
-        ))}
+        <div className="space-y-1">
+          {categories.map((cat) => (
+            <CategoryPill
+              key={cat.id}
+              category={cat}
+              active={selectedCategory === cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              count={counts[cat.id] || 0}
+            />
+          ))}
+        </div>
 
-        <div className="mt-auto pt-4">
+        <div className="mt-auto pt-6 px-2">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-700 transition-colors justify-center shadow-lg shadow-slate-900/10"
+            className="flex items-center gap-2.5 w-full px-4 py-3 rounded-2xl text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 transition-all active:scale-[0.98] justify-center shadow-xl shadow-slate-900/10"
           >
-            <Plus size={14} />
-            Upload
+            <Plus size={16} strokeWidth={2.5} />
+            Upload Document
           </button>
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <div className="relative">
+      <div className="flex-1 flex flex-col min-w-0 bg-white">
+        <div className="px-6 py-5 border-b border-slate-100/80">
+          <div className="relative group">
             <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-600 transition-colors pointer-events-none"
             />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search documents…"
-              className="w-full pl-8 pr-4 py-2 text-sm bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 transition placeholder-slate-400"
+              placeholder="Search in documents…"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50/50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-400 focus:bg-white transition-all placeholder-slate-400"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div className="flex-1 overflow-y-auto px-4 py-4 scrollbar-hide">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-40 gap-3">
-              <Loader2 size={24} className="animate-spin text-slate-300" />
-              <p className="text-sm text-slate-400 font-medium">Loading documents...</p>
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-300">
+              <Loader2 size={32} className="animate-spin" />
+              <p className="text-sm font-semibold tracking-wide">Syncing documents...</p>
             </div>
           ) : list.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-center gap-2">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-                <FileText size={20} className="text-slate-300" />
+            <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 m-2">
+              <div className="w-16 h-16 rounded-3xl bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-4">
+                <FolderOpen size={24} className="text-slate-300" />
               </div>
-              <p className="text-sm font-medium text-slate-500">No documents found</p>
-              <p className="text-xs text-slate-400">Try a different search or upload a new one</p>
+              <p className="text-base font-bold text-slate-600">No documents found</p>
+              <p className="text-sm text-slate-400 mt-1 max-w-[200px]">
+                {query ? "Try adjusting your search criteria" : "Start by uploading your first document"}
+              </p>
             </div>
           ) : (
-            <div className="flex flex-col">
+            <div className="space-y-1">
               {list.map((doc: any) => (
                 <DocRow key={doc.id} doc={doc} onDelete={handleDelete} />
               ))}
@@ -343,9 +352,12 @@ export function DocumentsTab({ employeeId }: { employeeId: string }) {
           )}
         </div>
 
-        <div className="px-5 py-3 border-t border-slate-100">
-          <p className="text-xs text-slate-400">
-            {list.length} document{list.length !== 1 ? "s" : ""}
+        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            {list.length} item{list.length !== 1 ? "s" : ""} detected
+          </p>
+          <p className="text-[10px] text-slate-300 font-medium">
+            Stored securely in LocalStack S3
           </p>
         </div>
       </div>
