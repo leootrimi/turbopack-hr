@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getEmployees, getEmployee } from "../api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getEmployees, getEmployee, getEmployeeTeam, updateEmployeeTeam } from "../api";
 import { EmployeeRow } from "@repo/types";
 
 export function useEmployees() {
@@ -17,5 +17,24 @@ export function useEmployee(id: string) {
     queryFn: () => getEmployee(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
+  });
+}
+
+export function useEmployeeTeam(id: string) {
+  return useQuery<any, Error>({
+    queryKey: ["employee", id, "team"],
+    queryFn: () => getEmployeeTeam(id),
+    enabled: !!id,
+  });
+}
+
+export function useUpdateEmployeeTeam(employeeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (teamId: number | null) => updateEmployeeTeam(employeeId, teamId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employee", employeeId, "team"] });
+      queryClient.invalidateQueries({ queryKey: ["employee", employeeId] });
+    },
   });
 }

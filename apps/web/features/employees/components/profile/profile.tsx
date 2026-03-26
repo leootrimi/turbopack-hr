@@ -36,7 +36,7 @@ const UserProfile = ({ id }: { id: string }) => {
       case "Activity":
         return <ActivityContent activityData={activityData} />;
       case "Team":
-        return <TeamTab />;
+        return <TeamTab employeeId={id} />;
       case "Documents":
         return <DocumentsTab employeeId={id} />;
       case "Time off":

@@ -23,8 +23,8 @@ export class TeamsController {
   }
 
   @Get('overview/:id')
-  teamsOverviewForEmployee() {
-    return this.teamsService.getTeamForEmployee(1)
+  teamsOverviewForEmployee(@Param('id') id: string) {
+    return this.teamsService.getTeamForEmployee(+id)
   }
 
   @Get(':id')

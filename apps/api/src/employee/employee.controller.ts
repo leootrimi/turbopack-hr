@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from '@repo/types';
 
@@ -19,5 +19,15 @@ export class EmployeeController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.employeeService.findOne(+id);
+  }
+
+  @Get(':id/team')
+  getTeam(@Param('id') id: string) {
+    return this.employeeService.getEmployeeTeam(+id);
+  }
+
+  @Patch(':id/team')
+  updateTeam(@Param('id') id: string, @Body() body: { teamId: number | null }) {
+    return this.employeeService.updateEmployeeTeam(+id, body.teamId);
   }
 }

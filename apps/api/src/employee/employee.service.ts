@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { compensation, employee, jobInfo, users, timeOffBalance, leaveRequests } from 'src/database/schema';
+import { compensation, employee, jobInfo, teams, users, timeOffBalance, leaveRequests } from 'src/database/schema';
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
@@ -149,6 +149,44 @@ async findOne(id: number) {
     },
     leaveRequests: leaveRequestsResult,
   };
+}
+
+async getEmployeeTeam(employeeId: number) {
+  const result = await this.drizzle.db
+    .select({
+      teamId: teams.id,
+      teamName: teams.name,
+      teamType: teams.team_type,
+      leaderName: sql<string>`CONCAT(${employee.firstName}, ' ', ${employee.lastName})`,
+      teamMemberCount: sql<number>`(
+        SELECT COUNT(*) FROM job_info ji2 WHERE ji2.team_id = ${teams.id}
+      )`,
+    })
+    .from(jobInfo)
+    .leftJoin(teams, eq(teams.id, jobInfo.teamId))
+    .leftJoin(employee, eq(employee.id, teams.leaderId))
+    .where(eq(jobInfo.employeeId, employeeId))
+    .limit(1);
+
+  if (!result[0] || !result[0].teamId) return null;
+  return result[0];
+}
+
+async updateEmployeeTeam(employeeId: number, teamId: number | null) {
+  const existing = await this.drizzle.db
+    .select({ id: jobInfo.id })
+    .from(jobInfo)
+    .where(eq(jobInfo.employeeId, employeeId))
+    .limit(1);
+
+  if (!existing[0]) throw new NotFoundException(`No job info found for employee ${employeeId}`);
+
+  await this.drizzle.db
+    .update(jobInfo)
+    .set({ teamId })
+    .where(eq(jobInfo.employeeId, employeeId));
+
+  return this.getEmployeeTeam(employeeId);
 }
 
 }
