@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Search, Briefcase } from "lucide-react";
-import { JobPost, MOCK_JOBS, JobStatus, DEPARTMENTS } from "./components/mock";
+import { JobPost, JobStatus, DEPARTMENTS } from "./components/mock";
 import { AdminJobRow }   from "./components/AdminJobRow";
 import { JobFormModal }  from "./components/JobFormModal";
-import { StatusBadge }   from "./components/shared";
+import { JobPreviewModal } from "./components/JobPreviewModal";
+import { useCreateJob, useJobs } from "./hooks/queries";
 
 const STATUSES: JobStatus[] = ["Open", "Draft", "Closed"];
 
@@ -30,13 +31,19 @@ function SectionPanel({ title, jobs, onEdit, onDelete, onView, accent }: {
 }
 
 export function AdminJobsPage() {
-  const [jobs, setJobs]       = useState<JobPost[]>(MOCK_JOBS);
+  const { data: serverJobs = [], isLoading } = useJobs();
+  const { mutate: createJob } = useCreateJob();
+  const [jobs, setJobs] = useState<JobPost[]>(serverJobs);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<JobPost | null>(null);
   const [preview, setPreview] = useState<JobPost | null>(null);
   const [query, setQuery]     = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState<"All" | JobStatus>("All");
+
+  useEffect(() => {
+    setJobs(serverJobs);
+  }, [serverJobs]);
 
   const filtered = jobs.filter((j) => {
     const q = query.toLowerCase();
@@ -46,7 +53,7 @@ export function AdminJobsPage() {
       (statusFilter === "All" || j.status     === statusFilter)
     );
   });
-
+  
   const open   = filtered.filter((j) => j.status === "Open");
   const drafts = filtered.filter((j) => j.status === "Draft");
   const closed = filtered.filter((j) => j.status === "Closed");
@@ -55,9 +62,7 @@ export function AdminJobsPage() {
     if (editing) {
       setJobs((prev) => prev.map((j) => j.id === editing.id ? { ...j, ...data } : j));
     } else {
-      setJobs((prev) => [{
-        ...data, id: crypto.randomUUID(), postedAt: new Date(), applicants: 0,
-      }, ...prev]);
+      createJob(data);
     }
     setEditing(null);
   };
@@ -119,13 +124,19 @@ export function AdminJobsPage() {
           </select>
           <div className="flex items-center gap-1.5">
             {(["All", ...STATUSES] as const).map((s) => (
-              <button key={s} onClick={() => setStatusFilter(s as any)}
+              <button key={s} onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${statusFilter === s ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"}`}>
                 {s}
               </button>
             ))}
           </div>
         </div>
+
+        {isLoading && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-sm text-slate-500">
+            Loading jobs...
+          </div>
+        )}
 
         {/* sections */}
         <SectionPanel title="Open Positions" jobs={open}   accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => setJobs((p) => p.filter((j) => j.id !== id))} onView={setPreview} />
@@ -136,45 +147,7 @@ export function AdminJobsPage() {
 
       <JobFormModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} onSave={handleSave} editing={editing} />
 
-      {/* quick preview drawer */}
-      {preview && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setPreview(null)} />
-          <div className="relative bg-white w-full max-w-md h-full overflow-y-auto shadow-2xl p-6 space-y-5" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-            <div className="flex items-center justify-between">
-              <StatusBadge status={preview.status} />
-              <button onClick={() => setPreview(null)} className="text-slate-400 hover:text-slate-700 transition-colors text-xs font-medium">Close ✕</button>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">{preview.title}</h2>
-              <p className="text-sm text-slate-500 mt-0.5">{preview.department} · {preview.location} · {preview.type}</p>
-              {preview.salary && <p className="text-sm font-semibold text-indigo-600 mt-1">{preview.salary}</p>}
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed">{preview.description}</p>
-            {[
-              { label: "Responsibilities", items: preview.responsibilities },
-              { label: "Requirements",     items: preview.requirements     },
-              { label: "Nice to Have",     items: preview.niceToHave       },
-            ].map(({ label, items }) => items.filter(Boolean).length > 0 && (
-              <div key={label}>
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">{label}</h3>
-                <ul className="space-y-1.5">
-                  {items.filter(Boolean).map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            <div className="pt-4 border-t border-slate-100 text-xs text-slate-400">
-              Posted {preview.postedAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-              · {preview.applicants} applicants
-            </div>
-          </div>
-        </div>
-      )}
+      <JobPreviewModal job={preview} onClose={() => setPreview(null)} />
     </div>
   );
 }
