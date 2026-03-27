@@ -18,7 +18,10 @@ export class TimeOffController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Request() req: any, @Body() createTimeOffDto: CreateTimeOffDto) {
+  async create(
+    @Request() req: any,
+    @Body() createTimeOffDto: CreateTimeOffDto,
+  ) {
     const userId = req.user.id;
     return this.timeOffService.create(userId, createTimeOffDto);
   }
@@ -41,4 +44,3 @@ export class TimeOffController {
     return this.timeOffService.updateStatus(parseInt(id, 10), userId, status);
   }
 }
-

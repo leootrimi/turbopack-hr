@@ -11,6 +11,7 @@ import { UploadModule } from './upload/upload.module';
 import { PaymentsModule } from './payments/payments.module';
 import { DocumentsModule } from './documents/documents.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     PaymentsModule,
     DocumentsModule,
     DashboardModule,
+    JobsModule,
   ],
   controllers: [],
   providers: [],

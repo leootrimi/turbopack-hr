@@ -10,7 +10,10 @@ export class CheckinService {
   constructor(private readonly drizzle: DrizzleService) {}
 
   async create(createCheckinDto: CreateCheckinDto) {
-    return await this.drizzle.db.insert(checkinLogs).values(createCheckinDto).returning();
+    return await this.drizzle.db
+      .insert(checkinLogs)
+      .values(createCheckinDto)
+      .returning();
   }
 
   findAll() {
@@ -41,8 +44,8 @@ export class CheckinService {
         and(
           eq(checkinLogs.employeeId, employee.id),
           gte(checkinLogs.checkinTime, startOfDay),
-          lte(checkinLogs.checkinTime, endOfDay)
-        )
+          lte(checkinLogs.checkinTime, endOfDay),
+        ),
       );
 
     const result = employees.map((emp) => {
@@ -80,7 +83,9 @@ export class CheckinService {
       };
     });
 
-    return filterAbsent ? result.filter(emp => emp.status !== 'absent') : result;
+    return filterAbsent
+      ? result.filter((emp) => emp.status !== 'absent')
+      : result;
   }
 
   findOne(id: number) {

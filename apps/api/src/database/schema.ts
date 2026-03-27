@@ -91,58 +91,68 @@ export const checkinLogs = pgTable('checkin_logs', {
 });
 
 export const equipmentConditionEnum = pgEnum('equipment_condition', [
-  "New",
-  "Used",
-  "Refurbished",
+  'New',
+  'Used',
+  'Refurbished',
 ]);
 
 export const equipmentStatusEnum = pgEnum('equipment_status', [
-  "Available",
-  "Assigned",
-  "Under Repair",
-  "Retired",
+  'Available',
+  'Assigned',
+  'Under Repair',
+  'Retired',
 ]);
 
 export const equipmentLocationEnum = pgEnum('equipment_location', [
-  "Office",
-  "Remote",
-  "Warehouse",
+  'Office',
+  'Remote',
+  'Warehouse',
 ]);
 
 export const equipmentCategoryEnum = pgEnum('equipment_category', [
-  "Laptop", "Monitor", "Phone", "Tablet", "Keyboard", "Mouse", "Headset", "Desk", "Chair", "Other",
+  'Laptop',
+  'Monitor',
+  'Phone',
+  'Tablet',
+  'Keyboard',
+  'Mouse',
+  'Headset',
+  'Desk',
+  'Chair',
+  'Other',
 ]);
 
-export const equipment = pgTable("equipment", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull(),
-  category: equipmentCategoryEnum("category").notNull(),
-  brand: varchar("brand").notNull(),
-  model: varchar("model").notNull(),
-  serialNumber: varchar("serial_number").default(""),
-  assetTag: varchar("asset_tag").default(""),
-  description: varchar("description").default(""),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  assignedTo: integer("assigned_to")
-      .references(() => employee.id, { onDelete: "cascade" }),
-  location: equipmentLocationEnum("location").notNull(),
-  notes: varchar("notes"),
-  assignmentDate: timestamp("assignment_date"),
-  returnDueDate: timestamp("return_due_date"),
+export const equipment = pgTable('equipment', {
+  id: serial('id').primaryKey(),
+  name: varchar('name').notNull(),
+  category: equipmentCategoryEnum('category').notNull(),
+  brand: varchar('brand').notNull(),
+  model: varchar('model').notNull(),
+  serialNumber: varchar('serial_number').default(''),
+  assetTag: varchar('asset_tag').default(''),
+  description: varchar('description').default(''),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  assignedTo: integer('assigned_to').references(() => employee.id, {
+    onDelete: 'cascade',
+  }),
+  location: equipmentLocationEnum('location').notNull(),
+  notes: varchar('notes'),
+  assignmentDate: timestamp('assignment_date'),
+  returnDueDate: timestamp('return_due_date'),
 });
 
-export const purchaseInfo = pgTable("purchase_info", {
-  id: serial("id").primaryKey(),
-  equipmentId: integer("equipment_id")
+export const purchaseInfo = pgTable('purchase_info', {
+  id: serial('id').primaryKey(),
+  equipmentId: integer('equipment_id')
     .notNull()
-    .references(() => equipment.id, { onDelete: "cascade" }),
-  purchaseDate: timestamp("purchase_date"),
-  purchaseCost: integer("purchase_cost"),
-  supplier: varchar("supplier"),
-  warrantyExpiration: timestamp("warranty_expiration"),
-  condition: equipmentConditionEnum("condition").notNull(),
-  status: equipmentStatusEnum("status").notNull(),
+    .references(() => equipment.id, { onDelete: 'cascade' }),
+  purchaseDate: timestamp('purchase_date'),
+  purchaseCost: integer('purchase_cost'),
+  supplier: varchar('supplier'),
+  warrantyExpiration: timestamp('warranty_expiration'),
+  condition: equipmentConditionEnum('condition').notNull(),
+  status: equipmentStatusEnum('status').notNull(),
 });
 
 export const userRoleEnum = pgEnum('user_role', ['admin', 'hr', 'employee']);
@@ -219,18 +229,38 @@ export const timeOffBalance = pgTable('time_off_balance', {
     .notNull()
     .unique()
     .references(() => employee.id, { onDelete: 'cascade' }),
-  vacationTotal: numeric('vacation_total', { precision: 4, scale: 1 }).default('20.0').notNull(),
-  vacationUsed: numeric('vacation_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
-  sickTotal: numeric('sick_total', { precision: 4, scale: 1 }).default('10.0').notNull(),
-  sickUsed: numeric('sick_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
-  personalTotal: numeric('personal_total', { precision: 4, scale: 1 }).default('5.0').notNull(),
-  personalUsed: numeric('personal_used', { precision: 4, scale: 1 }).default('0.0').notNull(),
+  vacationTotal: numeric('vacation_total', { precision: 4, scale: 1 })
+    .default('20.0')
+    .notNull(),
+  vacationUsed: numeric('vacation_used', { precision: 4, scale: 1 })
+    .default('0.0')
+    .notNull(),
+  sickTotal: numeric('sick_total', { precision: 4, scale: 1 })
+    .default('10.0')
+    .notNull(),
+  sickUsed: numeric('sick_used', { precision: 4, scale: 1 })
+    .default('0.0')
+    .notNull(),
+  personalTotal: numeric('personal_total', { precision: 4, scale: 1 })
+    .default('5.0')
+    .notNull(),
+  personalUsed: numeric('personal_used', { precision: 4, scale: 1 })
+    .default('0.0')
+    .notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'processed', 'error']);
-export const paymentSourceEnum = pgEnum('payment_source', ['manual', 'upload', 'both']);
+export const paymentStatusEnum = pgEnum('payment_status', [
+  'pending',
+  'processed',
+  'error',
+]);
+export const paymentSourceEnum = pgEnum('payment_source', [
+  'manual',
+  'upload',
+  'both',
+]);
 
 export const payments = pgTable('payments', {
   id: serial('id').primaryKey(),
@@ -253,6 +283,48 @@ export const documentCategoryEnum = pgEnum('document_category', [
   'additional',
   'other',
 ]);
+
+export const jobStatusEnum = pgEnum('job_status', ['Open', 'Closed', 'Draft']);
+export const jobTypeEnum = pgEnum('job_type', [
+  'Full-time',
+  'Part-time',
+  'Contract',
+  'Internship',
+]);
+export const jobLocationTypeEnum = pgEnum('job_location_type', [
+  'On-site',
+  'Remote',
+  'Hybrid',
+]);
+
+export const jobs = pgTable('jobs', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 256 }).notNull(),
+  department: varchar('department', { length: 256 }).notNull(),
+  location: varchar('location', { length: 256 }).notNull(),
+  locationType: jobLocationTypeEnum('location_type').notNull(),
+  type: jobTypeEnum('type').notNull(),
+  salary: varchar('salary', { length: 256 }).default('').notNull(),
+  status: jobStatusEnum('status').default('Open').notNull(),
+  description: varchar('description', { length: 4096 }).notNull(),
+  responsibilities: varchar('responsibilities', { length: 1024 })
+    .array()
+    .default([])
+    .notNull(),
+  requirements: varchar('requirements', { length: 1024 })
+    .array()
+    .default([])
+    .notNull(),
+  niceToHave: varchar('nice_to_have', { length: 1024 })
+    .array()
+    .default([])
+    .notNull(),
+  applicants: integer('applicants').default(0).notNull(),
+  postedAt: timestamp('posted_at').defaultNow().notNull(),
+  closedAt: timestamp('closed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
 
 export const documents = pgTable('documents', {
   id: serial('id').primaryKey(),

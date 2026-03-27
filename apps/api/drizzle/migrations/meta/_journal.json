@@ -71,6 +71,13 @@
       "when": 1774484574495,
       "tag": "0009_brave_chameleon",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774629776746,
+      "tag": "0010_add_jobs_table",
+      "breakpoints": true
     }
   ]
 }

@@ -62,7 +62,7 @@ export class TeamsService {
         employee.firstName,
         employee.lastName,
       );
-      console.log(result)
+    console.log(result);
     return result;
   }
 
@@ -93,9 +93,9 @@ export class TeamsService {
         employee.firstName,
         employee.lastName,
       )
-        .where(eq(employee.id, employeeId))
-  
-      return result[0];
+      .where(eq(employee.id, employeeId));
+
+    return result[0];
   }
 
   findOne(id: number) {

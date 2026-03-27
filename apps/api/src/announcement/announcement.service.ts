@@ -24,7 +24,7 @@ export class AnnouncementService {
       .leftJoin(employee, eq(announcements.authorId, employee.id))
       .orderBy(desc(announcements.createdAt));
 
-    return list.map(item => ({
+    return list.map((item) => ({
       id: item.id.toString(),
       title: item.title,
       body: item.body,

@@ -1,6 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { compensation, employee, jobInfo, teams, users, timeOffBalance, leaveRequests } from 'src/database/schema';
+import {
+  compensation,
+  employee,
+  jobInfo,
+  teams,
+  users,
+  timeOffBalance,
+  leaveRequests,
+} from 'src/database/schema';
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
@@ -67,126 +75,128 @@ export class EmployeeService {
     });
   }
 
-async findAll(page = 1, pageSize = 10): Promise<EmployeeWithJob[]> {
-  const offset = (page - 1) * pageSize;
+  async findAll(page = 1, pageSize = 10): Promise<EmployeeWithJob[]> {
+    const offset = (page - 1) * pageSize;
 
-  const results = await this.drizzle.db
-    .select({
-      id: employee.id,
-      fullName: sql<string>`${employee.firstName} || ' ' || ${employee.lastName}`, // Combine first + last
-      email: employee.email,
-      jobTitle: jobInfo.jobTitle,
-      department: jobInfo.department,
-    })
-    .from(employee)
-    .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id))
-    .limit(pageSize)
-    .offset(offset);
-
-  return results;
-}
-
-async findOne(id: number) {
-  const result = await this.drizzle.db
-    .select({
-      personal: {
+    const results = await this.drizzle.db
+      .select({
         id: employee.id,
-        firstName: employee.firstName,
-        lastName: employee.lastName,
+        fullName: sql<string>`${employee.firstName} || ' ' || ${employee.lastName}`, // Combine first + last
         email: employee.email,
-        phone: employee.phone,
-        dateOfBirth: employee.dateOfBirth,
-        personalNumber: employee.personalNumber,
-        address: employee.address,
-        emergencyContact: employee.emergencyContact,
-        createdAt: employee.createdAt,
-      },
-      job: {
         jobTitle: jobInfo.jobTitle,
         department: jobInfo.department,
-        employmentType: jobInfo.employmentType,
-        startDate: jobInfo.startDate,
-        endDate: jobInfo.endDate,
-        workLocation: jobInfo.workLocation,
+      })
+      .from(employee)
+      .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id))
+      .limit(pageSize)
+      .offset(offset);
+
+    return results;
+  }
+
+  async findOne(id: number) {
+    const result = await this.drizzle.db
+      .select({
+        personal: {
+          id: employee.id,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          email: employee.email,
+          phone: employee.phone,
+          dateOfBirth: employee.dateOfBirth,
+          personalNumber: employee.personalNumber,
+          address: employee.address,
+          emergencyContact: employee.emergencyContact,
+          createdAt: employee.createdAt,
+        },
+        job: {
+          jobTitle: jobInfo.jobTitle,
+          department: jobInfo.department,
+          employmentType: jobInfo.employmentType,
+          startDate: jobInfo.startDate,
+          endDate: jobInfo.endDate,
+          workLocation: jobInfo.workLocation,
+        },
+        compensation: {
+          salaryAmount: compensation.salaryAmount,
+          salaryType: compensation.salaryType,
+          currency: compensation.currency,
+          paymentFrequency: compensation.paymentFrequency,
+          bankAccount: compensation.bankAccount,
+          bonusEligible: compensation.bonusEligible,
+        },
+      })
+      .from(employee)
+      .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id))
+      .leftJoin(compensation, eq(compensation.employeeId, employee.id))
+      .where(eq(employee.id, id))
+      .limit(1);
+
+    if (!result[0]) return null;
+
+    const timeOffBalanceResult = await this.drizzle.db
+      .select()
+      .from(timeOffBalance)
+      .where(eq(timeOffBalance.employeeId, id))
+      .limit(1);
+
+    const leaveRequestsResult = await this.drizzle.db
+      .select()
+      .from(leaveRequests)
+      .where(eq(leaveRequests.employeeId, id));
+
+    return {
+      ...result[0],
+      timeOffBalance: timeOffBalanceResult[0] || {
+        vacationTotal: 20,
+        vacationUsed: 0,
+        sickTotal: 10,
+        sickUsed: 0,
+        personalTotal: 5,
+        personalUsed: 0,
       },
-      compensation: {
-        salaryAmount: compensation.salaryAmount,
-        salaryType: compensation.salaryType,
-        currency: compensation.currency,
-        paymentFrequency: compensation.paymentFrequency,
-        bankAccount: compensation.bankAccount,
-        bonusEligible: compensation.bonusEligible,
-      },
-    })
-    .from(employee)
-    .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id))
-    .leftJoin(compensation, eq(compensation.employeeId, employee.id))
-    .where(eq(employee.id, id))
-    .limit(1);
+      leaveRequests: leaveRequestsResult,
+    };
+  }
 
-  if (!result[0]) return null;
-
-  const timeOffBalanceResult = await this.drizzle.db
-    .select()
-    .from(timeOffBalance)
-    .where(eq(timeOffBalance.employeeId, id))
-    .limit(1);
-
-  const leaveRequestsResult = await this.drizzle.db
-    .select()
-    .from(leaveRequests)
-    .where(eq(leaveRequests.employeeId, id));
-
-  return {
-    ...result[0],
-    timeOffBalance: timeOffBalanceResult[0] || {
-      vacationTotal: 20,
-      vacationUsed: 0,
-      sickTotal: 10,
-      sickUsed: 0,
-      personalTotal: 5,
-      personalUsed: 0,
-    },
-    leaveRequests: leaveRequestsResult,
-  };
-}
-
-async getEmployeeTeam(employeeId: number) {
-  const result = await this.drizzle.db
-    .select({
-      teamId: teams.id,
-      teamName: teams.name,
-      teamType: teams.team_type,
-      leaderName: sql<string>`CONCAT(${employee.firstName}, ' ', ${employee.lastName})`,
-      teamMemberCount: sql<number>`(
+  async getEmployeeTeam(employeeId: number) {
+    const result = await this.drizzle.db
+      .select({
+        teamId: teams.id,
+        teamName: teams.name,
+        teamType: teams.team_type,
+        leaderName: sql<string>`CONCAT(${employee.firstName}, ' ', ${employee.lastName})`,
+        teamMemberCount: sql<number>`(
         SELECT COUNT(*) FROM job_info ji2 WHERE ji2.team_id = ${teams.id}
       )`,
-    })
-    .from(jobInfo)
-    .leftJoin(teams, eq(teams.id, jobInfo.teamId))
-    .leftJoin(employee, eq(employee.id, teams.leaderId))
-    .where(eq(jobInfo.employeeId, employeeId))
-    .limit(1);
+      })
+      .from(jobInfo)
+      .leftJoin(teams, eq(teams.id, jobInfo.teamId))
+      .leftJoin(employee, eq(employee.id, teams.leaderId))
+      .where(eq(jobInfo.employeeId, employeeId))
+      .limit(1);
 
-  if (!result[0] || !result[0].teamId) return null;
-  return result[0];
-}
+    if (!result[0] || !result[0].teamId) return null;
+    return result[0];
+  }
 
-async updateEmployeeTeam(employeeId: number, teamId: number | null) {
-  const existing = await this.drizzle.db
-    .select({ id: jobInfo.id })
-    .from(jobInfo)
-    .where(eq(jobInfo.employeeId, employeeId))
-    .limit(1);
+  async updateEmployeeTeam(employeeId: number, teamId: number | null) {
+    const existing = await this.drizzle.db
+      .select({ id: jobInfo.id })
+      .from(jobInfo)
+      .where(eq(jobInfo.employeeId, employeeId))
+      .limit(1);
 
-  if (!existing[0]) throw new NotFoundException(`No job info found for employee ${employeeId}`);
+    if (!existing[0])
+      throw new NotFoundException(
+        `No job info found for employee ${employeeId}`,
+      );
 
-  await this.drizzle.db
-    .update(jobInfo)
-    .set({ teamId })
-    .where(eq(jobInfo.employeeId, employeeId));
+    await this.drizzle.db
+      .update(jobInfo)
+      .set({ teamId })
+      .where(eq(jobInfo.employeeId, employeeId));
 
-  return this.getEmployeeTeam(employeeId);
-}
-
+    return this.getEmployeeTeam(employeeId);
+  }
 }

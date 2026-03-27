@@ -6,6 +6,6 @@ import { DrizzleModule } from 'src/database/drizzle.module';
 @Module({
   imports: [DrizzleModule],
   controllers: [AnnouncementController],
-  providers: [AnnouncementService]
+  providers: [AnnouncementService],
 })
 export class AnnouncementModule {}

@@ -228,12 +228,14 @@ async function seed() {
 
     console.log('🟢 Seeding Time Off Balances...');
 
-    await db.insert(timeOffBalance).values([
-      { employeeId: alice.id },
-      { employeeId: bob.id },
-      { employeeId: carol.id },
-      { employeeId: dave.id },
-    ]);
+    await db
+      .insert(timeOffBalance)
+      .values([
+        { employeeId: alice.id },
+        { employeeId: bob.id },
+        { employeeId: carol.id },
+        { employeeId: dave.id },
+      ]);
 
     console.log('🟢 Updating Team Leaders...');
 

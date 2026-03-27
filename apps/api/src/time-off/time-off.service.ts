@@ -1,12 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { leaveRequests, users, employee, timeOffBalance } from 'src/database/schema';
+import {
+  leaveRequests,
+  users,
+  employee,
+  timeOffBalance,
+} from 'src/database/schema';
 import { desc, eq, sql, and } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 
 @Injectable()
 export class TimeOffService {
-  constructor(private readonly drizzle: DrizzleService) { }
+  constructor(private readonly drizzle: DrizzleService) {}
 
   async getDashboardRequests(
     userId: number,
@@ -116,16 +121,18 @@ export class TimeOffService {
       })
       .from(leaveRequests)
       .leftJoin(employee, eq(leaveRequests.reviewedById, employee.id))
-      .where(and(
-        eq(leaveRequests.employeeId, user.employeeId),
-        eq(leaveRequests.status, "Pending")
-      ))
+      .where(
+        and(
+          eq(leaveRequests.employeeId, user.employeeId),
+          eq(leaveRequests.status, 'Pending'),
+        ),
+      )
       .orderBy(desc(leaveRequests.createdAt));
 
     return results.map((req) => ({
       ...req,
       id: req.id.toString(),
-      days: parseFloat(req.days as string),
+      days: parseFloat(req.days),
       submittedAt: req.createdAt,
     }));
   }
@@ -204,7 +211,8 @@ export class TimeOffService {
 
       // 3. Update the balance if approved
       if (status === 'Approved') {
-        let balanceField: keyof typeof timeOffBalance.$inferInsert | null = null;
+        let balanceField: keyof typeof timeOffBalance.$inferInsert | null =
+          null;
         if (request.type === 'Vacation') balanceField = 'vacationUsed';
         else if (request.type === 'Sick Leave') balanceField = 'sickUsed';
         else if (request.type === 'Personal Day') balanceField = 'personalUsed';
@@ -224,5 +232,3 @@ export class TimeOffService {
     });
   }
 }
-
-

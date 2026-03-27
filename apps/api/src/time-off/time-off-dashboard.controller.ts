@@ -15,7 +15,7 @@ export class TimeOffDashboardController {
   ) {
     const userId = req.user.id;
     const role = req.user.role;
-    
+
     return this.timeOffService.getDashboardRequests(
       userId,
       role,

@@ -14,7 +14,11 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
-    const userRecords = await this.drizzleService.db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1);
+    const userRecords = await this.drizzleService.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, email))
+      .limit(1);
     const user = userRecords[0];
 
     if (user && user.passwordHash) {
@@ -38,7 +42,11 @@ export class AuthService {
   async refresh(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      const newPayload = { email: payload.email, sub: payload.sub, role: payload.role };
+      const newPayload = {
+        email: payload.email,
+        sub: payload.sub,
+        role: payload.role,
+      };
       return {
         access_token: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
         refresh_token: this.jwtService.sign(newPayload, { expiresIn: '7d' }),

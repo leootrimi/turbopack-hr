@@ -128,8 +128,18 @@ export class EquipmentsService {
       const [updatedEquipment] = await tx
         .update(equipment)
         .set({
-          assignedTo: assignedTo !== undefined ? (assignedTo === 0 ? null : assignedTo) : undefined,
-          assignmentDate: assignedTo !== undefined ? (assignedTo === 0 ? null : new Date()) : undefined,
+          assignedTo:
+            assignedTo !== undefined
+              ? assignedTo === 0
+                ? null
+                : assignedTo
+              : undefined,
+          assignmentDate:
+            assignedTo !== undefined
+              ? assignedTo === 0
+                ? null
+                : new Date()
+              : undefined,
           updatedAt: new Date(),
         })
         .where(eq(equipment.id, id))
@@ -140,7 +150,10 @@ export class EquipmentsService {
         await tx
           .update(purchaseInfo)
           .set({
-            status: assignedTo === 0 || assignedTo === null ? 'Available' : 'Assigned',
+            status:
+              assignedTo === 0 || assignedTo === null
+                ? 'Available'
+                : 'Assigned',
           })
           .where(eq(purchaseInfo.equipmentId, id));
       }

@@ -16,11 +16,8 @@ export class PaymentsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async create(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
-  ) {
-    // Note: Multer handles multipart/form-data. 
+  async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
+    // Note: Multer handles multipart/form-data.
     // JSON data in the body might need parsing if sent as a string field in FormData.
     return this.paymentsService.create({
       ...body,

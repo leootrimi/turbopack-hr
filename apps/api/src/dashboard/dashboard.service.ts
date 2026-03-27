@@ -6,7 +6,7 @@ import { sql, eq, and, gte, lte, desc } from 'drizzle-orm';
 @Injectable()
 export class DashboardService {
   constructor(private readonly drizzleService: DrizzleService) {}
-  
+
   private get db() {
     return this.drizzleService.db;
   }
@@ -71,7 +71,10 @@ export class DashboardService {
         employeeName: sql<string>`concat(${schema.employee.firstName}, ' ', ${schema.employee.lastName})`,
       })
       .from(schema.leaveRequests)
-      .leftJoin(schema.employee, eq(schema.leaveRequests.employeeId, schema.employee.id))
+      .leftJoin(
+        schema.employee,
+        eq(schema.leaveRequests.employeeId, schema.employee.id),
+      )
       .orderBy(desc(schema.leaveRequests.createdAt))
       .limit(10);
 
@@ -85,7 +88,10 @@ export class DashboardService {
         endDate: schema.leaveRequests.endDate,
       })
       .from(schema.leaveRequests)
-      .leftJoin(schema.employee, eq(schema.leaveRequests.employeeId, schema.employee.id))
+      .leftJoin(
+        schema.employee,
+        eq(schema.leaveRequests.employeeId, schema.employee.id),
+      )
       .where(
         and(
           eq(schema.leaveRequests.status, 'Approved'),

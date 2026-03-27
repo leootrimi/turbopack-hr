@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
@@ -24,7 +32,7 @@ export class TeamsController {
 
   @Get('overview/:id')
   teamsOverviewForEmployee(@Param('id') id: string) {
-    return this.teamsService.getTeamForEmployee(+id)
+    return this.teamsService.getTeamForEmployee(+id);
   }
 
   @Get(':id')
