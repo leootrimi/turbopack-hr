@@ -49,6 +49,7 @@ const navItems = [
     title: "Equipment",
     icon: Monitor,
     items: [
+      { title: "My Equipment",       url: `${BASE_PATH}/equipment/my`       },
       { title: "Assigned Equipment", url: `${BASE_PATH}/equipment/assigned` },
       { title: "Archived Equipment", url: `${BASE_PATH}/equipment/archived` },
       { title: "Add Equipment",      url: `${BASE_PATH}/equipment/add`      },

@@ -8,9 +8,10 @@ export type RouteConfig = {
 export const ROUTE_ACCESS: RouteConfig[] = [
   { path: '/dashboard/admin', roles: ['admin', 'hr'] },
   { path: '/dashboard/timeoff/requests', roles: ['admin', 'hr'] },
-  { path: '/dashboard/timeoff', roles: ['admin', 'hr'] },
-  
   { path: '/dashboard', roles: ['admin', 'hr', 'employee'] },
+  { path: '/dashboard/equipment/my', roles: ['admin', 'hr', 'employee'] },
+  { path: '/dashboard/equipment/add', roles: ['admin', 'hr'] },
+  
 ];
 
 export function canAccess(role: string | undefined, path: string): boolean {

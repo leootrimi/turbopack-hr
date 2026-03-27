@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentForm, EquipmentRow } from '@repo/types';
 import { DrizzleService } from 'src/database/drizzle.provider';
-import { equipment, purchaseInfo, employee } from 'src/database/schema';
+import { equipment, purchaseInfo, employee, users } from 'src/database/schema';
 import { eq, sql } from 'drizzle-orm';
 
 @Injectable()
@@ -70,6 +70,34 @@ export class EquipmentsService {
       .leftJoin(purchaseInfo, eq(purchaseInfo.equipmentId, equipment.id));
 
     return equipments;
+  }
+
+  async findMine(userId: number): Promise<EquipmentRow[]> {
+    const [currentUser] = await this.drizzle.db
+      .select({ employeeId: users.employeeId })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!currentUser) {
+      return [];
+    }
+
+    return this.drizzle.db
+      .select({
+        id: equipment.id,
+        name: equipment.name,
+        category: equipment.category,
+        brand: equipment.brand,
+        model: equipment.model,
+        assetTag: equipment.assetTag,
+        assignedTo: equipment.assignedTo,
+        status: purchaseInfo.status,
+        condition: purchaseInfo.condition,
+      })
+      .from(equipment)
+      .leftJoin(purchaseInfo, eq(purchaseInfo.equipmentId, equipment.id))
+      .where(eq(equipment.assignedTo, currentUser.employeeId));
   }
 
   async findOne(id: number) {

@@ -8,6 +8,13 @@ export async function getEquipments() {
   });
 }
 
+export async function getMyEquipments() {
+  return await makeRequest<EquipmentRow[]>({
+    url: "/equipments/my",
+    method: "GET",
+  });
+}
+
 export async function getEquipment(id: string) {
   return await makeRequest<EquipmentDetail>({
     url: `/equipments/${id}`,

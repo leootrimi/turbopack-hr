@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { EquipmentsService } from './equipments.service';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentForm } from '@repo/types';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('equipments')
 export class EquipmentsController {
@@ -23,6 +26,12 @@ export class EquipmentsController {
   @Get()
   findAll() {
     return this.equipmentsService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  findMyEquipments(@Request() req: { user: { id: number } }) {
+    return this.equipmentsService.findMine(req.user.id);
   }
 
   @Get(':id')

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getEquipments, getEquipment, updateEquipment } from "../api";
+import { getEquipments, getEquipment, getMyEquipments, updateEquipment } from "../api";
 import { EquipmentRow, EquipmentDetail } from "@repo/types";
 
 export function useEquipments() {
@@ -16,6 +16,14 @@ export function useEquipment(id: string) {
     queryFn: () => getEquipment(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
+  });
+}
+
+export function useMyEquipments() {
+  return useQuery<EquipmentRow[], Error>({
+    queryKey: ["my-equipments"],
+    queryFn: getMyEquipments,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
