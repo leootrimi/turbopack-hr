@@ -56,6 +56,15 @@ const navItems = [
     ],
   },
   {
+    title: "Calendar",
+    icon: Monitor,
+    items: [
+      { title: "My Meetings", url: `${BASE_PATH}/meetings/my` },
+      { title: "Company Meetings", url: `${BASE_PATH}/meetings` },
+      { title: "Meetings stats", url: `${BASE_PATH}/meetings/stats`},
+    ],
+  },
+  {
     title: "Requests",
     icon: CalendarClock,
     items: [
