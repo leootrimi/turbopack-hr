@@ -1,4 +1,5 @@
 import { makeRequest } from "../../../lib/axios";
+import type { TimeOffBalanceApi } from "../components/mock";
 
 export interface CreateTimeOffRequestDTO {
   type: string;
@@ -55,6 +56,13 @@ export const createTimeOffRequest = async (data: CreateTimeOffRequestDTO) => {
 export const getTimeOffRequests = async () => {
   return makeRequest<LeaveRequest[]>({
     url: "/time-off",
+    method: "GET",
+  });
+};
+
+export const getTimeOffBalance = async () => {
+  return makeRequest<TimeOffBalanceApi>({
+    url: "/time-off/balance",
     method: "GET",
   });
 };

@@ -3,6 +3,7 @@ export class CreateTimeOffDto {
     | 'Vacation'
     | 'Work From Home'
     | 'Sick Leave'
+    | 'Personal Day'
     | 'Marriage'
     | 'Bereavement'
     | 'Unpaid';

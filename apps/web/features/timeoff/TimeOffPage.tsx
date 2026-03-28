@@ -2,24 +2,27 @@
 
 import { useState } from "react";
 import { CalendarDays, History, Umbrella } from "lucide-react";
-import { LEAVE_BALANCES, LeaveType } from "./components/mock";
 import { BalanceCard }    from "./components/BalanceCard";
 import { RequestForm }    from "./components/RequestForm";
 import { RequestHistory } from "./components/RequestHistory";
-import { useTimeOffRequests } from "./hooks/use-time-off";
+import { buildLeaveBalancesFromApi } from "./components/mock";
+import { useTimeOffRequests, useTimeOffBalance } from "./hooks/use-time-off";
 
 type Tab = "request" | "history";
 
 export function TimeOffPage() {
   const [tab, setTab] = useState<Tab>("request");
-  const { data: requests = [], isLoading } = useTimeOffRequests();
+  const { data: requests, isLoading } = useTimeOffRequests();
+  const { data: balanceRow, isLoading: balanceLoading } = useTimeOffBalance();
+  const leaveBalances = buildLeaveBalancesFromApi(balanceRow);
 
   const handleSubmit = () => {
     setTab("history");
   };
 
-  const pendingCount  = requests.filter((r) => r.status === "Pending").length;
-  const approvedCount = requests.filter((r) => r.status === "Approved").length;
+  const requestList = requests ?? [];
+  const pendingCount  = requestList.filter((r) => r.status === "Pending").length;
+  const approvedCount = requestList.filter((r) => r.status === "Approved").length;
 
   return (
     <div className="min-h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -91,7 +94,7 @@ export function TimeOffPage() {
               ) : tab === "request" ? (
                 <RequestForm onSubmit={() => { handleSubmit(); }} />
               ) : (
-                <RequestHistory requests={requests as any} />
+                <RequestHistory requests={requests} />
               )}
             </div>
           </div>
@@ -101,9 +104,13 @@ export function TimeOffPage() {
               <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Balances</h2>
               <div className="flex-1 h-px bg-slate-100" />
             </div>
-            {LEAVE_BALANCES.map((b) => (
-              <BalanceCard key={b.type} balance={b} />
-            ))}
+            {balanceLoading ? (
+              <p className="text-xs text-slate-400 px-1">Loading balances…</p>
+            ) : (
+              leaveBalances.map((b) => (
+                <BalanceCard key={b.type} balance={b} />
+              ))
+            )}
           </aside>
 
         </div>

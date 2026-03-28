@@ -3,6 +3,7 @@ import {
   createTimeOffRequest,
   CreateTimeOffRequestDTO,
   getTimeOffRequests,
+  getTimeOffBalance,
   getDashboardTimeOffRequests,
   updateLeaveRequestStatus,
 } from "../api";
@@ -14,6 +15,7 @@ export function useCreateTimeOff() {
     mutationFn: (data: CreateTimeOffRequestDTO) => createTimeOffRequest(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["time-off"] });
+      queryClient.invalidateQueries({ queryKey: ["time-off-balance"] });
       queryClient.invalidateQueries({ queryKey: ["time-off-dashboard"] });
     },
   });
@@ -32,6 +34,7 @@ export function useUpdateLeaveRequestStatus() {
     }) => updateLeaveRequestStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["time-off"] });
+      queryClient.invalidateQueries({ queryKey: ["time-off-balance"] });
       queryClient.invalidateQueries({ queryKey: ["time-off-dashboard"] });
     },
   });
@@ -42,6 +45,13 @@ export function useTimeOffRequests() {
   return useQuery({
     queryKey: ["time-off"],
     queryFn: getTimeOffRequests,
+  });
+}
+
+export function useTimeOffBalance() {
+  return useQuery({
+    queryKey: ["time-off-balance"],
+    queryFn: getTimeOffBalance,
   });
 }
 

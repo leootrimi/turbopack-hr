@@ -27,6 +27,12 @@ export class TimeOffController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('balance')
+  async getBalance(@Request() req: { user: { id: number } }) {
+    return this.timeOffService.getBalance(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Request() req: any) {
     const userId = req.user.id;

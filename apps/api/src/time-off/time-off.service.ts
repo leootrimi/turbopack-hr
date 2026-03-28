@@ -121,12 +121,7 @@ export class TimeOffService {
       })
       .from(leaveRequests)
       .leftJoin(employee, eq(leaveRequests.reviewedById, employee.id))
-      .where(
-        and(
-          eq(leaveRequests.employeeId, user.employeeId),
-          eq(leaveRequests.status, 'Pending'),
-        ),
-      )
+      .where(eq(leaveRequests.employeeId, user.employeeId))
       .orderBy(desc(leaveRequests.createdAt));
 
     return results.map((req) => ({
@@ -135,6 +130,53 @@ export class TimeOffService {
       days: parseFloat(req.days),
       submittedAt: req.createdAt,
     }));
+  }
+
+  async getBalance(userId: number) {
+    const userRecords = await this.drizzle.db
+      .select({ employeeId: users.employeeId })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    const user = userRecords[0];
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const rows = await this.drizzle.db
+      .select({
+        vacationTotal: timeOffBalance.vacationTotal,
+        vacationUsed: timeOffBalance.vacationUsed,
+        sickTotal: timeOffBalance.sickTotal,
+        sickUsed: timeOffBalance.sickUsed,
+        personalTotal: timeOffBalance.personalTotal,
+        personalUsed: timeOffBalance.personalUsed,
+      })
+      .from(timeOffBalance)
+      .where(eq(timeOffBalance.employeeId, user.employeeId))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) {
+      return {
+        vacationTotal: '20.0',
+        vacationUsed: '0.0',
+        sickTotal: '10.0',
+        sickUsed: '0.0',
+        personalTotal: '5.0',
+        personalUsed: '0.0',
+      };
+    }
+
+    return {
+      vacationTotal: String(row.vacationTotal),
+      vacationUsed: String(row.vacationUsed),
+      sickTotal: String(row.sickTotal),
+      sickUsed: String(row.sickUsed),
+      personalTotal: String(row.personalTotal),
+      personalUsed: String(row.personalUsed),
+    };
   }
 
   async create(userId: number, dto: CreateTimeOffDto) {

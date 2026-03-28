@@ -42,12 +42,15 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
     '05:00 PM',
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const t = e.target;
+    if (t instanceof HTMLInputElement && t.type === 'checkbox') {
+      setFormData((prev) => ({ ...prev, [t.name]: t.checked }));
+    } else {
+      setFormData((prev) => ({ ...prev, [t.name]: t.value }));
+    }
   };
 
   const handleTimeSelect = (time: string) => {

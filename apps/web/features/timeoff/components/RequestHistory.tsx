@@ -2,14 +2,12 @@ import { STATUS_CONFIG, LEAVE_CONFIG } from "./mock";
 import { CalendarDays, User, MessageSquare, Clock, Loader2 } from "lucide-react";
 import { LeaveRequest } from "../api";
 import { useTimeOffRequests } from "../hooks/use-time-off";
+import { formatDate } from "@/lib/utils";
 
 interface Props {
   requests?: LeaveRequest[];
 }
 
-function formatDate(s: string) {
-  return new Date(s).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-}
 
 function timeAgo(dateInput: string | Date) {
   const d = new Date(dateInput);
@@ -19,10 +17,23 @@ function timeAgo(dateInput: string | Date) {
   return `${diff}d ago`;
 }
 
+/** Calendar YYYY-MM-DD for leave range comparisons (avoids UTC/local drift on ISO datetimes). */
+function toDateKey(d: string | Date): string {
+  if (typeof d === "string") {
+    const m = d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  }
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) return "";
+  const y = date.getFullYear();
+  const mo = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${y}-${mo}-${day}`;
+}
+
 function RequestCard({ req }: { req: LeaveRequest }) {
   const cfg    = LEAVE_CONFIG[req.type as keyof typeof LEAVE_CONFIG] || LEAVE_CONFIG["Vacation"];
   const status = STATUS_CONFIG[req.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["Pending"];
-  const isUpcoming = new Date(req.startDate) >= new Date();
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
@@ -87,14 +98,18 @@ function RequestCard({ req }: { req: LeaveRequest }) {
 }
 
 export function RequestHistory({ requests: propsRequests }: Props) {
-  const { data: hookRequests = [], isLoading } = useTimeOffRequests();
-  const requests = propsRequests || hookRequests;
-  
-  const today = new Date().toISOString().split("T")[0];
-  const upcoming = requests.filter((r) => r.startDate >= today).sort((a, b) => a.startDate.localeCompare(b.startDate));
-  const past     = requests.filter((r) => r.startDate < today).sort((a, b) => b.startDate.localeCompare(a.startDate));
+  const { data: hookRequests, isLoading } = useTimeOffRequests();
+  const requests = propsRequests ?? hookRequests ?? [];
 
-  if (isLoading && !propsRequests) {
+  const todayKey = toDateKey(new Date());
+  const upcoming = requests
+    .filter((r) => toDateKey(r.endDate) >= todayKey)
+    .sort((a, b) => toDateKey(a.startDate).localeCompare(toDateKey(b.startDate)));
+  const past = requests
+    .filter((r) => toDateKey(r.endDate) < todayKey)
+    .sort((a, b) => toDateKey(b.endDate).localeCompare(toDateKey(a.endDate)));
+
+  if (isLoading && propsRequests === undefined) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <Loader2 className="animate-spin text-indigo-500" size={30} />

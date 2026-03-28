@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { Calendar, FileText, User, CheckCircle, AlertCircle, Upload, X, Clock, Send } from "lucide-react";
-import { LeaveType, LEAVE_CONFIG, LEAVE_BALANCES } from "./mock";
-import { useCreateTimeOff } from "../hooks/use-time-off";
+import { LeaveType, LEAVE_CONFIG, getBalanceForLeaveType } from "./mock";
+import { useCreateTimeOff, useTimeOffBalance } from "../hooks/use-time-off";
 
 interface FormState {
   type: LeaveType;
@@ -44,6 +44,7 @@ function formatDateDisplay(d: string) {
 export function RequestForm({ onSubmit }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const { mutate: createRequest, isPending: submitting } = useCreateTimeOff();
+  const { data: balanceRow } = useTimeOffBalance();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
@@ -63,8 +64,8 @@ export function RequestForm({ onSubmit }: Props) {
     setForm((f) => ({ ...f, [k]: v }));
 
   const days = form.halfDay ? 0.5 : countWorkdays(form.startDate, form.endDate);
-  const balance = LEAVE_BALANCES.find((b) => b.type === form.type);
-  const remaining = balance ? balance.total - balance.used : 0;
+  const balance = getBalanceForLeaveType(balanceRow, form.type);
+  const remaining = balance.total - balance.used;
   const cfg = LEAVE_CONFIG[form.type];
   const overLimit = days > remaining;
   const needsCert = form.type === "Sick Leave" && days > 2;
@@ -155,7 +156,7 @@ export function RequestForm({ onSubmit }: Props) {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 line-clamp-1">
-                  {typeConfig.description || `${typeConfig.totalDays} days available`}
+                  {typeConfig.description}
                 </p>
                 {active && (
                   <div className="absolute top-2 right-2">

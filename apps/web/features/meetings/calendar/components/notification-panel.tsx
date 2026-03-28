@@ -1,5 +1,5 @@
 // components/participants-calendar/NotificationsPanel.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, Clock, RefreshCw, XCircle, AlertCircle } from 'lucide-react';
 
 interface Notification {
@@ -19,6 +19,12 @@ interface NotificationsPanelProps {
 }
 
 const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const getIcon = () => {
     switch (notification.type) {
       case 'upcoming':
@@ -49,7 +55,7 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
       <div className="mt-0.5">{getIcon()}</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-slate-700">{notification.message}</p>
-        <p className="text-xs text-slate-400 mt-1">{timeAgo()}</p>
+        <p className="text-xs text-slate-400 mt-1">{mounted ? timeAgo() : ''}</p>
       </div>
     </div>
   );

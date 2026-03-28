@@ -44,7 +44,6 @@ interface Notification {
   createdAt: string;
 }
 
-// Mock Data
 const mockMeetings: Meeting[] = [
   {
     id: '1',
