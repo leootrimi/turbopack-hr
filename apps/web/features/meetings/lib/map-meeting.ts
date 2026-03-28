@@ -1,5 +1,6 @@
 import type { Meeting, MeetingStatus, Participant } from "../types";
 import type { MeetingApi } from "../api";
+import type { Meeting as CalendarGridMeeting } from "../calendar/components/calendar-with-meetings";
 
 function initials(first: string, last: string): string {
   const a = first?.trim()?.[0] ?? "";
@@ -72,5 +73,72 @@ export function mapMeetingApiToMeeting(m: MeetingApi): Meeting {
     hasConflict: false,
     createdAt: m.createdAt,
     updatedAt: m.updatedAt,
+  };
+}
+
+/** Shape expected by `CalendarWithMeetings` (month grid). */
+export function mapMeetingApiToCalendarGridMeeting(api: MeetingApi): CalendarGridMeeting {
+  const base = mapMeetingApiToMeeting(api);
+  const start = new Date(api.startsAt);
+  const end = new Date(start.getTime() + api.durationMinutes * 60 * 1000);
+  const endTime = end.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return {
+    id: String(api.id),
+    title: base.title,
+    description: base.description,
+    date: base.date,
+    time: base.time,
+    endTime,
+    duration: base.duration,
+    status: base.status,
+    participants: base.participants.map((p) => ({
+      id: String(p.id),
+      name: p.name,
+      initial: p.initial,
+      email: p.email,
+      status: "confirmed" as const,
+    })),
+    isPriority: false,
+  };
+}
+
+/** Rich stats / participants calendar (`calendar-page-stats`). */
+export type StatsCalendarMeeting = {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  status: "upcoming" | "completed" | "canceled";
+  participants: {
+    id: string;
+    name: string;
+    initial: string;
+    email?: string;
+    status?: "confirmed" | "pending" | "declined";
+  }[];
+  recurrence?: { isRecurring: boolean };
+  location?: string;
+};
+
+export function mapMeetingApiToStatsCalendarMeeting(api: MeetingApi): StatsCalendarMeeting {
+  const base = mapMeetingApiToMeeting(api);
+  return {
+    id: String(api.id),
+    title: base.title,
+    date: base.date,
+    time: base.time,
+    status: base.status,
+    participants: base.participants.map((p) => ({
+      id: String(p.id),
+      name: p.name,
+      initial: p.initial,
+      email: p.email,
+      status: "confirmed" as const,
+    })),
+    recurrence: { isRecurring: false },
   };
 }
