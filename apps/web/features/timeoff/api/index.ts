@@ -135,4 +135,25 @@ export const deleteTimeOffType = async (id: number) => {
   });
 };
 
+/** Approved leave for all employees overlapping the date range (YYYY-MM-DD). */
+export interface CalendarLeaveRow {
+  id: string;
+  employeeId: number;
+  firstName: string;
+  lastName: string;
+  type: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+  status: string;
+}
+
+export const getTimeOffCalendar = async (from: string, to: string) => {
+  return makeRequest<CalendarLeaveRow[]>({
+    url: "/time-off/calendar",
+    method: "GET",
+    params: { from, to },
+  });
+};
+
 

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DrizzleService } from 'src/database/drizzle.provider';
 import {
   leaveRequests,
@@ -6,7 +10,7 @@ import {
   employee,
   timeOffBalance,
 } from 'src/database/schema';
-import { desc, eq, sql, and } from 'drizzle-orm';
+import { desc, eq, sql, and, gte, lte } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { TimeOffTypesService } from './time-off-types.service';
 
@@ -95,6 +99,75 @@ export class TimeOffService {
         status: item.status.toLowerCase(),
       })),
     };
+  }
+
+  /**
+   * Approved leave overlapping [from, to] (inclusive calendar days), all employees.
+   * Used by the "Who's out" calendar.
+   */
+  async getCalendarLeaves(fromStr: string, toStr: string) {
+    const from = new Date(fromStr);
+    const to = new Date(toStr);
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      throw new BadRequestException('Invalid from/to date');
+    }
+    if (from > to) {
+      throw new BadRequestException('"from" must be before or equal to "to"');
+    }
+
+    const fromStart = new Date(
+      from.getFullYear(),
+      from.getMonth(),
+      from.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
+    const toEnd = new Date(
+      to.getFullYear(),
+      to.getMonth(),
+      to.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const rows = await this.drizzle.db
+      .select({
+        id: leaveRequests.id,
+        employeeId: leaveRequests.employeeId,
+        type: leaveRequests.type,
+        startDate: leaveRequests.startDate,
+        endDate: leaveRequests.endDate,
+        days: leaveRequests.days,
+        status: leaveRequests.status,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+      })
+      .from(leaveRequests)
+      .innerJoin(employee, eq(leaveRequests.employeeId, employee.id))
+      .where(
+        and(
+          eq(leaveRequests.status, 'Approved'),
+          lte(leaveRequests.startDate, toEnd),
+          gte(leaveRequests.endDate, fromStart),
+        ),
+      )
+      .orderBy(leaveRequests.startDate);
+
+    return rows.map((r) => ({
+      id: r.id.toString(),
+      employeeId: r.employeeId,
+      firstName: r.firstName,
+      lastName: r.lastName,
+      type: r.type,
+      startDate: r.startDate,
+      endDate: r.endDate,
+      days: parseFloat(String(r.days)),
+      status: r.status,
+    }));
   }
 
   async findAll(userId: number) {

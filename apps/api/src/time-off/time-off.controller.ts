@@ -7,6 +7,7 @@ import {
   Request,
   Patch,
   Param,
+  Query,
 } from '@nestjs/common';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -30,6 +31,16 @@ export class TimeOffController {
   @Get('balance')
   async getBalance(@Request() req: { user: { id: number } }) {
     return this.timeOffService.getBalance(req.user.id);
+  }
+
+  /** Approved leave for all employees in a date range (Who's out calendar). */
+  @UseGuards(JwtAuthGuard)
+  @Get('calendar')
+  async getCalendar(
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    return this.timeOffService.getCalendarLeaves(from, to);
   }
 
   @UseGuards(JwtAuthGuard)

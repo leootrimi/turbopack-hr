@@ -148,10 +148,7 @@ export function LeaveRequestCard({
               <Clock size={12} />
               <span>{duration}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <Calendar size={12} />
-              <span>{dateRange}</span>
-            </div>
+
           </div>
 
           {/* Reason Section */}

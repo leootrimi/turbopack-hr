@@ -4,6 +4,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { SectionHeader, Badge } from "../components/shared";
 import { useDashboardSummary } from "../hooks/useDashboard";
 import { formatDate } from "../../../lib/utils";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 const TAG_COLORS: Record<string, string> = {
   General: "#6366f1",
@@ -19,6 +20,7 @@ interface AnnouncementsWidgetProps {
 
 export function AnnouncementsWidget({ onNew }: AnnouncementsWidgetProps) {
   const { data: summary, isLoading } = useDashboardSummary();
+  const { isAdmin } = useAuth();
 
   if (isLoading) {
     return (
@@ -36,13 +38,17 @@ export function AnnouncementsWidget({ onNew }: AnnouncementsWidgetProps) {
         <h3 className="text-[13px] font-bold text-slate-800 tracking-[-0.01em]">
           Announcements
         </h3>
-        <button
+        {
+          isAdmin && 
+          <button
           onClick={onNew}
           className="flex items-center gap-1.5 text-[11px] font-bold text-white bg-slate-900 rounded-xl px-3 py-1.5 hover:bg-slate-700 transition-colors cursor-pointer"
         >
           <Plus size={11} />
           New
         </button>
+        }
+
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col gap-2.5">

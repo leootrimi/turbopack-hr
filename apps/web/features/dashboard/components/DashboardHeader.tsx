@@ -1,10 +1,12 @@
 import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDashboardSummary } from "../hooks/useDashboard";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 export function DashboardHeader() {
   const router = useRouter();
   const { data: summary, isLoading } = useDashboardSummary();
+  const { user, isAdmin } = useAuth();
 
   const today = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
@@ -21,10 +23,10 @@ export function DashboardHeader() {
     );
   }
 
-  const { stats } = summary || { stats: { totalEmployees: 0, workingToday: 0 }};
+  const { stats } = summary || { stats: { totalEmployees: 0, workingToday: 0 } };
   const working = stats.workingToday;
-  const attendancePct = stats.totalEmployees > 0 
-    ? Math.round((working / stats.totalEmployees) * 100) 
+  const attendancePct = stats.totalEmployees > 0
+    ? Math.round((working / stats.totalEmployees) * 100)
     : 0;
 
   return (
@@ -32,7 +34,7 @@ export function DashboardHeader() {
       {/* greeting */}
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-0.5">
-          Good morning, Admin 👋
+          {`Good morning, ${user?.email} 👋`}
         </h1>
         <p className="text-[13px] text-slate-400">{today}</p>
       </div>
@@ -47,13 +49,15 @@ export function DashboardHeader() {
           attendance
         </div>
 
-        <button 
-        className="flex items-center gap-2 bg-slate-900 text-white text-[12px] font-bold rounded-xl px-4 py-2.5 hover:bg-slate-700 transition-colors cursor-pointer"
-        onClick={() => router.push("/dashboard/admin/add-employer")}
+        {isAdmin && 
+        <button
+          className="flex items-center gap-2 bg-slate-900 text-white text-[12px] font-bold rounded-xl px-4 py-2.5 hover:bg-slate-700 transition-colors cursor-pointer"
+          onClick={() => router.push("/dashboard/admin/add-employer")}
         >
           <Plus size={14} />
           Add Employee
-        </button>
+        </button>}
+
       </div>
     </div>
   );

@@ -12,12 +12,13 @@ import { RecentRequests } from "./RecentRequests";
 import { Card } from "./shared";
 import { TeamOverview } from "./TeamOverview";
 import { DashboardHeader } from "./DashboardHeader";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 // layout primitives
 
 export function EmployerDashboard() {
   const [showModal, setShowModal] = useState(false);
-
+  const { isAdmin } = useAuth()
   return (
     <div
       className="min-h-screen bg-slate-50 p-6"
@@ -29,9 +30,11 @@ export function EmployerDashboard() {
 
         <div className="grid grid-cols-12 gap-4">
 
-          <Card className="col-span-12 p-5">
-            <TeamOverview />
-          </Card>
+          {isAdmin &&
+            <Card className="col-span-12 p-5">
+              <TeamOverview />
+            </Card>
+          }
 
           <Card className="col-span-12 lg:col-span-5 p-5 min-h-[380px]">
             <CheckInPanel />
@@ -45,23 +48,29 @@ export function EmployerDashboard() {
             <Card className="p-5">
               <MilestonesWidget />
             </Card>
-            <Card className="p-5">
-              <QuickActions />
-            </Card>
+            {isAdmin &&
+              <Card className="p-5">
+                <QuickActions />
+              </Card>}
+
           </div>
 
           <Card className="col-span-12 p-5">
             <LeaveCarousel />
           </Card>
 
-          <Card className="col-span-12 lg:col-span-7 p-5 h-72">
-            <AttendanceChart />
-          </Card>
+          {isAdmin && (
+            <>
+              <Card className="col-span-12 lg:col-span-5 p-5 h-72">
+                <RecentRequests />
+              </Card>
 
-          <Card className="col-span-12 lg:col-span-5 p-5 h-72">
-            <RecentRequests />
-          </Card>
-
+              <Card className="col-span-12 lg:col-span-7 p-5 h-72">
+                <AttendanceChart />
+              </Card>
+            </>
+          )
+          }
         </div>
       </div>
 

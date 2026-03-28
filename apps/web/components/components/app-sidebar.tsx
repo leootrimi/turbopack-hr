@@ -59,9 +59,10 @@ const navItems = [
     title: "Calendar",
     icon: Monitor,
     items: [
-      { title: "My Meetings", url: `${BASE_PATH}/meetings/my` },
-      { title: "Company Meetings", url: `${BASE_PATH}/meetings` },
-      { title: "Meetings stats", url: `${BASE_PATH}/meetings/stats`},
+      { title: "My Meetings", url: `${BASE_PATH}/calendar/my` },
+      { title: "Company Meetings", url: `${BASE_PATH}/calendar` },
+      { title: "Who's out", url: `${BASE_PATH}/calendar/whos-out` },
+      { title: "Meetings stats", url: `${BASE_PATH}/calendar/stats`},
     ],
   },
   {

@@ -37,6 +37,7 @@ export function useUpdateLeaveRequestStatus() {
       queryClient.invalidateQueries({ queryKey: ["time-off"] });
       queryClient.invalidateQueries({ queryKey: ["time-off-balance"] });
       queryClient.invalidateQueries({ queryKey: ["time-off-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["time-off-calendar"] });
     },
   });
 }
