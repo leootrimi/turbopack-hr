@@ -12,8 +12,22 @@ import {
   users,
   announcements,
   timeOffBalance,
+  meetings,
+  meetingParticipants,
+  leaveRequests,
+  documents,
+  payments,
+  jobs,
 } from './schema';
 import { eq } from 'drizzle-orm';
+
+// Helper function to calculate dates relative to now
+const getDateWithOffset = (dayOffset: number, hours = 0, minutes = 0): Date => {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+};
 
 async function seed() {
   const pool = new Pool({
@@ -153,7 +167,7 @@ async function seed() {
         department: 'Engineering',
         teamId: engineering.id,
         employmentType: 'Full-time',
-        startDate: new Date(),
+        startDate: new Date('2023-01-15'),
         workLocation: 'Office',
       },
       {
@@ -162,7 +176,7 @@ async function seed() {
         department: 'Operations',
         teamId: operations.id,
         employmentType: 'Full-time',
-        startDate: new Date(),
+        startDate: new Date('2022-06-01'),
         workLocation: 'Hybrid',
       },
       {
@@ -171,7 +185,7 @@ async function seed() {
         department: 'Marketing',
         teamId: marketing.id,
         employmentType: 'Full-time',
-        startDate: new Date(),
+        startDate: new Date('2023-09-10'),
         workLocation: 'Remote',
       },
       {
@@ -180,7 +194,7 @@ async function seed() {
         department: 'HR',
         teamId: hr.id,
         employmentType: 'Full-time',
-        startDate: new Date(),
+        startDate: new Date('2021-03-20'),
         workLocation: 'Office',
       },
     ]);
@@ -258,11 +272,15 @@ async function seed() {
     console.log('🟢 Seeding Check-in Logs...');
 
     await db.insert(checkinLogs).values([
-      { employeeId: alice.id, checkinTime: new Date('2025-12-27T08:00:00Z') },
-      { employeeId: bob.id, checkinTime: new Date('2025-12-27T08:15:00Z') },
-      { employeeId: carol.id, checkinTime: new Date('2025-12-27T08:30:00Z') },
-      { employeeId: dave.id, checkinTime: new Date('2025-12-27T09:00:00Z') },
+      { employeeId: alice.id, checkinTime: getDateWithOffset(-1, 8, 0) },
+      { employeeId: bob.id, checkinTime: getDateWithOffset(-1, 8, 15) },
+      { employeeId: carol.id, checkinTime: getDateWithOffset(-1, 8, 30) },
+      { employeeId: dave.id, checkinTime: getDateWithOffset(-1, 9, 0) },
+      { employeeId: alice.id, checkinTime: getDateWithOffset(0, 8, 5) },
+      { employeeId: bob.id, checkinTime: getDateWithOffset(0, 8, 20) },
     ]);
+
+    console.log('🟢 Seeding Equipment...');
 
     const [laptop, monitor, phone] = await db
       .insert(equipment)
@@ -275,8 +293,10 @@ async function seed() {
           serialNumber: 'MBP16-001',
           assetTag: 'EQT-1001',
           description: 'Development laptop',
+          assignedTo: alice.id,
           location: 'Office',
           notes: 'Assigned to dev team',
+          assignmentDate: new Date('2023-01-20'),
         },
         {
           name: 'Dell UltraSharp',
@@ -296,7 +316,9 @@ async function seed() {
           serialNumber: 'IP15-001',
           assetTag: 'EQT-1003',
           description: 'Company phone',
+          assignedTo: carol.id,
           location: 'Remote',
+          assignmentDate: new Date('2023-11-01'),
         },
       ])
       .returning();
@@ -371,7 +393,534 @@ async function seed() {
       },
     ]);
 
+    console.log('🟢 Seeding Meetings (Past & Upcoming)...');
+
+    // Past meetings (completed)
+    const pastMeeting1 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Q3 Planning Review',
+          description: 'Quarterly review of Q3 goals and progress',
+          organizerId: alice.id,
+          startsAt: getDateWithOffset(-5, 10, 0),
+          durationMinutes: 60,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    const pastMeeting2 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Team Standup - Engineering',
+          description: 'Daily standup for engineering team',
+          organizerId: alice.id,
+          startsAt: getDateWithOffset(-2, 9, 30),
+          durationMinutes: 30,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    const pastMeeting3 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Operations Budget Meeting',
+          description: 'Discuss Q4 budget allocation for operations',
+          organizerId: bob.id,
+          startsAt: getDateWithOffset(-1, 14, 0),
+          durationMinutes: 45,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    // Upcoming meetings
+    const upcomingMeeting1 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Team Standup - Engineering',
+          description: 'Daily standup for engineering team',
+          organizerId: alice.id,
+          startsAt: getDateWithOffset(1, 9, 30),
+          durationMinutes: 30,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    const upcomingMeeting2 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Client Presentation - Marketing Strategy',
+          description: 'Present Q4 marketing strategy to client stakeholders',
+          organizerId: carol.id,
+          startsAt: getDateWithOffset(2, 11, 0),
+          durationMinutes: 90,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    const upcomingMeeting3 = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'HR Review - Annual Performance',
+          description: 'Annual performance review discussion',
+          organizerId: dave.id,
+          startsAt: getDateWithOffset(2, 14, 0),
+          durationMinutes: 60,
+          timezone: 'Europe/Berlin',
+          status: 'scheduled',
+        })
+        .returning()
+    )[0];
+
+    const canceledMeeting = (
+      await db
+        .insert(meetings)
+        .values({
+          title: 'Project Kickoff - Canceled',
+          description: 'This meeting was canceled',
+          organizerId: alice.id,
+          startsAt: getDateWithOffset(1, 15, 0),
+          durationMinutes: 120,
+          timezone: 'Europe/Berlin',
+          status: 'canceled',
+        })
+        .returning()
+    )[0];
+
+    console.log('🟢 Seeding Meeting Participants...');
+
+    await db.insert(meetingParticipants).values([
+      // Past meeting 1 participants
+      { meetingId: pastMeeting1.id, employeeId: alice.id },
+      { meetingId: pastMeeting1.id, employeeId: bob.id },
+      { meetingId: pastMeeting1.id, employeeId: carol.id },
+      // Past meeting 2 participants
+      { meetingId: pastMeeting2.id, employeeId: alice.id },
+      { meetingId: pastMeeting2.id, employeeId: bob.id },
+      // Past meeting 3 participants
+      { meetingId: pastMeeting3.id, employeeId: bob.id },
+      { meetingId: pastMeeting3.id, employeeId: alice.id },
+      // Upcoming meeting 1 participants
+      { meetingId: upcomingMeeting1.id, employeeId: alice.id },
+      { meetingId: upcomingMeeting1.id, employeeId: bob.id },
+      { meetingId: upcomingMeeting1.id, employeeId: dave.id },
+      // Upcoming meeting 2 participants
+      { meetingId: upcomingMeeting2.id, employeeId: carol.id },
+      { meetingId: upcomingMeeting2.id, employeeId: alice.id },
+      { meetingId: upcomingMeeting2.id, employeeId: bob.id },
+      // Upcoming meeting 3 participants
+      { meetingId: upcomingMeeting3.id, employeeId: dave.id },
+      { meetingId: upcomingMeeting3.id, employeeId: alice.id },
+      // Canceled meeting participants
+      { meetingId: canceledMeeting.id, employeeId: alice.id },
+      { meetingId: canceledMeeting.id, employeeId: carol.id },
+    ]);
+
+    console.log('🟢 Seeding Leave Requests (Past & Upcoming)...');
+
+    await db.insert(leaveRequests).values([
+      {
+        employeeId: alice.id,
+        type: 'Vacation',
+        startDate: getDateWithOffset(-10, 0, 0),
+        endDate: getDateWithOffset(-5, 23, 59),
+        days: '5.0',
+        reason: 'Family vacation to Italy',
+        status: 'Approved',
+        reviewedById: dave.id,
+        managerNote: 'Approved for Q3 vacation',
+      },
+      {
+        employeeId: bob.id,
+        type: 'Sick Leave',
+        startDate: getDateWithOffset(-3, 0, 0),
+        endDate: getDateWithOffset(-1, 23, 59),
+        days: '3.0',
+        reason: 'Medical appointment and recovery',
+        status: 'Approved',
+        reviewedById: dave.id,
+        managerNote: 'Get well soon!',
+      },
+      {
+        employeeId: carol.id,
+        type: 'Work From Home',
+        startDate: getDateWithOffset(1, 0, 0),
+        endDate: getDateWithOffset(2, 23, 59),
+        days: '2.0',
+        reason: 'Home office setup day',
+        status: 'Pending',
+      },
+      {
+        employeeId: dave.id,
+        type: 'Personal Day',
+        startDate: getDateWithOffset(5, 0, 0),
+        endDate: getDateWithOffset(5, 23, 59),
+        days: '1.0',
+        reason: 'Personal matters',
+        status: 'Pending',
+      },
+      {
+        employeeId: alice.id,
+        type: 'Marriage',
+        startDate: getDateWithOffset(30, 0, 0),
+        endDate: getDateWithOffset(32, 23, 59),
+        days: '3.0',
+        reason: 'Wedding day and honeymoon preparation',
+        status: 'Pending',
+      },
+      {
+        employeeId: bob.id,
+        type: 'Bereavement',
+        startDate: getDateWithOffset(-7, 0, 0),
+        endDate: getDateWithOffset(-4, 23, 59),
+        days: '3.0',
+        reason: 'Family bereavement',
+        status: 'Approved',
+        reviewedById: dave.id,
+        managerNote: 'Condolences to the family',
+      },
+    ]);
+
+    console.log('🟢 Seeding Documents...');
+
+    await db.insert(documents).values([
+      {
+        employeeId: alice.id,
+        name: 'Employment Contract',
+        type: 'PDF',
+        size: '2.4 MB',
+        url: '/documents/alice-employment-contract.pdf',
+        category: 'contracts',
+      },
+      {
+        employeeId: alice.id,
+        name: 'Health Insurance Certificate',
+        type: 'PDF',
+        size: '1.1 MB',
+        url: '/documents/alice-health-insurance.pdf',
+        category: 'health',
+      },
+      {
+        employeeId: bob.id,
+        name: 'Employment Contract',
+        type: 'PDF',
+        size: '2.4 MB',
+        url: '/documents/bob-employment-contract.pdf',
+        category: 'contracts',
+      },
+      {
+        employeeId: bob.id,
+        name: 'Additional Training Certificate',
+        type: 'PDF',
+        size: '0.8 MB',
+        url: '/documents/bob-training-certificate.pdf',
+        category: 'additional',
+      },
+      {
+        employeeId: carol.id,
+        name: 'Employment Contract',
+        type: 'PDF',
+        size: '2.4 MB',
+        url: '/documents/carol-employment-contract.pdf',
+        category: 'contracts',
+      },
+      {
+        employeeId: carol.id,
+        name: 'Health Insurance Certificate',
+        type: 'PDF',
+        size: '1.1 MB',
+        url: '/documents/carol-health-insurance.pdf',
+        category: 'health',
+      },
+      {
+        employeeId: carol.id,
+        name: 'Performance Review - Q2 2024',
+        type: 'DOCX',
+        size: '0.5 MB',
+        url: '/documents/carol-performance-review-q2.docx',
+        category: 'additional',
+      },
+      {
+        employeeId: dave.id,
+        name: 'Employment Contract',
+        type: 'PDF',
+        size: '2.4 MB',
+        url: '/documents/dave-employment-contract.pdf',
+        category: 'contracts',
+      },
+      {
+        employeeId: dave.id,
+        name: 'Health Insurance Certificate',
+        type: 'PDF',
+        size: '1.1 MB',
+        url: '/documents/dave-health-insurance.pdf',
+        category: 'health',
+      },
+      {
+        employeeId: dave.id,
+        name: 'HR Manager Certification',
+        type: 'PDF',
+        size: '3.2 MB',
+        url: '/documents/dave-hr-certification.pdf',
+        category: 'additional',
+      },
+    ]);
+
+    console.log('🟢 Seeding Payments...');
+
+    await db.insert(payments).values([
+      {
+        amount: '5000.00',
+        date: getDateWithOffset(-15, 0, 0),
+        vendor: 'Office Supplies Co',
+        category: 'Supplies',
+        description: 'Monthly office supplies including paper, pens, and desk accessories',
+        documentName: 'Invoice-OS-2024-12-001.pdf',
+        documentUrl: '/invoices/office-supplies-dec.pdf',
+        source: 'manual',
+        status: 'processed',
+      },
+      {
+        amount: '12000.00',
+        date: getDateWithOffset(-10, 0, 0),
+        vendor: 'Cloud Services Ltd',
+        category: 'IT Services',
+        description: 'Monthly cloud infrastructure and services subscription',
+        documentName: 'Invoice-CSL-2024-12-001.pdf',
+        documentUrl: '/invoices/cloud-services-dec.pdf',
+        source: 'upload',
+        status: 'processed',
+      },
+      {
+        amount: '3500.00',
+        date: getDateWithOffset(-5, 0, 0),
+        vendor: 'Training Academy',
+        category: 'Employee Development',
+        description: 'Employee training program for Q4 2024',
+        documentName: 'Invoice-TA-2024-12-001.pdf',
+        documentUrl: '/invoices/training-academy-dec.pdf',
+        source: 'upload',
+        status: 'processed',
+      },
+      {
+        amount: '8500.00',
+        date: getDateWithOffset(-2, 0, 0),
+        vendor: 'Facility Management Inc',
+        category: 'Facilities',
+        description: 'Office rent and maintenance for December',
+        documentName: 'Invoice-FMI-2024-12-001.pdf',
+        documentUrl: '/invoices/facilities-dec.pdf',
+        source: 'manual',
+        status: 'processed',
+      },
+      {
+        amount: '2200.00',
+        date: getDateWithOffset(0, 0, 0),
+        vendor: 'Marketing Tools Pro',
+        category: 'Marketing',
+        description: 'Marketing automation platform subscription',
+        documentName: 'Invoice-MTP-2025-01-001.pdf',
+        documentUrl: '/invoices/marketing-tools-jan.pdf',
+        source: 'upload',
+        status: 'pending',
+      },
+      {
+        amount: '4500.00',
+        date: getDateWithOffset(1, 0, 0),
+        vendor: 'Software Licenses Ltd',
+        category: 'Software',
+        description: 'Annual software licenses renewal',
+        documentName: 'Invoice-SLL-2025-01-001.pdf',
+        documentUrl: '/invoices/software-licenses-jan.pdf',
+        source: 'manual',
+        status: 'pending',
+      },
+      {
+        amount: '1800.00',
+        date: getDateWithOffset(3, 0, 0),
+        vendor: 'Catering Services',
+        category: 'Events',
+        description: 'Team lunch catering for team building event',
+        documentName: 'Invoice-CS-2025-01-001.pdf',
+        documentUrl: '/invoices/catering-jan.pdf',
+        source: 'manual',
+        status: 'pending',
+      },
+    ]);
+
+    console.log('🟢 Seeding Job Postings (Open & Closed)...');
+
+    await db.insert(jobs).values([
+      {
+        title: 'Senior Software Engineer',
+        department: 'Engineering',
+        location: 'Berlin, Germany',
+        locationType: 'Hybrid',
+        type: 'Full-time',
+        salary: '€55,000 - €75,000',
+        status: 'Open',
+        description:
+          'We are looking for an experienced Senior Software Engineer to join our engineering team. You will work on scalable backend systems and contribute to architectural decisions.',
+        responsibilities: [
+          'Design and implement scalable software solutions',
+          'Lead code reviews and mentor junior developers',
+          'Collaborate with product and design teams',
+          'Participate in architecture discussions',
+        ],
+        requirements: [
+          '5+ years of software development experience',
+          'Strong proficiency in backend technologies',
+          'Experience with cloud platforms (AWS, GCP, Azure)',
+          'Bachelor\'s degree in Computer Science or related field',
+        ],
+        niceToHave: [
+          'Experience with Kubernetes and containerization',
+          'Background in system design and architecture',
+          'Open source contributions',
+        ],
+        applicants: 12,
+        postedAt: getDateWithOffset(-30, 9, 0),
+      },
+      {
+        title: 'Marketing Manager',
+        department: 'Marketing',
+        location: 'Berlin, Germany',
+        locationType: 'Remote',
+        type: 'Full-time',
+        salary: '€45,000 - €60,000',
+        status: 'Open',
+        description:
+          'Join our marketing team as a Marketing Manager. You will oversee marketing campaigns, strategy development, and lead a small team of marketing professionals.',
+        responsibilities: [
+          'Develop and execute marketing strategies',
+          'Manage marketing budget and campaigns',
+          'Lead marketing team and coordinate with other departments',
+          'Analyze marketing metrics and optimize campaigns',
+        ],
+        requirements: [
+          '3+ years of marketing experience',
+          'Strong analytical and communication skills',
+          'Experience with marketing automation tools',
+          'Degree in Marketing, Business or related field',
+        ],
+        niceToHave: [
+          'Experience with SEO and SEM',
+          'Knowledge of analytics tools',
+          'Track record of successful campaigns',
+        ],
+        applicants: 8,
+        postedAt: getDateWithOffset(-15, 10, 0),
+      },
+      {
+        title: 'Operations Associate',
+        department: 'Operations',
+        location: 'Munich, Germany',
+        locationType: 'Hybrid',
+        type: 'Full-time',
+        salary: '€30,000 - €40,000',
+        status: 'Open',
+        description:
+          'We are seeking an Operations Associate to support our daily operations. This role involves process optimization, vendor management, and administrative coordination.',
+        responsibilities: [
+          'Support operational processes and procedures',
+          'Manage vendor relationships and contracts',
+          'Coordinate logistics and supply chain activities',
+          'Prepare operational reports and analysis',
+        ],
+        requirements: [
+          '2+ years of operations or business operations experience',
+          'Strong organizational and communication skills',
+          'Proficiency with ERP systems',
+        ],
+        niceToHave: [
+          'Lean Six Sigma certification',
+          'Experience with SAP',
+          'Project management experience',
+        ],
+        applicants: 5,
+        postedAt: getDateWithOffset(-7, 11, 0),
+      },
+      {
+        title: 'Python Developer',
+        department: 'Engineering',
+        location: 'Remote',
+        locationType: 'Remote',
+        type: 'Full-time',
+        salary: '€50,000 - €70,000',
+        status: 'Closed',
+        description:
+          'We have successfully filled this position. Thank you to all applicants.',
+        responsibilities: [],
+        requirements: [],
+        niceToHave: [],
+        applicants: 25,
+        postedAt: getDateWithOffset(-60, 8, 0),
+        closedAt: getDateWithOffset(-5, 17, 0),
+      },
+      {
+        title: 'UX/UI Designer',
+        department: 'Engineering',
+        location: 'Berlin, Germany',
+        locationType: 'Hybrid',
+        type: 'Full-time',
+        salary: '€40,000 - €55,000',
+        status: 'Open',
+        description:
+          'We are looking for a talented UX/UI Designer to create intuitive and beautiful user interfaces for our products.',
+        responsibilities: [
+          'Design user interfaces for web and mobile applications',
+          'Conduct user research and usability testing',
+          'Create wireframes, mockups, and prototypes',
+          'Collaborate with developers and product managers',
+        ],
+        requirements: [
+          '3+ years of UX/UI design experience',
+          'Proficiency with design tools (Figma, Adobe XD, etc.)',
+          'Strong portfolio demonstrating design skills',
+          'Understanding of user-centered design principles',
+        ],
+        niceToHave: [
+          'Experience with design systems',
+          'Knowledge of web technologies (HTML, CSS, JavaScript)',
+          'Experience with user testing tools',
+        ],
+        applicants: 15,
+        postedAt: getDateWithOffset(-20, 10, 0),
+      },
+    ]);
+
     console.log('✅ Seeding complete!');
+    console.log('📊 Summary:');
+    console.log('   - 4 Teams seeded');
+    console.log('   - 4 Employees seeded');
+    console.log('   - 4 Users seeded');
+    console.log('   - 4 Job Info records seeded');
+    console.log('   - 4 Compensation records seeded');
+    console.log('   - 4 Time Off Balance records seeded');
+    console.log('   - 6 Check-in Logs seeded');
+    console.log('   - 3 Equipment items seeded with 3 Purchase Info records');
+    console.log('   - 5 Announcements seeded');
+    console.log('   - 5 Meetings seeded (4 past/upcoming, 1 canceled)');
+    console.log('   - 16 Meeting Participants seeded');
+    console.log('   - 6 Leave Requests seeded');
+    console.log('   - 10 Documents seeded');
+    console.log('   - 7 Payments seeded');
+    console.log('   - 5 Job Postings seeded (4 open, 1 closed)');
   } catch (err) {
     console.error('❌ Seeding failed:', err);
     throw err;
