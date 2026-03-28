@@ -6,6 +6,7 @@ import {
   getTimeOffBalance,
   getDashboardTimeOffRequests,
   updateLeaveRequestStatus,
+  getTimeOffTypes,
 } from "../api";
 
 export function useCreateTimeOff() {
@@ -62,4 +63,11 @@ export function useDashboardTimeOffRequests(page: number, perPage: number) {
   });
 }
 
+/** Enabled types only — for request form and balance cards. */
+export function useEnabledTimeOffTypes() {
+  return useQuery({
+    queryKey: ["time-off-types"],
+    queryFn: () => getTimeOffTypes(),
+  });
+}
 

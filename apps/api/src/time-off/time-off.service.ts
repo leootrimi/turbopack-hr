@@ -8,10 +8,14 @@ import {
 } from 'src/database/schema';
 import { desc, eq, sql, and } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
+import { TimeOffTypesService } from './time-off-types.service';
 
 @Injectable()
 export class TimeOffService {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(
+    private readonly drizzle: DrizzleService,
+    private readonly timeOffTypesService: TimeOffTypesService,
+  ) {}
 
   async getDashboardRequests(
     userId: number,
@@ -190,6 +194,8 @@ export class TimeOffService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    await this.timeOffTypesService.assertTypeAllowedForRequest(dto.type);
 
     const [newRequest] = await this.drizzle.db
       .insert(leaveRequests)

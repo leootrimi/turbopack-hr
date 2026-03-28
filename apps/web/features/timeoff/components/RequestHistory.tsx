@@ -1,4 +1,4 @@
-import { STATUS_CONFIG, LEAVE_CONFIG } from "./mock";
+import { STATUS_CONFIG, getLeaveTypeConfig } from "./mock";
 import { CalendarDays, User, MessageSquare, Clock, Loader2 } from "lucide-react";
 import { LeaveRequest } from "../api";
 import { useTimeOffRequests } from "../hooks/use-time-off";
@@ -32,7 +32,7 @@ function toDateKey(d: string | Date): string {
 }
 
 function RequestCard({ req }: { req: LeaveRequest }) {
-  const cfg    = LEAVE_CONFIG[req.type as keyof typeof LEAVE_CONFIG] || LEAVE_CONFIG["Vacation"];
+  const cfg = getLeaveTypeConfig(req.type);
   const status = STATUS_CONFIG[req.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG["Pending"];
 
   return (

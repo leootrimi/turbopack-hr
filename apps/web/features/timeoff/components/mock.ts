@@ -1,3 +1,4 @@
+/** @deprecated Prefer dynamic types from API; kept for styling presets. */
 export type LeaveType =
   | "Vacation"
   | "Work From Home"
@@ -19,7 +20,7 @@ export interface TimeOffBalanceApi {
 }
 
 export interface LeaveBalance {
-  type: LeaveType;
+  type: string;
   total: number;
   used: number;
   color: string;
@@ -39,7 +40,7 @@ const UNTRACKED_BALANCE = { total: 9999, used: 0 };
  */
 export function getBalanceForLeaveType(
   row: TimeOffBalanceApi | undefined,
-  type: LeaveType,
+  type: string,
 ): { total: number; used: number } {
   if (!row) return { ...UNTRACKED_BALANCE };
   switch (type) {
@@ -65,7 +66,7 @@ export function getBalanceForLeaveType(
 
 export interface LeaveRequest {
   id: string;
-  type: LeaveType;
+  type: string;
   startDate: string;
   endDate: string;
   days: number;
@@ -86,15 +87,39 @@ export const LEAVE_CONFIG: Record<LeaveType, { color: string; bg: string; text: 
   "Unpaid":         { color: "#94a3b8", bg: "#f8fafc", text: "#475569", icon: "📋", description: "Unpaid leave of absence" },
 };
 
-/** Build sidebar cards: one entry per configured leave type, totals from DB where applicable. */
-export function buildLeaveBalancesFromApi(row: TimeOffBalanceApi | undefined): LeaveBalance[] {
-  return (Object.keys(LEAVE_CONFIG) as LeaveType[]).map((type) => {
+const FALLBACK_LEAVE_STYLE = {
+  color: "#64748b",
+  bg: "#f8fafc",
+  text: "#334155",
+  icon: "📋",
+  description: "Time off",
+} as const;
+
+export function getLeaveTypeConfig(typeName: string): {
+  color: string;
+  bg: string;
+  text: string;
+  icon: string;
+  description: string;
+} {
+  if (Object.prototype.hasOwnProperty.call(LEAVE_CONFIG, typeName)) {
+    return LEAVE_CONFIG[typeName as LeaveType];
+  }
+  return { ...FALLBACK_LEAVE_STYLE, description: typeName };
+}
+
+/** Build sidebar cards for the given type names (from API), totals from DB where applicable. */
+export function buildLeaveBalancesFromApi(
+  row: TimeOffBalanceApi | undefined,
+  typeNames: string[],
+): LeaveBalance[] {
+  return typeNames.map((type) => {
     const { total, used } = getBalanceForLeaveType(row, type);
     return {
       type,
       total,
       used,
-      color: LEAVE_CONFIG[type].color,
+      color: getLeaveTypeConfig(type).color,
     };
   });
 }

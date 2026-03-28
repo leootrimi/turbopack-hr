@@ -1,4 +1,4 @@
-import { LeaveBalance, LEAVE_CONFIG } from "./mock";
+import { LeaveBalance, getLeaveTypeConfig } from "./mock";
 
 interface Props {
   balance: LeaveBalance;
@@ -8,7 +8,7 @@ export function BalanceCard({ balance }: Props) {
   const { type, total, used, color } = balance;
   const remaining = total - used;
   const pct = Math.round((used / total) * 100);
-  const cfg = LEAVE_CONFIG[type];
+  const cfg = getLeaveTypeConfig(type);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">

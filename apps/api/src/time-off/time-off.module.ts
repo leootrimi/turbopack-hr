@@ -2,12 +2,18 @@ import { Module } from '@nestjs/common';
 import { TimeOffService } from './time-off.service';
 import { TimeOffController } from './time-off.controller';
 import { TimeOffDashboardController } from './time-off-dashboard.controller';
+import { TimeOffTypesController } from './time-off-types.controller';
+import { TimeOffTypesService } from './time-off-types.service';
 import { DrizzleModule } from 'src/database/drizzle.module';
 
 @Module({
   imports: [DrizzleModule],
-  controllers: [TimeOffController, TimeOffDashboardController],
-  providers: [TimeOffService],
-  exports: [TimeOffService],
+  controllers: [
+    TimeOffController,
+    TimeOffDashboardController,
+    TimeOffTypesController,
+  ],
+  providers: [TimeOffService, TimeOffTypesService],
+  exports: [TimeOffService, TimeOffTypesService],
 })
 export class TimeOffModule {}

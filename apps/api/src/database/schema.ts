@@ -191,28 +191,28 @@ export const announcements = pgTable('announcements', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
-export const leaveTypeEnum = pgEnum('leave_type', [
-  'Vacation',
-  'Work From Home',
-  'Sick Leave',
-  'Marriage',
-  'Bereavement',
-  'Unpaid',
-  'Personal Day',
-]);
-
 export const leaveRequestStatusEnum = pgEnum('leave_request_status', [
   'Pending',
   'Approved',
   'Rejected',
 ]);
 
+export const timeOffTypes = pgTable('time_off_types', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 128 }).notNull().unique(),
+  defaultValue: numeric('default_value', { precision: 8, scale: 2 })
+    .default('0')
+    .notNull(),
+  enabled: boolean('enabled').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export const leaveRequests = pgTable('leave_requests', {
   id: serial('id').primaryKey(),
   employeeId: integer('employee_id')
     .notNull()
     .references(() => employee.id, { onDelete: 'cascade' }),
-  type: leaveTypeEnum('type').notNull(),
+  type: varchar('type', { length: 128 }).notNull(),
   startDate: timestamp('start_date').notNull(),
   endDate: timestamp('end_date').notNull(),
   days: numeric('days', { precision: 4, scale: 1 }).notNull(),

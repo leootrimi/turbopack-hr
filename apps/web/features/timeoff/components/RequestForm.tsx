@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Calendar, FileText, User, CheckCircle, AlertCircle, Upload, X, Clock, Send } from "lucide-react";
-import { LeaveType, LEAVE_CONFIG, getBalanceForLeaveType } from "./mock";
-import { useCreateTimeOff, useTimeOffBalance } from "../hooks/use-time-off";
+import { getLeaveTypeConfig, getBalanceForLeaveType } from "./mock";
+import { useCreateTimeOff, useTimeOffBalance, useEnabledTimeOffTypes } from "../hooks/use-time-off";
 
 interface FormState {
-  type: LeaveType;
+  type: string;
   startDate: string;
   endDate: string;
   reason: string;
@@ -18,8 +18,6 @@ interface FormState {
 interface Props {
   onSubmit: (data: FormState & { days: number }) => void;
 }
-
-const TYPES = Object.keys(LEAVE_CONFIG) as LeaveType[];
 
 function countWorkdays(start: string, end: string): number {
   if (!start || !end) return 0;
@@ -45,10 +43,11 @@ export function RequestForm({ onSubmit }: Props) {
   const today = new Date().toISOString().split("T")[0];
   const { mutate: createRequest, isPending: submitting } = useCreateTimeOff();
   const { data: balanceRow } = useTimeOffBalance();
+  const { data: timeOffTypes, isLoading: typesLoading } = useEnabledTimeOffTypes();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>({
-    type: "Vacation",
+    type: "",
     startDate: "",
     endDate: "",
     reason: "",
@@ -63,13 +62,28 @@ export function RequestForm({ onSubmit }: Props) {
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  useEffect(() => {
+    const list = timeOffTypes;
+    const first = list?.[0];
+    if (!list?.length || !first) return;
+    setForm((f) => {
+      if (list.some((t) => t.name === f.type)) return f;
+      return { ...f, type: first.name };
+    });
+  }, [timeOffTypes]);
+
   const days = form.halfDay ? 0.5 : countWorkdays(form.startDate, form.endDate);
   const balance = getBalanceForLeaveType(balanceRow, form.type);
   const remaining = balance.total - balance.used;
-  const cfg = LEAVE_CONFIG[form.type];
+  const cfg = getLeaveTypeConfig(form.type);
   const overLimit = days > remaining;
-  const needsCert = form.type === "Sick Leave" && days > 2;
-  const isValid = form.startDate && form.endDate && !overLimit && days > 0;
+  const needsCert = /sick/i.test(form.type) && days > 2;
+  const isValid =
+    form.type &&
+    form.startDate &&
+    form.endDate &&
+    !overLimit &&
+    days > 0;
 
   const handleSubmit = () => {
     if (!isValid) return;
@@ -81,13 +95,14 @@ export function RequestForm({ onSubmit }: Props) {
         attachmentName: selectedFile?.name,
       },
       {
-        onSuccess: () => {
+          onSuccess: () => {
           onSubmit({ ...form, days, attachmentName: selectedFile?.name });
           setSubmitted(true);
           setTimeout(() => {
             setSubmitted(false);
+            const first = timeOffTypes?.[0]?.name ?? "";
             setForm({
-              type: "Vacation",
+              type: first,
               startDate: "",
               endDate: "",
               reason: "",
@@ -120,6 +135,23 @@ export function RequestForm({ onSubmit }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  if (typesLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <div className="w-8 h-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+        <p className="text-sm text-slate-500 font-medium">Loading leave types…</p>
+      </div>
+    );
+  }
+
+  if (!timeOffTypes?.length) {
+    return (
+      <div className="rounded-xl border border-amber-100 bg-amber-50/80 p-4 text-sm text-amber-900">
+        No time off types are available. Contact HR to configure leave types in Settings.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -133,14 +165,15 @@ export function RequestForm({ onSubmit }: Props) {
           <User size={12} className="text-slate-400" />
           Leave Type
         </label>
-        <div className="grid grid-cols-3 gap-3">
-          {TYPES.map((t) => {
-            const active = form.type === t;
-            const typeConfig = LEAVE_CONFIG[t];
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {timeOffTypes.map((t) => {
+            const active = form.type === t.name;
+            const typeConfig = getLeaveTypeConfig(t.name);
             return (
               <button
-                key={t}
-                onClick={() => set("type", t)}
+                key={t.id}
+                type="button"
+                onClick={() => set("type", t.name)}
                 className={`
                   group relative p-3 rounded-xl text-left transition-all duration-200
                   ${active 
@@ -152,7 +185,7 @@ export function RequestForm({ onSubmit }: Props) {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">{typeConfig.icon}</span>
                   <span className={`text-sm font-medium ${active ? 'text-slate-800' : 'text-slate-600'}`}>
-                    {t}
+                    {t.name}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 line-clamp-1">
@@ -316,7 +349,7 @@ export function RequestForm({ onSubmit }: Props) {
       </div>
 
       {/* File Upload - Modern Drag & Drop Style */}
-      {form.type === "Sick Leave" && (
+      {/sick/i.test(form.type) && (
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-slate-700 flex items-center gap-1">
             <Upload size={12} className="text-slate-400" />

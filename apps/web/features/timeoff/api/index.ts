@@ -89,4 +89,50 @@ export const updateLeaveRequestStatus = async (
   });
 };
 
+export interface TimeOffTypeDTO {
+  id: number;
+  name: string;
+  defaultValue: number;
+  enabled: boolean;
+  createdAt?: string;
+}
+
+export const getTimeOffTypes = async (options?: { all?: boolean }) => {
+  return makeRequest<TimeOffTypeDTO[]>({
+    url: "/time-off/types",
+    method: "GET",
+    params: options?.all ? { all: "true" } : undefined,
+  });
+};
+
+export const createTimeOffType = async (data: {
+  name: string;
+  defaultValue: number;
+  enabled: boolean;
+}) => {
+  return makeRequest<TimeOffTypeDTO>({
+    url: "/time-off/types",
+    method: "POST",
+    data,
+  });
+};
+
+export const updateTimeOffType = async (
+  id: number,
+  data: { name?: string; defaultValue?: number; enabled?: boolean },
+) => {
+  return makeRequest<TimeOffTypeDTO>({
+    url: `/time-off/types/${id}`,
+    method: "PATCH",
+    data,
+  });
+};
+
+export const deleteTimeOffType = async (id: number) => {
+  return makeRequest<void>({
+    url: `/time-off/types/${id}`,
+    method: "DELETE",
+  });
+};
+
 

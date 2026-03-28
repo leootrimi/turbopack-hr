@@ -6,7 +6,11 @@ import { BalanceCard }    from "./components/BalanceCard";
 import { RequestForm }    from "./components/RequestForm";
 import { RequestHistory } from "./components/RequestHistory";
 import { buildLeaveBalancesFromApi } from "./components/mock";
-import { useTimeOffRequests, useTimeOffBalance } from "./hooks/use-time-off";
+import {
+  useTimeOffRequests,
+  useTimeOffBalance,
+  useEnabledTimeOffTypes,
+} from "./hooks/use-time-off";
 
 type Tab = "request" | "history";
 
@@ -14,7 +18,9 @@ export function TimeOffPage() {
   const [tab, setTab] = useState<Tab>("request");
   const { data: requests, isLoading } = useTimeOffRequests();
   const { data: balanceRow, isLoading: balanceLoading } = useTimeOffBalance();
-  const leaveBalances = buildLeaveBalancesFromApi(balanceRow);
+  const { data: timeOffTypes, isLoading: typesLoading } = useEnabledTimeOffTypes();
+  const typeNames = timeOffTypes?.map((t) => t.name) ?? [];
+  const leaveBalances = buildLeaveBalancesFromApi(balanceRow, typeNames);
 
   const handleSubmit = () => {
     setTab("history");
@@ -104,7 +110,7 @@ export function TimeOffPage() {
               <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Balances</h2>
               <div className="flex-1 h-px bg-slate-100" />
             </div>
-            {balanceLoading ? (
+            {balanceLoading || typesLoading ? (
               <p className="text-xs text-slate-400 px-1">Loading balances…</p>
             ) : (
               leaveBalances.map((b) => (

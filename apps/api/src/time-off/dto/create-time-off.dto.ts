@@ -1,12 +1,6 @@
 export class CreateTimeOffDto {
-  type:
-    | 'Vacation'
-    | 'Work From Home'
-    | 'Sick Leave'
-    | 'Personal Day'
-    | 'Marriage'
-    | 'Bereavement'
-    | 'Unpaid';
+  /** Must match an enabled row in `time_off_types`. */
+  type!: string;
   startDate: string;
   endDate: string;
   days: number;
