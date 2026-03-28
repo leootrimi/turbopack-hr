@@ -77,10 +77,8 @@ const navItems = [
     icon: ShieldCheck,
     items: [
       { title: "Settings",       url: `${BASE_PATH}/admin/settings` },
-      { title: "Access Control", url: `${BASE_PATH}/admin/access`   },
       { title: "Check-ins",      url: `${BASE_PATH}/admin/check-in` },
       { title: "Payments",    url: `${BASE_PATH}/admin/payments`},
-      { title: "System Logs",    url: `${BASE_PATH}/admin/logs`     },
       { title: "Announcements",    url: `${BASE_PATH}/admin/announcements`},
       { title: "Positions/Jobs",    url: `${BASE_PATH}/admin/jobs`},
     ],
