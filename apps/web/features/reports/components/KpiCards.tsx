@@ -1,7 +1,7 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
-import { kpis } from "./mock";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import type { KpiItem } from "../api";
 
-export function KpiCards() {
+export function KpiCards({ kpis }: { kpis: KpiItem[] }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {kpis.map((kpi) => (
@@ -14,14 +14,20 @@ export function KpiCards() {
             {kpi.value}
           </p>
           <div className="flex items-center gap-1.5 mt-2">
-            {kpi.deltaType === "up" ? (
+            {kpi.deltaType === "neutral" ? (
+              <Minus size={13} className="text-slate-400" />
+            ) : kpi.deltaType === "up" ? (
               <TrendingUp size={13} className="text-emerald-500" />
             ) : (
               <TrendingDown size={13} className="text-red-400" />
             )}
             <span
               className={`text-xs font-semibold ${
-                kpi.deltaType === "up" ? "text-emerald-600" : "text-red-500"
+                kpi.deltaType === "neutral"
+                  ? "text-slate-500"
+                  : kpi.deltaType === "up"
+                    ? "text-emerald-600"
+                    : "text-red-500"
               }`}
             >
               {kpi.delta}

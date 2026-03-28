@@ -12,7 +12,11 @@ import {
   CartesianGrid,
   Cell,
 } from "recharts";
-import { headcountByTeam, headcountGrowth, turnoverData } from "./mock";
+import type {
+  HeadcountGrowthRow,
+  HeadcountTeamRow,
+  TurnoverRow,
+} from "../api";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -40,7 +44,9 @@ function ChartCard({
   className?: string;
 }) {
   return (
-    <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm p-5 ${className}`}>
+    <div
+      className={`bg-white rounded-2xl border border-slate-100 shadow-sm p-5 ${className}`}
+    >
       <p className="text-sm font-semibold text-slate-800">{title}</p>
       {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
       <div className="mt-4">{children}</div>
@@ -48,47 +54,74 @@ function ChartCard({
   );
 }
 
-export function UserStatistics() {
+export function UserStatistics({
+  headcountByTeam,
+  headcountGrowth,
+  turnoverData,
+}: {
+  headcountByTeam: HeadcountTeamRow[];
+  headcountGrowth: HeadcountGrowthRow[];
+  turnoverData: TurnoverRow[];
+}) {
+  const counts = headcountGrowth.map((g) => g.count);
+  const minC = counts.length ? Math.min(...counts) : 0;
+  const maxC = counts.length ? Math.max(...counts) : 1;
+  const pad = Math.max(1, Math.ceil((maxC - minC) * 0.1));
+
   return (
     <section className="space-y-3">
       <h2 className="text-base font-bold text-slate-800">User Statistics</h2>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-
-        {/* Headcount by team */}
-        <ChartCard title="Headcount by Team" subtitle="Current employees per department">
-          <ResponsiveContainer width="100%" height={190}>
-            <BarChart
-              data={headcountByTeam}
-              layout="vertical"
-              barSize={12}
-              margin={{ left: 10 }}
-            >
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="team"
-                tick={{ fontSize: 11, fill: "#94a3b8" }}
-                axisLine={false}
-                tickLine={false}
-                width={72}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc" }} />
-              <Bar dataKey="count" name="Employees" radius={[0, 4, 4, 0]}>
-                {headcountByTeam.map((entry, i) => (
-                  <Cell key={i} fill={entry.fill} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <ChartCard
+          title="Headcount by Department"
+          subtitle="Employees with job info (top 8)"
+        >
+          {headcountByTeam.length === 0 ? (
+            <p className="text-xs text-slate-400 py-8 text-center">
+              No department data yet.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={190}>
+              <BarChart
+                data={headcountByTeam}
+                layout="vertical"
+                barSize={12}
+                margin={{ left: 10 }}
+              >
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="team"
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={100}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc" }} />
+                <Bar dataKey="count" name="Employees" radius={[0, 4, 4, 0]}>
+                  {headcountByTeam.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </ChartCard>
 
-        {/* Headcount growth */}
-        <ChartCard title="Headcount Growth" subtitle="Total employees over 6 months">
+        <ChartCard
+          title="Headcount Growth"
+          subtitle="Cumulative employees (by account created date)"
+        >
           <ResponsiveContainer width="100%" height={190}>
             <LineChart data={headcountGrowth}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis domain={[28, 46]} hide />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis domain={[Math.max(0, minC - pad), maxC + pad]} hide />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
@@ -103,23 +136,32 @@ export function UserStatistics() {
           </ResponsiveContainer>
         </ChartCard>
 
-        {/* Turnover */}
-        <ChartCard title="Joiners vs Leavers" subtitle="Monthly movement">
+        <ChartCard title="Joiners vs Leavers" subtitle="Per month (joins from employee record; exits from job end date)">
           <ResponsiveContainer width="100%" height={190}>
             <BarChart data={turnoverData} barSize={10} barGap={3}>
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc" }} />
               <Bar dataKey="joined" name="Joined" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="left"   name="Left"   fill="#fca5a5" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="left" name="Left" fill="#fca5a5" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
           <div className="flex gap-4 mt-2">
-            <span className="flex items-center gap-1.5 text-[11px] text-slate-500"><span className="w-2 h-2 rounded-sm bg-indigo-500 inline-block" />Joined</span>
-            <span className="flex items-center gap-1.5 text-[11px] text-slate-500"><span className="w-2 h-2 rounded-sm bg-red-300 inline-block" />Left</span>
+            <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+              <span className="w-2 h-2 rounded-sm bg-indigo-500 inline-block" />
+              Joined
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
+              <span className="w-2 h-2 rounded-sm bg-red-300 inline-block" />
+              Left
+            </span>
           </div>
         </ChartCard>
-
       </div>
     </section>
   );
