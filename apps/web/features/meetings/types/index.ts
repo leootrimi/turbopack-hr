@@ -102,6 +102,8 @@ export interface Meeting {
   recurrence?: RecurrenceConfig;
   /** Availability and conflict information */
   availability?: AvailabilityInfo;
+  /** Quick flag for table rows (scheduling conflict); prefer `availability` when detailed */
+  hasConflict?: boolean;
   /** Meeting notes or transcript */
   notes?: string;
   /** Attachments or file references */
@@ -143,6 +145,8 @@ export interface CreateMeetingFormData {
   recurrenceConfig?: RecurrenceConfig;
   /** Selected participants */
   participants?: Participant[];
+  /** Employee IDs to invite (organizer is added automatically on the server). */
+  participantEmployeeIds?: number[];
   /** Meeting location */
   location?: string;
 }

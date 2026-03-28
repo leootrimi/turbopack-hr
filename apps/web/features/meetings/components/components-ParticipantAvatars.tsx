@@ -22,7 +22,7 @@ const ParticipantAvatars = ({ participants }: { participants: Participant[] }) =
       <div className="flex -space-x-2">
         {displayed.map((participant, index) => (
           <div
-            key={index}
+            key={participant.id ?? `${participant.name}-${index}`}
             className={`w-7 h-7 rounded-full ${colors[index % colors.length]} text-white flex items-center justify-center text-xs font-semibold border-2 border-white shadow-sm`}
             title={participant.name}
           >

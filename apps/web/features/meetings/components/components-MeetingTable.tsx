@@ -1,85 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Eye, Edit2, Trash2, Users, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { Eye, Edit2, Trash2, AlertCircle, Loader2 } from 'lucide-react';
 import ParticipantAvatars from './components-ParticipantAvatars';
 import StatusBadge from './components-StatusBadge';
 import { Meeting } from '../types';
 import { formatDate } from '@/lib/utils';
 
 interface MeetingTableProps {
+  meetings: Meeting[];
+  isLoading?: boolean;
+  isDeleting?: boolean;
   onView: (meeting: Meeting) => void;
   onEdit: (meeting: Meeting) => void;
   onDelete: (meetingId: number) => void;
 }
 
-const MeetingTable = ({ onView, onEdit, onDelete }: MeetingTableProps) => {
-  const [meetings] = useState([
-    {
-      id: 1,
-      title: 'Q1 Planning Session',
-      date: '2024-04-15',
-      time: '10:00 AM',
-      status: 'upcoming',
-      participants: [
-        { name: 'Sarah Chen', initial: 'SC' },
-        { name: 'Mike Johnson', initial: 'MJ' },
-        { name: 'Emma Wilson', initial: 'EW' },
-      ],
-      hasConflict: false,
-    },
-    {
-      id: 2,
-      title: 'Team Sync - Engineering',
-      date: '2024-04-16',
-      time: '2:00 PM',
-      status: 'upcoming',
-      participants: [
-        { name: 'Alex Kumar', initial: 'AK' },
-        { name: 'Jessica Lee', initial: 'JL' },
-      ],
-      hasConflict: true,
-    },
-    {
-      id: 3,
-      title: 'Client Presentation - Acme Corp',
-      date: '2024-04-10',
-      time: '3:30 PM',
-      status: 'completed',
-      participants: [
-        { name: 'Robert Brown', initial: 'RB' },
-        { name: 'Lisa Garcia', initial: 'LG' },
-        { name: 'Tom White', initial: 'TW' },
-        { name: 'Anna Davis', initial: 'AD' },
-      ],
-      hasConflict: false,
-    },
-    {
-      id: 4,
-      title: 'Budget Review',
-      date: '2024-04-05',
-      time: '11:00 AM',
-      status: 'canceled',
-      participants: [
-        { name: 'David Park', initial: 'DP' },
-        { name: 'Nina Patel', initial: 'NP' },
-      ],
-      hasConflict: false,
-    },
-    {
-      id: 5,
-      title: 'Design Sprint Kickoff',
-      date: '2024-04-18',
-      time: '9:00 AM',
-      status: 'upcoming',
-      participants: [
-        { name: 'Sophie Turner', initial: 'ST' },
-        { name: 'Mark Hansen', initial: 'MH' },
-      ],
-      hasConflict: false,
-    },
-  ]);
+const MeetingTable = ({
+  meetings,
+  isLoading,
+  isDeleting,
+  onView,
+  onEdit,
+  onDelete,
+}: MeetingTableProps) => {
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-slate-200/50 bg-white/70 backdrop-blur-sm p-12 flex flex-col items-center justify-center gap-3">
+        <Loader2 className="animate-spin text-indigo-500" size={28} />
+        <p className="text-sm text-slate-500">Loading meetings…</p>
+      </div>
+    );
+  }
 
+  if (meetings.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-200/50 bg-white/70 backdrop-blur-sm p-12 text-center text-sm text-slate-500">
+        No meetings yet. Create one to get started.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-slate-200/50 bg-white/70 backdrop-blur-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -105,9 +65,9 @@ const MeetingTable = ({ onView, onEdit, onDelete }: MeetingTableProps) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {meetings.map((meeting, index) => (
+            {meetings.map((meeting) => (
               <tr
-                key={meeting.id}
+                key={String(meeting.id)}
                 className="hover:bg-slate-50/50 transition-colors duration-150 group"
               >
                 <td className="px-6 py-4">
@@ -142,25 +102,29 @@ const MeetingTable = ({ onView, onEdit, onDelete }: MeetingTableProps) => {
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
-                      onClick={() => onView(meeting as Meeting)}
+                      type="button"
+                      onClick={() => onView(meeting)}
                       className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
                       title="View details"
                     >
                       <Eye size={16} />
                     </button>
                     <button
-                      onClick={() => onEdit(meeting as Meeting)}
+                      type="button"
+                      onClick={() => onEdit(meeting)}
                       className="p-2 rounded-lg hover:bg-indigo-100 text-indigo-600 transition-colors"
                       title="Edit meeting"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
-                      onClick={() => onDelete(meeting.id)}
-                      className="p-2 rounded-lg hover:bg-rose-100 text-rose-600 transition-colors"
+                      type="button"
+                      onClick={() => onDelete(Number(meeting.id))}
+                      disabled={isDeleting}
+                      className="p-2 rounded-lg hover:bg-rose-100 text-rose-600 transition-colors disabled:opacity-50"
                       title="Delete meeting"
                     >
-                      <Trash2 size={16} />  
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </td>

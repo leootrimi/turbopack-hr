@@ -1,10 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Calendar, Clock, Globe, RotateCw } from 'lucide-react';
+import { X, Calendar, Clock, Globe, RotateCw, Users } from 'lucide-react';
 import { CreateMeetingFormData } from '../types';
+import { useEmployees } from '../../employees/hooks/queries';
 
 const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (formData: CreateMeetingFormData) => void }) => {
+  const { data: employees = [], isLoading: employeesLoading } = useEmployees();
+  const [participantEmployeeIds, setParticipantEmployeeIds] = useState<number[]>([]);
+
   const [formData, setFormData] = useState({
     title: '',
     date: '',
@@ -15,7 +19,7 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
     description: '',
   });
 
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const timezones = [
     'UTC',
@@ -54,13 +58,23 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
   };
 
   const handleTimeSelect = (time: string) => {
-    setSelectedTime(time as any);
+    setSelectedTime(time);
     setFormData((prev) => ({ ...prev, time }));
+  };
+
+  const toggleParticipant = (id: number) => {
+    setParticipantEmployeeIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onCreate(formData);
+    if (!formData.time) return;
+    onCreate({
+      ...formData,
+      participantEmployeeIds,
+    });
   };
 
   return (
@@ -210,6 +224,40 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
             </div>
           </div>
 
+          {/* Participants (employees) */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+              <Users size={14} className="inline mr-1" />
+              Participants
+            </label>
+            <p className="text-[11px] text-slate-500 mb-2">
+              You are included automatically. Select other employees to invite.
+            </p>
+            <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2 space-y-1">
+              {employeesLoading ? (
+                <p className="text-xs text-slate-500 px-2 py-2">Loading employees…</p>
+              ) : employees.length === 0 ? (
+                <p className="text-xs text-slate-500 px-2 py-2">No employees found.</p>
+              ) : (
+                employees.map((emp) => (
+                  <label
+                    key={emp.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white cursor-pointer text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={participantEmployeeIds.includes(emp.id)}
+                      onChange={() => toggleParticipant(emp.id)}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="text-slate-800">{emp.fullName}</span>
+                    <span className="text-xs text-slate-400 truncate">{emp.email}</span>
+                  </label>
+                ))
+              )}
+            </div>
+          </div>
+
           {/* Availability Info */}
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl p-4">
             <p className="text-xs font-medium text-green-900 mb-1">✓ Availability Check</p>
@@ -229,7 +277,8 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm"
+              disabled={!formData.time}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create Meeting
             </button>

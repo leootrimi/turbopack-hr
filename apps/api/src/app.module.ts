@@ -12,6 +12,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { DocumentsModule } from './documents/documents.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { JobsModule } from './jobs/jobs.module';
+import { MeetingsModule } from './meetings/meetings.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { JobsModule } from './jobs/jobs.module';
     DocumentsModule,
     DashboardModule,
     JobsModule,
+    MeetingsModule,
   ],
   controllers: [],
   providers: [],

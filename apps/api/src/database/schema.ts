@@ -7,6 +7,7 @@ import {
   pgEnum,
   boolean,
   numeric,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const employee = pgTable('employee', {
@@ -339,3 +340,42 @@ export const documents = pgTable('documents', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+/** Scheduled = active; canceled = explicitly canceled. Completed/upcoming are derived from time + scheduled. */
+export const meetingStatusEnum = pgEnum('meeting_status', ['scheduled', 'canceled']);
+
+export const meetings = pgTable('meetings', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 512 }).notNull(),
+  description: varchar('description', { length: 4096 }),
+  /** Employee who created the meeting (always included as a participant row). */
+  organizerId: integer('organizer_id')
+    .notNull()
+    .references(() => employee.id, { onDelete: 'cascade' }),
+  startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+  durationMinutes: integer('duration_minutes').notNull().default(30),
+  timezone: varchar('timezone', { length: 64 }).default('UTC').notNull(),
+  status: meetingStatusEnum('status').default('scheduled').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const meetingParticipants = pgTable(
+  'meeting_participants',
+  {
+    id: serial('id').primaryKey(),
+    meetingId: integer('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    employeeId: integer('employee_id')
+      .notNull()
+      .references(() => employee.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => ({
+    meetingEmployeeUnique: uniqueIndex('meeting_participants_meeting_employee_unique').on(
+      t.meetingId,
+      t.employeeId,
+    ),
+  }),
+);

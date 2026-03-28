@@ -3,49 +3,60 @@
 import React from 'react';
 import { Calendar, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const SummaryCards = () => {
-  const stats = [
+interface MeetingStats {
+  total: number;
+  upcoming: number;
+  completed: number;
+  canceled: number;
+}
+
+const SummaryCards = ({ stats }: { stats: MeetingStats }) => {
+  const cards = [
     {
       id: 1,
       label: 'Total Meetings',
-      value: '24',
+      value: String(stats.total),
       icon: Calendar,
       gradient: 'from-blue-500/10 to-cyan-500/10',
       borderColor: 'border-blue-200/30',
       iconColor: 'text-blue-600',
+      blurb: 'All meetings you organize or attend',
     },
     {
       id: 2,
       label: 'Upcoming',
-      value: '5',
+      value: String(stats.upcoming),
       icon: Clock,
       gradient: 'from-indigo-500/10 to-violet-500/10',
       borderColor: 'border-indigo-200/30',
       iconColor: 'text-indigo-600',
+      blurb: 'Scheduled and not yet ended',
     },
     {
       id: 3,
       label: 'Completed',
-      value: '18',
+      value: String(stats.completed),
       icon: CheckCircle2,
       gradient: 'from-emerald-500/10 to-teal-500/10',
       borderColor: 'border-emerald-200/30',
       iconColor: 'text-emerald-600',
+      blurb: 'Past end time',
     },
     {
       id: 4,
       label: 'Canceled',
-      value: '1',
+      value: String(stats.canceled),
       icon: AlertCircle,
       gradient: 'from-rose-500/10 to-pink-500/10',
       borderColor: 'border-rose-200/30',
       iconColor: 'text-rose-600',
+      blurb: 'Canceled in the system',
     },
   ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-      {stats.map((stat) => {
+      {cards.map((stat) => {
         const Icon = stat.icon;
         return (
           <div
@@ -66,12 +77,7 @@ const SummaryCards = () => {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-slate-200/30">
-              <p className="text-xs text-slate-500">
-                {stat.id === 1 && 'Total scheduled meetings'}
-                {stat.id === 2 && 'This week'}
-                {stat.id === 3 && 'Successfully completed'}
-                {stat.id === 4 && 'This month'}
-              </p>
+              <p className="text-xs text-slate-500">{stat.blurb}</p>
             </div>
           </div>
         );
