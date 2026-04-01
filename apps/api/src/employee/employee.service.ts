@@ -12,20 +12,33 @@ import {
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
+import { EmailService } from 'src/email/email.service';
 import { CreateEmployeeDto } from '@repo/types';
 
 @Injectable()
 export class EmployeeService {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(
+    private readonly drizzle: DrizzleService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async create(dto: CreateEmployeeDto) {
-    return await this.drizzle.db.transaction(async (tx) => {
+    const tempPassword =
+      process.env.DEFAULT_EMPLOYEE_PASSWORD?.trim() || 'password';
+
+    const createdEmployee = await this.drizzle.db.transaction(async (tx) => {
+      const personalEmail =
+        dto.personal.personalEmail && dto.personal.personalEmail.trim()
+          ? dto.personal.personalEmail.trim()
+          : dto.personal.email;
+
       const [newEmployee] = await tx
         .insert(employee)
         .values({
           firstName: dto.personal.firstName,
           lastName: dto.personal.lastName,
           email: dto.personal.email,
+          personalEmail,
           phone: dto.personal.phone,
           dateOfBirth: dto.personal.dateOfBirth
             ? new Date(dto.personal.dateOfBirth)
@@ -58,7 +71,7 @@ export class EmployeeService {
         bonusEligible: dto.compensation.bonusEligible,
       });
 
-      const defaultPasswordHash = await bcrypt.hash('password', 10);
+      const defaultPasswordHash = await bcrypt.hash(tempPassword, 10);
       await tx.insert(users).values({
         employeeId: newEmployee.id,
         email: dto.personal.email,
@@ -73,6 +86,17 @@ export class EmployeeService {
 
       return newEmployee;
     });
+
+    // Fire-and-forget so we do not extend request latency.
+    this.emailService.enqueueAccountCreatedEmail({
+      toEmail: createdEmployee.personalEmail || createdEmployee.email,
+      firstName: createdEmployee.firstName,
+      lastName: createdEmployee.lastName,
+      accountEmail: createdEmployee.email,
+      tempPassword,
+    });
+
+    return createdEmployee;
   }
 
   async findAll(page = 1, pageSize = 10): Promise<EmployeeWithJob[]> {
@@ -102,6 +126,7 @@ export class EmployeeService {
           firstName: employee.firstName,
           lastName: employee.lastName,
           email: employee.email,
+          personalEmail: employee.personalEmail,
           phone: employee.phone,
           dateOfBirth: employee.dateOfBirth,
           personalNumber: employee.personalNumber,

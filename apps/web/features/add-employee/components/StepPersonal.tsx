@@ -51,6 +51,27 @@ export function StepPersonal({ data, onChange }: Props) {
             />
           </div>
         </Field>
+
+        <div className="col-span-2">
+          <Field label="Personal Email" hint="Used for account-created emails (optional)">
+            <div className="relative">
+              <Mail
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+              />
+              <Input
+                type="email"
+                placeholder="john.doe@gmail.com"
+                value={data.personalEmail ?? ""}
+                onChange={(e) =>
+                  onChange("personalEmail", e.target.value)
+                }
+                className="pl-9"
+              />
+            </div>
+          </Field>
+        </div>
+
         <Field label="Phone Number">
           <div className="relative">
             <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />

@@ -3,9 +3,10 @@ import { EmployeeService } from './employee.service';
 import { EmployeeController } from './employee.controller';
 import { DrizzleService } from 'src/database/drizzle.provider';
 import { DrizzleModule } from 'src/database/drizzle.module';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [DrizzleModule],
+  imports: [DrizzleModule, EmailModule],
   controllers: [EmployeeController],
   providers: [EmployeeService],
 })

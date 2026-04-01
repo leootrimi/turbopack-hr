@@ -92,6 +92,13 @@
       "when": 1774800000000,
       "tag": "0012_time_off_types",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1774949111452,
+      "tag": "0013_add_employee_personal_email",
+      "breakpoints": true
     }
   ]
 }

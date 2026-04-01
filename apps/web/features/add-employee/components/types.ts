@@ -2,6 +2,8 @@ export interface PersonalInfo {
   firstName: string;
   lastName: string;
   email: string;
+  // Optional: where we should send onboarding/account emails (SES).
+  personalEmail?: string;
   phone: string;
   dateOfBirth: string;
   personalNumber: string;

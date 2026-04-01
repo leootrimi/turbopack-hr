@@ -42,6 +42,9 @@ export const CreateEmployeeDtoSchema = z.object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
     email: z.string().email(),
+    // Email to send onboarding/HR notifications (optional).
+    // Accepts empty string to avoid breaking existing forms that may send "".
+    personalEmail: z.union([z.string().email(), z.literal("")]).optional(),
     phone: z.string(),
     dateOfBirth: z.string(),
     personalNumber: z.string(),
@@ -76,6 +79,7 @@ export const PersonalInfoSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string(),
+  personalEmail: z.union([z.string().email(), z.literal("")]).optional(),
   phone: z.string(),
   dateOfBirth: z.string(),
   personalNumber: z.string(),
@@ -159,6 +163,7 @@ export const INITIAL_FORM: EmployeeForm = {
     firstName: "",
     lastName: "",
     email: "",
+    personalEmail: "",
     phone: "",
     dateOfBirth: "",
     personalNumber: "",

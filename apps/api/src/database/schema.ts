@@ -15,6 +15,8 @@ export const employee = pgTable('employee', {
   firstName: varchar('first_name', { length: 128 }).notNull(),
   lastName: varchar('last_name', { length: 128 }).notNull(),
   email: varchar('email', { length: 256 }).notNull().unique(),
+  // Email used for sending account/HR notifications (optional; falls back to `email`).
+  personalEmail: varchar('personal_email', { length: 256 }).unique(),
   phone: varchar('phone', { length: 32 }),
   dateOfBirth: timestamp('date_of_birth'),
   personalNumber: varchar('personal_number', { length: 64 }).unique(),

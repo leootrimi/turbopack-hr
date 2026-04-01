@@ -63,6 +63,7 @@ export function StepReview({ form }: Props) {
         rows={[
           { label: "Full Name",          value: fullName                     },
           { label: "Email",              value: personal.email               },
+          { label: "Personal Email",    value: personal.personalEmail ?? "" },
           { label: "Phone",              value: personal.phone               },
           { label: "Date of Birth",      value: personal.dateOfBirth         },
           { label: "Personal Number",    value: personal.personalNumber      },
