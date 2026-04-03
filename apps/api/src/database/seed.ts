@@ -249,10 +249,10 @@ async function seed() {
         { name: 'Vacation', defaultValue: '20.0', enabled: true },
         { name: 'Sick Leave', defaultValue: '10.0', enabled: true },
         { name: 'Personal Day', defaultValue: '5.0', enabled: true },
-        { name: 'Work From Home', defaultValue: '9999.0', enabled: true },
-        { name: 'Marriage', defaultValue: '9999.0', enabled: true },
-        { name: 'Bereavement', defaultValue: '9999.0', enabled: true },
-        { name: 'Unpaid', defaultValue: '9999.0', enabled: true },
+        { name: 'Work From Home', defaultValue: '10.0', enabled: true },
+        { name: 'Marriage', defaultValue: '5.0', enabled: true },
+        { name: 'Bereavement', defaultValue: '5.0', enabled: true },
+        { name: 'Unpaid', defaultValue: '5.0', enabled: true },
       ])
       .returning();
 
