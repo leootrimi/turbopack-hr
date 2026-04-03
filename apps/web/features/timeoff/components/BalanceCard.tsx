@@ -6,8 +6,10 @@ interface Props {
 
 export function BalanceCard({ balance }: Props) {
   const { type, total, used, color } = balance;
-  const remaining = total - used;
-  const pct = Math.round((used / total) * 100);
+
+  const isUnlimited = total >= 9999;
+  const remaining = isUnlimited ? "Unlimited" : total - used;
+  const pct = !isUnlimited && total > 0 ? Math.round((used / total) * 100) : 0;
   const cfg = getLeaveTypeConfig(type);
 
   return (
@@ -33,18 +35,20 @@ export function BalanceCard({ balance }: Props) {
       </div>
 
       {/* progress bar */}
-      <div className="space-y-1">
-        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${pct}%`, backgroundColor: color }}
-          />
+      {!isUnlimited && (
+        <div className="space-y-1">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${pct}%`, backgroundColor: color }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-400">
+            <span>{used} used</span>
+            <span>{total} total</span>
+          </div>
         </div>
-        <div className="flex justify-between text-[10px] text-slate-400">
-          <span>{used} used</span>
-          <span>{total} total</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

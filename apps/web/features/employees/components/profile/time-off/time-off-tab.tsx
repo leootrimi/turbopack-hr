@@ -21,58 +21,32 @@ const mockCardStates = [
 ];
 
 interface TimeOffTabProps {
-  timeOffBalance: {
-    vacationTotal: number;
-    vacationUsed: number;
-    sickTotal: number;
-    sickUsed: number;
-    personalTotal: number;
-    personalUsed: number;
-  };
+  timeOffBalance: Array<{ typeName: string; total: string | number; used: string | number }>;
   leaveRequests: any[];
 }
 
 export default function TimeOffTab({ timeOffBalance, leaveRequests }: TimeOffTabProps) {
-  const vacationTotal = Number(timeOffBalance.vacationTotal);
-  const vacationUsed = Number(timeOffBalance.vacationUsed);
-  const sickTotal = Number(timeOffBalance.sickTotal);
-  const sickUsed = Number(timeOffBalance.sickUsed);
-  const personalTotal = Number(timeOffBalance.personalTotal);
-  const personalUsed = Number(timeOffBalance.personalUsed);
+  const balances = Array.isArray(timeOffBalance) ? timeOffBalance : [];
 
-  const annualLeaveRemaining = vacationTotal - vacationUsed;
-  const sickLeaveRemaining = sickTotal - sickUsed;
-  const personalRemaining = personalTotal - personalUsed;
+  const cardStates = balances
+    .filter(b => Number(b.total) < 9999) // exclude untracked or unlimited
+    .map(b => ({
+      days: Number(b.total) - Number(b.used),
+      title: b.typeName,
+      description: `Remaining ${b.typeName.toLowerCase()} days.`,
+    }));
 
-  const cardStates = [
-    {
-      days: annualLeaveRemaining,
-      title: "Annual Leave",
-      description: "Remaining vacation days for this year.",
-    },
-    {
-      days: sickLeaveRemaining,
-      title: "Sick Leave",
-      description: "Approved sick leave days.",
-    },
-    {
-      days: personalRemaining,
-      title: "Personal Day",
-      description: "A day reserved for personal matters.",
-    },
-  ];
+  const usedData = balances.map(b => ({ typeName: b.typeName, used: Number(b.used) }));
 
   return (
     <div className="p-6">
       <div className="flex justify-between gap-4 ">
-        <DaysOffCarousel cardStates={cardStates} />
-        <UsedTimeOffCard
-          used={{
-            vacation: vacationUsed,
-            sick: sickUsed,
-            personal: personalUsed,
-          }}
-        />
+        {cardStates.length > 0 ? (
+          <DaysOffCarousel cardStates={cardStates} />
+        ) : (
+          <div className="flex-1" />
+        )}
+        <UsedTimeOffCard usedData={usedData} />
       </div>
       <TimeOffRequestsTable requests={leaveRequests} />
     </div>

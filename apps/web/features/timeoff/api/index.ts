@@ -61,7 +61,7 @@ export const getTimeOffRequests = async () => {
 };
 
 export const getTimeOffBalance = async () => {
-  return makeRequest<TimeOffBalanceApi>({
+  return makeRequest<TimeOffBalanceApi[]>({
     url: "/time-off/balance",
     method: "GET",
   });

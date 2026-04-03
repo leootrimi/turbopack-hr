@@ -230,29 +230,24 @@ export const timeOffBalance = pgTable('time_off_balance', {
   id: serial('id').primaryKey(),
   employeeId: integer('employee_id')
     .notNull()
-    .unique()
     .references(() => employee.id, { onDelete: 'cascade' }),
-  vacationTotal: numeric('vacation_total', { precision: 4, scale: 1 })
-    .default('20.0')
-    .notNull(),
-  vacationUsed: numeric('vacation_used', { precision: 4, scale: 1 })
+  timeOffTypeId: integer('time_off_type_id')
+    .notNull()
+    .references(() => timeOffTypes.id, { onDelete: 'cascade' }),
+  total: numeric('total', { precision: 8, scale: 2 })
     .default('0.0')
     .notNull(),
-  sickTotal: numeric('sick_total', { precision: 4, scale: 1 })
-    .default('10.0')
-    .notNull(),
-  sickUsed: numeric('sick_used', { precision: 4, scale: 1 })
-    .default('0.0')
-    .notNull(),
-  personalTotal: numeric('personal_total', { precision: 4, scale: 1 })
-    .default('5.0')
-    .notNull(),
-  personalUsed: numeric('personal_used', { precision: 4, scale: 1 })
+  used: numeric('used', { precision: 8, scale: 2 })
     .default('0.0')
     .notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
-});
+}, (t) => ({
+  employeeTimeOffTypeUnique: uniqueIndex('time_off_balance_emp_type_idx').on(
+    t.employeeId,
+    t.timeOffTypeId,
+  ),
+}));
 
 export const paymentStatusEnum = pgEnum('payment_status', [
   'pending',

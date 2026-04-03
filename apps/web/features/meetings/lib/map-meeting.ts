@@ -1,4 +1,4 @@
-import type { Meeting, MeetingStatus, Participant } from "../types";
+import { Meeting, MeetingStatus, Participant } from "@repo/types";
 import type { MeetingApi } from "../api";
 import type { Meeting as CalendarGridMeeting } from "../calendar/components/calendar-with-meetings";
 

@@ -11,12 +11,10 @@ export type RequestStatus = "Pending" | "Approved" | "Rejected";
 
 /** Matches GET /time-off/balance (from `time_off_balance` in DB). */
 export interface TimeOffBalanceApi {
-  vacationTotal: string;
-  vacationUsed: string;
-  sickTotal: string;
-  sickUsed: string;
-  personalTotal: string;
-  personalUsed: string;
+  timeOffTypeId: number;
+  typeName: string;
+  total: string;
+  used: string;
 }
 
 export interface LeaveBalance {
@@ -39,29 +37,18 @@ const UNTRACKED_BALANCE = { total: 9999, used: 0 };
  * Vacation / Sick Leave / Personal Day use `time_off_balance` columns; others are uncapped.
  */
 export function getBalanceForLeaveType(
-  row: TimeOffBalanceApi | undefined,
+  rows: TimeOffBalanceApi[] | undefined,
   type: string,
 ): { total: number; used: number } {
-  if (!row) return { ...UNTRACKED_BALANCE };
-  switch (type) {
-    case "Vacation":
-      return {
-        total: parseBalanceNum(row.vacationTotal),
-        used: parseBalanceNum(row.vacationUsed),
-      };
-    case "Sick Leave":
-      return {
-        total: parseBalanceNum(row.sickTotal),
-        used: parseBalanceNum(row.sickUsed),
-      };
-    case "Personal Day":
-      return {
-        total: parseBalanceNum(row.personalTotal),
-        used: parseBalanceNum(row.personalUsed),
-      };
-    default:
-      return { ...UNTRACKED_BALANCE };
+  if (!rows || !Array.isArray(rows)) return { ...UNTRACKED_BALANCE };
+  const b = rows.find(r => r.typeName === type);
+  if (b) {
+    return {
+      total: parseBalanceNum(b.total),
+      used: parseBalanceNum(b.used),
+    };
   }
+  return { ...UNTRACKED_BALANCE };
 }
 
 export interface LeaveRequest {
@@ -110,11 +97,11 @@ export function getLeaveTypeConfig(typeName: string): {
 
 /** Build sidebar cards for the given type names (from API), totals from DB where applicable. */
 export function buildLeaveBalancesFromApi(
-  row: TimeOffBalanceApi | undefined,
+  rows: TimeOffBalanceApi[] | undefined,
   typeNames: string[],
 ): LeaveBalance[] {
   return typeNames.map((type) => {
-    const { total, used } = getBalanceForLeaveType(row, type);
+    const { total, used } = getBalanceForLeaveType(rows, type);
     return {
       type,
       total,

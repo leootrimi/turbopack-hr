@@ -2,18 +2,7 @@
 
 import { Badge } from "@/components/components/ui/badge"
 import { LeaveRequestCard } from "./leave-request-card"
-
-interface LeaveApprovalSectionProps {
-  requests: Array<{
-    id: string;
-    employeeName: string;
-    type: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-    createdAt: string;
-  }>;
-}
+import { LeaveApprovalSectionProps } from "@repo/types"
 
 export function LeaveApprovalSection({ requests }: LeaveApprovalSectionProps) {
   return (
@@ -31,12 +20,12 @@ export function LeaveApprovalSection({ requests }: LeaveApprovalSectionProps) {
             key={request.id} 
             id={request.id}
             employeeName={request.employeeName}
-            employeeId={request.id} // Using ID as fallback for employeeId if not provided
-            avatar="" // Fallback for avatar
-            grade="N/A" // Fallback for grade
+            employeeId={request.id}
+            avatar="" 
+            grade="N/A" 
             leaveType={request.type}
             duration={`${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}`}
-            reason="Request for time off" // Basic fallback
+            reason="Request for time off"
             dateRange={`${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}`}
             status={
               request.status.toLowerCase() === 'approved' ? 'Approved' :

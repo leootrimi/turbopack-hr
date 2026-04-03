@@ -17,10 +17,10 @@ type Tab = "request" | "history";
 export function TimeOffPage() {
   const [tab, setTab] = useState<Tab>("request");
   const { data: requests, isLoading } = useTimeOffRequests();
-  const { data: balanceRow, isLoading: balanceLoading } = useTimeOffBalance();
+  const { data: balances, isLoading: balanceLoading } = useTimeOffBalance();
   const { data: timeOffTypes, isLoading: typesLoading } = useEnabledTimeOffTypes();
   const typeNames = timeOffTypes?.map((t) => t.name) ?? [];
-  const leaveBalances = buildLeaveBalancesFromApi(balanceRow, typeNames);
+  const leaveBalances = buildLeaveBalancesFromApi(balances, typeNames);
 
   const handleSubmit = () => {
     setTab("history");

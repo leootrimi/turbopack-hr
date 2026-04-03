@@ -9,6 +9,7 @@ import {
   users,
   employee,
   timeOffBalance,
+  timeOffTypes,
 } from 'src/database/schema';
 import { desc, eq, sql, and, gte, lte } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
@@ -224,39 +225,25 @@ export class TimeOffService {
       throw new NotFoundException('User not found');
     }
 
+    const types = await this.drizzle.db
+      .select()
+      .from(timeOffTypes)
+      .where(eq(timeOffTypes.enabled, true));
+
     const rows = await this.drizzle.db
-      .select({
-        vacationTotal: timeOffBalance.vacationTotal,
-        vacationUsed: timeOffBalance.vacationUsed,
-        sickTotal: timeOffBalance.sickTotal,
-        sickUsed: timeOffBalance.sickUsed,
-        personalTotal: timeOffBalance.personalTotal,
-        personalUsed: timeOffBalance.personalUsed,
-      })
+      .select()
       .from(timeOffBalance)
-      .where(eq(timeOffBalance.employeeId, user.employeeId))
-      .limit(1);
+      .where(eq(timeOffBalance.employeeId, user.employeeId));
 
-    const row = rows[0];
-    if (!row) {
+    return types.map(t => {
+      const b = rows.find(r => r.timeOffTypeId === t.id);
       return {
-        vacationTotal: '20.0',
-        vacationUsed: '0.0',
-        sickTotal: '10.0',
-        sickUsed: '0.0',
-        personalTotal: '5.0',
-        personalUsed: '0.0',
+        timeOffTypeId: t.id,
+        typeName: t.name,
+        total: String(b ? b.total : t.defaultValue),
+        used: String(b ? b.used : '0.0'),
       };
-    }
-
-    return {
-      vacationTotal: String(row.vacationTotal),
-      vacationUsed: String(row.vacationUsed),
-      sickTotal: String(row.sickTotal),
-      sickUsed: String(row.sickUsed),
-      personalTotal: String(row.personalTotal),
-      personalUsed: String(row.personalUsed),
-    };
+    });
   }
 
   async create(userId: number, dto: CreateTimeOffDto) {
@@ -345,20 +332,35 @@ export class TimeOffService {
 
       // 3. Update the balance if approved
       if (status === 'Approved') {
-        let balanceField: keyof typeof timeOffBalance.$inferInsert | null =
-          null;
-        if (request.type === 'Vacation') balanceField = 'vacationUsed';
-        else if (request.type === 'Sick Leave') balanceField = 'sickUsed';
-        else if (request.type === 'Personal Day') balanceField = 'personalUsed';
+        const typeRecord = await tx
+          .select({ id: timeOffTypes.id, defaultValue: timeOffTypes.defaultValue })
+          .from(timeOffTypes)
+          .where(eq(timeOffTypes.name, request.type))
+          .limit(1);
 
-        if (balanceField) {
-          await tx
-            .update(timeOffBalance)
-            .set({
-              [balanceField as string]: sql`${timeOffBalance[balanceField as any]} + ${request.days}`,
-              updatedAt: new Date(),
-            })
-            .where(eq(timeOffBalance.employeeId, request.employeeId));
+        if (typeRecord[0]) {
+          const typeId = typeRecord[0].id;
+          const existing = await tx.select().from(timeOffBalance)
+            .where(and(eq(timeOffBalance.employeeId, request.employeeId), eq(timeOffBalance.timeOffTypeId, typeId))).limit(1);
+          
+          if (existing[0]) {
+            await tx
+              .update(timeOffBalance)
+              .set({
+                used: sql`${timeOffBalance.used} + ${request.days}`,
+                updatedAt: new Date(),
+              })
+              .where(eq(timeOffBalance.id, existing[0].id));
+          } else {
+            await tx
+              .insert(timeOffBalance)
+              .values({
+                employeeId: request.employeeId,
+                timeOffTypeId: typeId,
+                total: typeRecord[0].defaultValue,
+                used: request.days.toString(),
+              });
+          }
         }
       }
 

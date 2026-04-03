@@ -29,16 +29,6 @@ interface LeaveRequestCardProps {
   status?: 'Pending' | 'Approved' | 'Rejected'
 }
 
-// Leave type configurations
-const leaveTypeConfig: Record<string, { color: string; bg: string; icon: string }> = {
-  'Vacation': { color: 'text-emerald-600', bg: 'bg-emerald-50', icon: '🌴' },
-  'Sick Leave': { color: 'text-blue-600', bg: 'bg-blue-50', icon: '🤒' },
-  'Personal': { color: 'text-purple-600', bg: 'bg-purple-50', icon: '👤' },
-  'Bereavement': { color: 'text-slate-600', bg: 'bg-slate-50', icon: '🕊️' },
-  'Maternity': { color: 'text-pink-600', bg: 'bg-pink-50', icon: '👶' },
-  'Unpaid': { color: 'text-amber-600', bg: 'bg-amber-50', icon: '💰' },
-}
-
 export function LeaveRequestCard({
   id,
   employeeName,
@@ -69,7 +59,6 @@ export function LeaveRequestCard({
     .join('')
     .slice(0, 2)
 
-  const typeConfig = leaveTypeConfig[leaveType] || { color: 'text-slate-600', bg: 'bg-slate-50', icon: '📋' }
   
   const getStatusBadge = () => {
     switch (status) {
@@ -140,9 +129,8 @@ export function LeaveRequestCard({
         <div className="space-y-3">
           {/* Leave Type & Duration Row */}
           <div className="flex items-center gap-3 flex-wrap">
-            <div className={`${typeConfig.bg} rounded-lg px-2.5 py-1.5 flex items-center gap-1.5`}>
-              <span className="text-sm">{typeConfig.icon}</span>
-              <span className={`text-xs font-medium ${typeConfig.color}`}>{leaveType}</span>
+            <div className="rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+              <span className="text-xs font-medium">{leaveType}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-500">
               <Clock size={12} />

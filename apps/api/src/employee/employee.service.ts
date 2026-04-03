@@ -8,6 +8,7 @@ import {
   users,
   timeOffBalance,
   leaveRequests,
+  timeOffTypes,
 } from 'src/database/schema';
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
@@ -80,9 +81,17 @@ export class EmployeeService {
         isActive: true,
       });
 
-      await tx.insert(timeOffBalance).values({
-        employeeId: newEmployee.id,
-      });
+      const allTypes = await tx.select().from(timeOffTypes).where(eq(timeOffTypes.enabled, true));
+      if (allTypes.length > 0) {
+        await tx.insert(timeOffBalance).values(
+          allTypes.map(t => ({
+            employeeId: newEmployee.id,
+            timeOffTypeId: t.id,
+            total: t.defaultValue,
+            used: '0.0',
+          }))
+        );
+      }
 
       return newEmployee;
     });
@@ -160,10 +169,15 @@ export class EmployeeService {
     if (!result[0]) return null;
 
     const timeOffBalanceResult = await this.drizzle.db
-      .select()
+      .select({
+        timeOffTypeId: timeOffBalance.timeOffTypeId,
+        typeName: timeOffTypes.name,
+        total: timeOffBalance.total,
+        used: timeOffBalance.used,
+      })
       .from(timeOffBalance)
-      .where(eq(timeOffBalance.employeeId, id))
-      .limit(1);
+      .innerJoin(timeOffTypes, eq(timeOffBalance.timeOffTypeId, timeOffTypes.id))
+      .where(eq(timeOffBalance.employeeId, id));
 
     const leaveRequestsResult = await this.drizzle.db
       .select()
@@ -172,14 +186,7 @@ export class EmployeeService {
 
     return {
       ...result[0],
-      timeOffBalance: timeOffBalanceResult[0] || {
-        vacationTotal: 20,
-        vacationUsed: 0,
-        sickTotal: 10,
-        sickUsed: 0,
-        personalTotal: 5,
-        personalUsed: 0,
-      },
+      timeOffBalance: timeOffBalanceResult,
       leaveRequests: leaveRequestsResult,
     };
   }

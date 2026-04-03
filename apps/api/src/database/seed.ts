@@ -18,6 +18,7 @@ import {
   documents,
   payments,
   jobs,
+  timeOffTypes,
 } from './schema';
 import { eq } from 'drizzle-orm';
 
@@ -240,16 +241,38 @@ async function seed() {
       },
     ]);
 
+    console.log('🟢 Seeding Time Off Types...');
+
+    const insertedTimeOffTypes = await db
+      .insert(timeOffTypes)
+      .values([
+        { name: 'Vacation', defaultValue: '20.0', enabled: true },
+        { name: 'Sick Leave', defaultValue: '10.0', enabled: true },
+        { name: 'Personal Day', defaultValue: '5.0', enabled: true },
+        { name: 'Work From Home', defaultValue: '9999.0', enabled: true },
+        { name: 'Marriage', defaultValue: '9999.0', enabled: true },
+        { name: 'Bereavement', defaultValue: '9999.0', enabled: true },
+        { name: 'Unpaid', defaultValue: '9999.0', enabled: true },
+      ])
+      .returning();
+
     console.log('🟢 Seeding Time Off Balances...');
 
-    await db
-      .insert(timeOffBalance)
-      .values([
-        { employeeId: alice.id },
-        { employeeId: bob.id },
-        { employeeId: carol.id },
-        { employeeId: dave.id },
-      ]);
+    const employeeIds = [alice.id, bob.id, carol.id, dave.id];
+    const balanceRecords: any[] = [];
+
+    for (const empId of employeeIds) {
+      for (const t of insertedTimeOffTypes) {
+        balanceRecords.push({
+          employeeId: empId,
+          timeOffTypeId: t.id,
+          total: t.defaultValue,
+          used: '0.0', // Could offset manually, but 0.0 is fine for seed.
+        });
+      }
+    }
+
+    await db.insert(timeOffBalance).values(balanceRecords);
 
     console.log('🟢 Updating Team Leaders...');
 

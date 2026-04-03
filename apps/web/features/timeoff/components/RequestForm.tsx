@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Calendar, FileText, User, CheckCircle, AlertCircle, Upload, X, Clock, Send } from "lucide-react";
-import { getLeaveTypeConfig, getBalanceForLeaveType } from "./mock";
 import { useCreateTimeOff, useTimeOffBalance, useEnabledTimeOffTypes } from "../hooks/use-time-off";
+import { formatDate } from "@/lib/utils";
 
 interface FormState {
   type: string;
@@ -32,11 +32,6 @@ function countWorkdays(start: string, end: string): number {
     cur.setDate(cur.getDate() + 1);
   }
   return count;
-}
-
-function formatDateDisplay(d: string) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 export function RequestForm({ onSubmit }: Props) {
@@ -73,9 +68,17 @@ export function RequestForm({ onSubmit }: Props) {
   }, [timeOffTypes]);
 
   const days = form.halfDay ? 0.5 : countWorkdays(form.startDate, form.endDate);
-  const balance = getBalanceForLeaveType(balanceRow, form.type);
-  const remaining = balance.total - balance.used;
-  const cfg = getLeaveTypeConfig(form.type);
+  
+  let remaining = 0;
+  let totalLimit = 1;
+  if (balanceRow && Array.isArray(balanceRow)) {
+    const b = balanceRow.find((r: any) => r.typeName === form.type);
+    if (b) {
+      remaining = Number(b.total || 0) - Number(b.used || 0);
+      totalLimit = Number(b.total || 1);
+    }
+  }
+
   const overLimit = days > remaining;
   const needsCert = /sick/i.test(form.type) && days > 2;
   const isValid =
@@ -154,7 +157,6 @@ export function RequestForm({ onSubmit }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-lg font-semibold text-slate-800">Request Time Off</h2>
         <p className="text-xs text-slate-500 mt-1">Submit a leave request for approval</p>
@@ -168,7 +170,6 @@ export function RequestForm({ onSubmit }: Props) {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {timeOffTypes.map((t) => {
             const active = form.type === t.name;
-            const typeConfig = getLeaveTypeConfig(t.name);
             return (
               <button
                 key={t.id}
@@ -183,14 +184,10 @@ export function RequestForm({ onSubmit }: Props) {
                 `}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{typeConfig.icon}</span>
                   <span className={`text-sm font-medium ${active ? 'text-slate-800' : 'text-slate-600'}`}>
                     {t.name}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 line-clamp-1">
-                  {typeConfig.description}
-                </p>
                 {active && (
                   <div className="absolute top-2 right-2">
                     <CheckCircle size={12} className="text-indigo-500" />
@@ -242,7 +239,6 @@ export function RequestForm({ onSubmit }: Props) {
         </div>
       </div>
 
-      {/* Half Day Toggle - Modern Switch */}
       <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-xl border border-slate-100">
         <div className="flex items-center gap-2">
           <Clock size={14} className="text-slate-500" />
@@ -280,7 +276,7 @@ export function RequestForm({ onSubmit }: Props) {
                 {days} {days === 1 ? 'day' : 'days'}
               </p>
               <p className="text-xs text-slate-500">
-                {formatDateDisplay(form.startDate)} → {formatDateDisplay(form.endDate)}
+                {formatDate(form.startDate)} → {formatDate(form.endDate)}
               </p>
             </div>
             <div className="text-right">
@@ -294,13 +290,12 @@ export function RequestForm({ onSubmit }: Props) {
             </div>
           </div>
           
-          {/* Progress Bar */}
           {!overLimit && (
             <div className="mt-3">
               <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-indigo-500 rounded-full transition-all duration-300"
-                  style={{ width: `${(days / (balance?.total || 1)) * 100}%` }}
+                  style={{ width: `${(days / (totalLimit || 1)) * 100}%` }}
                 />
               </div>
             </div>
