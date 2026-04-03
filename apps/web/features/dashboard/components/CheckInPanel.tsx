@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Building2, Wifi } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Building2, Wifi, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, SectionHeader } from "../components/shared";
 import { useCheckinDashboard } from "../hooks/queries";
 import { useRouter } from "next/navigation";
@@ -32,10 +32,17 @@ const TABS: { key: Filter; label: string }[] = [
   { key: "leave", label: "On Leave" },
 ];
 
+const PAGE_SIZE = 5;
+
 export function CheckInPanel() {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const { data: queryData, isLoading } = useCheckinDashboard(undefined, true);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const TODAY_CHECKINS = queryData || [];
 
@@ -51,6 +58,15 @@ export function CheckInPanel() {
     filter === "all"
       ? TODAY_CHECKINS
       : TODAY_CHECKINS.filter((e) => e.status === filter);
+
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const paginatedList = list.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
+  const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
 
   return (
     <div className="flex flex-col h-full">
@@ -92,7 +108,7 @@ export function CheckInPanel() {
             No check-in records found.
           </div>
         )}
-        {!isLoading && list.map((emp) => (
+        {!isLoading && paginatedList.map((emp) => (
           <div
             key={emp.id}
             className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
@@ -137,6 +153,30 @@ export function CheckInPanel() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between px-1">
+          <p className="text-[10px] text-slate-400">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex gap-1.5">
+            <button
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all cursor-pointer"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
