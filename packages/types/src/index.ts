@@ -4,3 +4,4 @@ export * from './team/index.js';
 export * from './time-off/index.js';
 export * from './equipment/index.js';
 export * from './announcement/index.js';
+export * from './email/index.js';

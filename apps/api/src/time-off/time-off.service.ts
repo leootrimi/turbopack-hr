@@ -13,12 +13,14 @@ import {
 import { desc, eq, sql, and, gte, lte } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { TimeOffTypesService } from './time-off-types.service';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class TimeOffService {
   constructor(
     private readonly drizzle: DrizzleService,
     private readonly timeOffTypesService: TimeOffTypesService,
+    private readonly emailService: EmailService,
   ) {}
 
   async getDashboardRequests(
@@ -292,7 +294,7 @@ export class TimeOffService {
     userId: number,
     status: 'Approved' | 'Rejected',
   ) {
-    return await this.drizzle.db.transaction(async (tx) => {
+    const result = await this.drizzle.db.transaction(async (tx) => {
       // 1. Get employeeId of the reviewer (current user)
       const userRecords = await tx
         .select({ employeeId: users.employeeId })
@@ -331,6 +333,16 @@ export class TimeOffService {
         throw new NotFoundException(`Leave request with ID ${id} not found`);
       }
 
+      const employeeRecords = await tx
+        .select({
+          email: users.email,
+          firstName: employee.firstName,
+        })
+        .from(users)
+        .innerJoin(employee, eq(employee.id, users.employeeId))
+        .where(eq(users.employeeId, request.employeeId))
+        .limit(1);
+
       // 3. Update the balance if approved
       if (status === 'Approved') {
         let balanceField: keyof typeof timeOffBalance.$inferInsert | null =
@@ -350,7 +362,27 @@ export class TimeOffService {
         }
       }
 
-      return updatedRequest;
+      return {
+        updatedRequest,
+        employeeEmail: employeeRecords[0]?.email,
+        employeeFirstName: employeeRecords[0]?.firstName ?? 'there',
+        requestType: request.type,
+        requestStartDate: request.startDate,
+        requestEndDate: request.endDate,
+      };
     });
+
+    if (result.employeeEmail) {
+      this.emailService.enqueueTimeOffStatusEmail({
+        toEmail: result.employeeEmail,
+        firstName: result.employeeFirstName,
+        leaveType: result.requestType,
+        startDate: result.requestStartDate,
+        endDate: result.requestEndDate,
+        status,
+      });
+    }
+
+    return result.updatedRequest;
   }
 }

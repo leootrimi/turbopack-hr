@@ -1,21 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createHash, createHmac } from 'crypto';
-
-type EnqueueAccountCreatedEmailArgs = {
-  toEmail: string;
-  firstName: string;
-  lastName: string;
-  accountEmail: string;
-  tempPassword: string;
-};
-
-type SesSendEmailArgs = {
-  toEmail: string;
-  fromEmail: string;
-  subject: string;
-  textBody: string;
-  htmlBody?: string;
-};
+import {
+  EnqueueAccountCreatedEmailArgs,
+  EnqueueTimeOffStatusEmailArgs,
+  SesSendEmailArgs,
+} from '@repo/types';
 
 class ConcurrencyQueue {
   private running = 0;
@@ -113,13 +102,6 @@ export class EmailService {
   }
 
   enqueueAccountCreatedEmail(args: EnqueueAccountCreatedEmailArgs) {
-    console.log('fromEmail', this.fromEmail);
-    console.log('SES Endpoint', this.sesEndpoint);
-    console.log('Access Key ID', this.accessKeyId);
-    console.log('Secret Access Key', this.secretAccessKey);
-    console.log('Session Token', this.sessionToken);
-    console.log('Region', this.region);
-    console.log('args', args);
     if (!this.fromEmail) {
       this.logger.warn(
         'SES_FROM_EMAIL not configured; skipping account-created email.',
@@ -156,8 +138,42 @@ export class EmailService {
     });
   }
 
-  private async sendSesEmail(args: SesSendEmailArgs) {
-    // SES “SendEmail” Query API parameters (AWS Query protocol).
+  enqueueTimeOffStatusEmail(args: EnqueueTimeOffStatusEmailArgs) {
+    if (!this.fromEmail) {
+      this.logger.warn(
+        'SES_FROM_EMAIL not configured; skipping time-off status email.',
+      );
+      return;
+    }
+
+    if (!args.toEmail) return;
+
+    const statusText = args.status.toLowerCase();
+    const dateRange = `${args.startDate.toDateString()} to ${args.endDate.toDateString()}`;
+
+    this.queue.add(async () => {
+      await this.sendSesEmail({
+        toEmail: args.toEmail,
+        fromEmail: this.fromEmail!,
+        subject: `Your time off request has been ${statusText}`,
+        textBody: [
+          `Hi ${args.firstName},`,
+          '',
+          `Your ${args.leaveType} request for ${dateRange} has been ${statusText}.`,
+          '',
+          'Best regards,',
+          'HR Team',
+        ].join('\n'),
+        htmlBody: `
+          <p>Hi ${args.firstName},</p>
+          <p>Your <strong>${args.leaveType}</strong> request for <strong>${dateRange}</strong> has been <strong>${statusText}</strong>.</p>
+          <p>Best regards,<br />HR Team</p>
+        `,
+      });
+    });
+  }
+
+  async sendSesEmail(args: SesSendEmailArgs) {
     const params: Record<string, string> = {
       Action: 'SendEmail',
       Version: '2010-12-01',
@@ -272,4 +288,3 @@ function toDateStamp(d: Date) {
     d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate())
   );
 }
-
