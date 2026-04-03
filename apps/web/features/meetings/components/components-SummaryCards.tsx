@@ -61,7 +61,7 @@ const SummaryCards = ({ stats }: { stats: MeetingStats }) => {
         return (
           <div
             key={stat.id}
-            className={`bg-gradient-to-br ${stat.gradient} border ${stat.borderColor} rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50`}
+            className={`bg-linear-to-br ${stat.gradient} border ${stat.borderColor} rounded-2xl p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50`}
           >
             <div className="flex items-start justify-between">
               <div className="space-y-2 flex-1">

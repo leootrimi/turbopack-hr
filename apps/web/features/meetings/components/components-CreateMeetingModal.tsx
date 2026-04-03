@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { X, Calendar, Clock, Globe, RotateCw, Users } from 'lucide-react';
-import { CreateMeetingFormData } from '../types';
 import { useEmployees } from '../../employees/hooks/queries';
+import { CreateMeetingForm } from '@repo/types';
 
-const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (formData: CreateMeetingFormData) => void }) => {
+const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCreate: (formData: CreateMeetingForm) => void }) => {
   const { data: employees = [], isLoading: employeesLoading } = useEmployees();
   const [participantEmployeeIds, setParticipantEmployeeIds] = useState<number[]>([]);
 
@@ -81,7 +81,7 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50 to-blue-50">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200/50 bg-linear-to-r from-slate-50 to-blue-50">
           <h2 className="text-lg font-semibold text-slate-900">Create New Meeting</h2>
           <button
             onClick={onClose}
@@ -174,7 +174,7 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
                   onClick={() => handleTimeSelect(time)}
                   className={`py-2 px-3 rounded-lg text-xs font-medium transition-all ${
                     selectedTime === time
-                      ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg shadow-indigo-500/30'
+                      ? 'bg-linear-to-r from-indigo-500 to-blue-500 text-white shadow-lg shadow-indigo-500/30'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
@@ -259,7 +259,7 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
           </div>
 
           {/* Availability Info */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl p-4">
+          <div className="bg-linear-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-xl p-4">
             <p className="text-xs font-medium text-green-900 mb-1">✓ Availability Check</p>
             <p className="text-xs text-green-700">
               All participants are available at the selected time. No scheduling conflicts detected.
@@ -278,7 +278,7 @@ const CreateMeetingModal = ({ onClose, onCreate }: { onClose: () => void; onCrea
             <button
               type="submit"
               disabled={!formData.time}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 bg-linear-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Create Meeting
             </button>

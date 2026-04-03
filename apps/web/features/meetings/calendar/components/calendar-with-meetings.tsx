@@ -190,9 +190,8 @@ const CalendarWithMeetings: React.FC<CalendarWithMeetingsProps> = ({
                 )}
               </div>
 
-              {/* ALL Meetings (NO LIMIT) */}
               {day && (
-                <div className="space-y-1 max-h-[160px] overflow-y-auto pr-1">
+                <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
 
                   {dayMeetings.map((meeting) => (
                     <div

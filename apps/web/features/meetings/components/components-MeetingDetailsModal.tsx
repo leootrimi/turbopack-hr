@@ -4,7 +4,7 @@ import React from 'react';
 import { X, Calendar, Clock, Users, AlertCircle, Edit2, Copy } from 'lucide-react';
 import StatusBadge from './components-StatusBadge';
 import { formatDate } from '@/lib/utils';
-import { Meeting } from '../types';
+import { Meeting } from '@repo/types';
 
 interface MeetingDetailsModalProps {
   meeting: Meeting;
@@ -26,7 +26,7 @@ const MeetingDetailsModal = ({ meeting, onClose }: MeetingDetailsModalProps) => 
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50 to-blue-50">
+        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200/50 bg-linear-to-r from-slate-50 to-blue-50">
           <h2 className="text-lg font-semibold text-slate-900">Meeting Details</h2>
           <button
             onClick={onClose}
@@ -59,7 +59,7 @@ const MeetingDetailsModal = ({ meeting, onClose }: MeetingDetailsModalProps) => 
           {/* Meeting Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Date & Time */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200/30 rounded-xl p-4">
+            <div className="bg-linear-to-br from-blue-50 to-cyan-50 border border-blue-200/30 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar size={16} className="text-blue-600" />
                 <p className="text-xs font-semibold text-blue-900 uppercase tracking-wide">
@@ -71,7 +71,7 @@ const MeetingDetailsModal = ({ meeting, onClose }: MeetingDetailsModalProps) => 
             </div>
 
             {/* Duration */}
-            <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200/30 rounded-xl p-4">
+            <div className="bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-200/30 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Clock size={16} className="text-indigo-600" />
                 <p className="text-xs font-semibold text-indigo-900 uppercase tracking-wide">
@@ -138,11 +138,11 @@ const MeetingDetailsModal = ({ meeting, onClose }: MeetingDetailsModalProps) => 
             >
               Close
             </button>
-            <button className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-100 to-blue-100 text-indigo-700 font-medium rounded-xl hover:from-indigo-200 hover:to-blue-200 transition-all text-sm flex items-center justify-center gap-2">
+            <button className="flex-1 px-4 py-2.5 bg-linear-to-r from-indigo-100 to-blue-100 text-indigo-700 font-medium rounded-xl hover:from-indigo-200 hover:to-blue-200 transition-all text-sm flex items-center justify-center gap-2">
               <Edit2 size={16} />
               Edit Meeting
             </button>
-            <button className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm">
+            <button className="flex-1 px-4 py-2.5 bg-linear-to-r from-indigo-500 to-blue-500 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all shadow-lg shadow-indigo-500/20 text-sm">
               Join Meeting
             </button>
           </div>

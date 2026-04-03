@@ -1,7 +1,7 @@
 'use client';
 
+import { Participant } from '@repo/types';
 import React from 'react';
-import { Participant } from '../types';
 
 const ParticipantAvatars = ({ participants }: { participants: Participant[] }) => {
   const displayLimit = 3;

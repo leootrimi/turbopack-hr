@@ -4,8 +4,8 @@ import React from 'react';
 import { Eye, Edit2, Trash2, AlertCircle, Loader2 } from 'lucide-react';
 import ParticipantAvatars from './components-ParticipantAvatars';
 import StatusBadge from './components-StatusBadge';
-import { Meeting } from '../types';
 import { formatDate } from '@/lib/utils';
+import { Meeting } from '@repo/types';
 
 interface MeetingTableProps {
   meetings: Meeting[];
@@ -46,7 +46,7 @@ const MeetingTable = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50">
+            <tr className="border-b border-slate-100 bg-linear-to-r from-slate-50 to-blue-50">
               <th className="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide">
                 Meeting
               </th>

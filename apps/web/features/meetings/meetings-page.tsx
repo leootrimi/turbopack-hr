@@ -6,7 +6,6 @@ import CreateMeetingModal from "./components/components-CreateMeetingModal";
 import MeetingDetailsModal from "./components/components-MeetingDetailsModal";
 import MeetingTable from "./components/components-MeetingTable";
 import SummaryCards from "./components/components-SummaryCards";
-import { CreateMeetingFormData, Meeting } from "./types";
 import {
   useCreateMeeting,
   useDeleteMeeting,
@@ -16,6 +15,7 @@ import {
   combineDateAndTimeToIso,
   mapMeetingApiToMeeting,
 } from "./lib/map-meeting";
+import { CreateMeetingForm, Meeting } from "@repo/types";
 
 export default function MeetingsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -42,7 +42,7 @@ export default function MeetingsPage() {
     };
   }, [meetings]);
 
-  const handleCreateMeeting = async (formData: CreateMeetingFormData) => {
+  const handleCreateMeeting = async (formData: CreateMeetingForm) => {
     await createMeetingAsync({
       title: formData.title,
       description: formData.description || undefined,
@@ -69,7 +69,7 @@ export default function MeetingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screenbg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
       <header className="border-b border-blue-100/50 bg-white/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
