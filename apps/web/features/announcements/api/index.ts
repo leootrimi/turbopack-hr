@@ -7,3 +7,11 @@ export const getAnnouncements = async () => {
     method: "GET",
   });
 };
+
+export const createAnnouncement = async (data: any) => {
+  return makeRequest({
+    url: "/announcements",
+    method: "POST",
+    data,
+  });
+};

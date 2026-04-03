@@ -6,18 +6,19 @@ import { Announcement, AnnouncementTag, TAG_CONFIG } from "./components/mock";
 import { AnnouncementSection }        from "./components/AnnouncementSection";
 import { CreateAnnouncementModal }    from "./components/CreateAnnouncementModal";
 import { groupAnnouncements } from "./components/utils";
-import { useAnnouncements } from "./hooks/queries";
+import { useAnnouncements, useCreateAnnouncement } from "./hooks/queries";
 import { useEffect } from "react";
 
 const TAGS = ["All", ...Object.keys(TAG_CONFIG)] as const;
 
 export function AnnouncementsPage() {
-  const { data: serverData }    = useAnnouncements();
-  const [items, setItems]       = useState<Announcement[]>([]);
-  const [query, setQuery]       = useState("");
+  const { data: serverData }      = useAnnouncements();
+  const { mutateAsync: createFn } = useCreateAnnouncement();
+  const [items, setItems]         = useState<Announcement[]>([]);
+  const [query, setQuery]         = useState("");
   const [tagFilter, setTagFilter] = useState<string>("All");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing]   = useState<Announcement | null>(null);
+  const [editing, setEditing]     = useState<Announcement | null>(null);
 
   useEffect(() => {
     if (serverData) {
@@ -39,20 +40,22 @@ export function AnnouncementsPage() {
   const { thisWeek, thisMonth, older } = groupAnnouncements(filtered);
 
   // ── handlers ───────────────────────────────────────────────────────────────
-  const handleSave = (data: Omit<Announcement, "id" | "createdAt">) => {
+  const handleSave = async (data: Omit<Announcement, "id" | "createdAt">) => {
     if (editing) {
       setItems((prev) =>
         prev.map((a) => (a.id === editing.id ? { ...a, ...data } : a))
       );
     } else {
-      const newItem: Announcement = {
-        ...data,
-        id: crypto.randomUUID(),
-        createdAt: new Date(),
-      };
-      setItems((prev) => [newItem, ...prev]);
+      await createFn({
+        title: data.title,
+        body: data.body,
+        tag: data.tag,
+        pinned: data.pinned || false,
+      });
+      // Re-fetching happens via invalidateQueries
     }
     setEditing(null);
+    setModalOpen(false);
   };
 
   const handleEdit = (a: Announcement) => {

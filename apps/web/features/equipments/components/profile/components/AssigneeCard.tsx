@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/components/ui/input';
 import { ScrollArea } from '@/components/components/ui/scroll-area';
 import { Button } from '@/components/components/ui/button';
+import { formatDate } from '@/lib/utils';
 
 interface AssigneeCardProps {
   equipmentId: number;
@@ -43,15 +44,6 @@ export function AssigneeCard({
       emp.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [employees, searchTerm]);
-
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return null;
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   const handleAssign = (employeeId: number) => {
     updateAssignment({ id: equipmentId, data: { assignedTo: employeeId } as any });

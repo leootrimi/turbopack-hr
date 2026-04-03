@@ -40,6 +40,13 @@ export const columns: ColumnDef<EmployeeRow>[] = [
     ),
   },
   {
+    accessorKey: 'email',
+    header: 'Email',
+    cell: ({ row }) => (
+      <div>{row.getValue('email')}</div>
+    ),
+  },
+  {
     id: 'actions',
     enableHiding: false,
     cell: ({ row }) => {

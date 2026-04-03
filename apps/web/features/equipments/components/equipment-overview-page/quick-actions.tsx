@@ -5,7 +5,7 @@ export function QuickActionCard() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3 shadow-lg">
       <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quick Actions</h3>
-      <button className="w-full flex items-center justify-center gap-2 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium transition-colors">
+      <button className="w-full flex items-center justify-center gap-2 py-2 bg-slate-800 hover:bg-slate-600 text-white rounded-lg text-sm font-medium transition-colors">
         <PlusCircle size={16} />
         Request New Equipment
       </button>

@@ -35,4 +35,9 @@ export class AnnouncementService {
       createdAt: item.createdAt,
     }));
   }
+
+  async create(data: { title: string; body: string; tag: any; pinned: boolean; authorId: number }) {
+    const result = await this.drizzle.db.insert(announcements).values(data).returning();
+    return result[0];
+  }
 }

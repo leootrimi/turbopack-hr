@@ -57,9 +57,7 @@ export default function EquipmentDetailPage({
           onBack={() => window.history.back()}
         />
 
-        {/* Responsive Masonry Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
-          {/* Specifications */}
           <div className="lg:col-span-1">
             <SpecificationsCard
               category={equipment.category}
@@ -69,7 +67,6 @@ export default function EquipmentDetailPage({
             />
           </div>
 
-          {/* Assignment */}
           <div className="lg:col-span-1">
             <AssigneeCard
               equipmentId={equipment.id}
@@ -83,7 +80,6 @@ export default function EquipmentDetailPage({
             />
           </div>
 
-          {/* Purchase Info */}
           <div className="lg:col-span-1">
             {equipment.purchaseInfo && (
               <PurchaseInfoCard
@@ -97,7 +93,6 @@ export default function EquipmentDetailPage({
             )}
           </div>
 
-          {/* Notes */}
           <div className="md:col-span-2 lg:col-span-2">
             <NotesCard
               description={equipment.description || ''}
@@ -105,7 +100,6 @@ export default function EquipmentDetailPage({
             />
           </div>
 
-          {/* Metadata */}
           <div className="lg:col-span-1">
             <MetadataCard
               createdAt={new Date(equipment.createdAt)}
