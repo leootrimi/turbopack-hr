@@ -8,6 +8,7 @@ interface User {
   email?: string;
   role?: string;
   sub?: string;
+  fullName?: string;
   [key: string]: any;
 }
 

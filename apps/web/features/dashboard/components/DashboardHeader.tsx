@@ -34,7 +34,7 @@ export function DashboardHeader() {
       {/* greeting */}
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight mb-0.5">
-          {`Good morning, ${user?.email} 👋`}
+          {`Hi, ${user?.fullName} 👋`}
         </h1>
         <p className="text-[13px] text-slate-400">{today}</p>
       </div>

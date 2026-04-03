@@ -15,8 +15,16 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const userRecords = await this.drizzleService.db
-      .select()
+      .select({
+        id: schema.users.id,
+        email: schema.users.email,
+        passwordHash: schema.users.passwordHash,
+        role: schema.users.role,
+        firstName: schema.employee.firstName,
+        lastName: schema.employee.lastName,
+      })
       .from(schema.users)
+      .leftJoin(schema.employee, eq(schema.users.employeeId, schema.employee.id))
       .where(eq(schema.users.email, email))
       .limit(1);
     const user = userRecords[0];
@@ -32,7 +40,8 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const fullName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : undefined;
+    const payload = { email: user.email, sub: user.id, role: user.role, fullName };
     return {
       access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
       refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
@@ -46,6 +55,7 @@ export class AuthService {
         email: payload.email,
         sub: payload.sub,
         role: payload.role,
+        fullName: payload.fullName,
       };
       return {
         access_token: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
