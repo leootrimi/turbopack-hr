@@ -26,6 +26,7 @@ export class TimeOffService {
     role: string,
     page: number = 1,
     perPage: number = 10,
+    status: 'Pending' | 'Approved' | 'Rejected' = 'Pending',
   ) {
     const offset = (page - 1) * perPage;
 
@@ -84,7 +85,7 @@ export class TimeOffService {
       })
       .from(leaveRequests)
       .innerJoin(employee, eq(leaveRequests.employeeId, employee.id))
-      .where(and(whereClause, eq(leaveRequests.status, 'Pending')))
+      .where(and(whereClause, eq(leaveRequests.status, status)))
       .orderBy(desc(leaveRequests.createdAt))
       .limit(perPage)
       .offset(offset);

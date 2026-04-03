@@ -70,6 +70,7 @@ export const getTimeOffBalance = async () => {
 export const getDashboardTimeOffRequests = async (params: {
   page: number;
   perPage: number;
+  status?: string;
 }) => {
   return makeRequest<TimeOffDashboardResponse>({
     url: "/dashboard/timeoff/requests",

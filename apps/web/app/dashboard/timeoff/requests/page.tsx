@@ -5,12 +5,14 @@ import { LeaveApprovalSection } from "../../../../features/timeoff/requests/comp
 import { StatCard } from "../../../../features/timeoff/requests/components/stats-card";
 import { useDashboardTimeOffRequests } from "../../../../features/timeoff/hooks/use-time-off";
 import { Button } from "@/components/components/ui/button";
+import { Tabs } from "./components/tabs";
 
 export default function Page() {
   const [page, setPage] = useState(1);
+  const [status, setStatus] = useState("Pending");
   const perPage = 10;
 
-  const { data, isLoading, error } = useDashboardTimeOffRequests(page, perPage);
+  const { data, isLoading, error } = useDashboardTimeOffRequests(page, perPage, status);
 
   if (isLoading) {
     return (
@@ -65,6 +67,14 @@ export default function Page() {
             color="yellow"
           />
         </div>
+
+      <Tabs
+        options={["Pending", "Approved", "Rejected"]}
+        value={status}
+        onChange={setStatus}
+        variant="underline"
+        size="md"
+      />
 
         <LeaveApprovalSection requests={data?.items || []} />
 

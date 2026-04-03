@@ -26,7 +26,7 @@ export function LoginForm() {
       
       if (data.access_token && data.refresh_token) {
         login(data.access_token, data.refresh_token);
-        router.push("/dashboard");
+        router.push("/dashboard/overview");
       }
     } catch (error) {
       console.error("Login failed:", error);
@@ -35,9 +35,7 @@ export function LoginForm() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 overflow-hidden">
-      {/* Animated Line Shape Background */}
       <div className="absolute inset-0 w-full h-full">
-        {/* Main Wavy Line */}
         <svg
           className="absolute w-full h-full"
           preserveAspectRatio="none"

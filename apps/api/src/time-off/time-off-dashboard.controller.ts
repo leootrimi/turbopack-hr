@@ -12,6 +12,7 @@ export class TimeOffDashboardController {
     @Request() req: any,
     @Query('page') page: string = '1',
     @Query('perPage') perPage: string = '10',
+    @Query('status') status: string = 'Pending',
   ) {
     const userId = req.user.id;
     const role = req.user.role;
@@ -21,6 +22,7 @@ export class TimeOffDashboardController {
       role,
       parseInt(page, 10) || 1,
       parseInt(perPage, 10) || 10,
+      status as 'Pending' | 'Approved' | 'Rejected',
     );
   }
 }

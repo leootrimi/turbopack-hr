@@ -57,10 +57,10 @@ export function useTimeOffBalance() {
   });
 }
 
-export function useDashboardTimeOffRequests(page: number, perPage: number) {
+export function useDashboardTimeOffRequests(page: number, perPage: number, status: string = "Pending") {
   return useQuery({
-    queryKey: ["time-off-dashboard", page, perPage],
-    queryFn: () => getDashboardTimeOffRequests({ page, perPage }),
+    queryKey: ["time-off-dashboard", page, perPage, status],
+    queryFn: () => getDashboardTimeOffRequests({ page, perPage, status }),
   });
 }
 

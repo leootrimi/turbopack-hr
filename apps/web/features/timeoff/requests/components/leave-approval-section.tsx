@@ -38,6 +38,10 @@ export function LeaveApprovalSection({ requests }: LeaveApprovalSectionProps) {
             duration={`${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}`}
             reason="Request for time off" // Basic fallback
             dateRange={`${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}`}
+            status={
+              request.status.toLowerCase() === 'approved' ? 'Approved' :
+              request.status.toLowerCase() === 'rejected' ? 'Rejected' : 'Pending'
+            }
           />
         ))}
 

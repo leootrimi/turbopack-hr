@@ -51,15 +51,13 @@ const TeamTab = ({ employeeId }: TeamTabProps) => {
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-500">
-      {/* Success Notification */}
       {successMessage && (
         <div
           className="flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold animate-in slide-in-from-top-4 duration-500 shadow-lg shadow-emerald-500/10"
           style={{
             background: "hsl(140,70%,97%)",
             border: "1px solid hsl(140,70%,85%)",
-            color: "hsl(140,70%,25%)",
-            fontFamily: "'DM Sans', sans-serif"
+            color: "hsl(140,70%,25%)"
           }}
         >
           <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm">
