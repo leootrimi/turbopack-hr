@@ -209,35 +209,6 @@ export default function CalendarStatsPage() {
                 ))}
               </div>
             )}
-
-            <div>
-              <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                <CheckCircle size={16} className="text-emerald-500" />
-                Attendance Tracking
-              </h2>
-              {filteredMeetings.length === 0 ? (
-                <p className="text-xs text-slate-400">
-                  Attendance appears once you have meetings.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {filteredMeetings.map((meeting) => (
-                    <AttendanceTracking
-                      key={meeting.id}
-                      meeting={meeting}
-                      stats={
-                        attendanceById[meeting.id] ?? {
-                          total: 0,
-                          attended: 0,
-                          absent: 0,
-                          percentage: 0,
-                        }
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
 
           <div className="space-y-6">

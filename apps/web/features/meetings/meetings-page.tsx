@@ -70,7 +70,6 @@ export default function MeetingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header Section */}
       <header className="border-b border-blue-100/50 bg-white/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
@@ -86,7 +85,7 @@ export default function MeetingsPage() {
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
               disabled={creating}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white text-sm font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-xl hover:from-indigo-600 hover:to-blue-600 transition-all duration-200 shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50"
             >
               <Plus size={16} />
               Create Meeting

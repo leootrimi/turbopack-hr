@@ -47,25 +47,6 @@ export function EmployeeTable() {
 
   const columns = React.useMemo(
     () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-          className="border-border bg-card text-primary hover:bg-muted"
-            checked={table.getIsAllPageRowsSelected()}
-            // indeterminate={table.getIsSomePageRowsSelected()}
-            onCheckedChange={table.getToggleAllPageRowsSelectedHandler()}
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-          className="border-border bg-card text-primary hover:bg-muted"
-            checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
-            onCheckedChange={row.getToggleSelectedHandler()}
-          />
-        ),
-      },
       ...baseColumns,
     ],
     []

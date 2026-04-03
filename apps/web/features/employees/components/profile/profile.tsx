@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import ProfileHeader from "./profile-header";
 import ActivityContent from "./activity/activity-content";
-import { activityData } from "../mock";
 import TeamTab from "./team-tab";
 import { DocumentsTab } from "./documents/document-tab";
 import TimeOffTab from "./time-off/time-off-tab";
@@ -30,11 +29,10 @@ const UserProfile = ({ id }: { id: string }) => {
 
   const { personal, job, compensation, timeOffBalance, leaveRequests } = employeeData;
 
-  // Render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "Activity":
-        return <ActivityContent activityData={activityData} />;
+        return <ActivityContent activityData={[]} />;
       case "Team":
         return <TeamTab employeeId={id} />;
       case "Documents":
@@ -42,7 +40,7 @@ const UserProfile = ({ id }: { id: string }) => {
       case "Time off":
         return <TimeOffTab timeOffBalance={timeOffBalance} leaveRequests={leaveRequests} />;
       default:
-        return <ActivityContent activityData={activityData} />;
+        return <ActivityContent activityData={[]} />;
     }
   };
 
@@ -50,7 +48,6 @@ const UserProfile = ({ id }: { id: string }) => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Sidebar - User Info */}
           <div className="lg:col-span-1">
             <div className="bg-card rounded-lg shadow-sm p-6">
               <ProfileHeader 
@@ -58,7 +55,6 @@ const UserProfile = ({ id }: { id: string }) => {
                 jobTitle={`${job.jobTitle} - ${job.department}`}
               />
 
-              {/* Action Buttons */}
               <div className="grid grid-cols-3 gap-2 mb-6">
                 <button className="flex items-center justify-center space-x-1 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                   <Phone className="w-4 h-4" />
@@ -74,7 +70,6 @@ const UserProfile = ({ id }: { id: string }) => {
                 </button>
               </div>
 
-              {/* Profile Details */}
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <MapPin className="w-4 h-4 text-gray-400 mt-1" />
@@ -142,10 +137,8 @@ const UserProfile = ({ id }: { id: string }) => {
             </div>
           </div>
 
-          {/* Right Content Area */}
           <div className="lg:col-span-2">
             <div className="bg-card rounded-lg shadow-sm">
-              {/* Tabs */}
               <div className="border-b">
                 <div className="flex space-x-8 px-6 overflow-x-auto">
                   {tabs.map((tab) => (
@@ -164,7 +157,6 @@ const UserProfile = ({ id }: { id: string }) => {
                 </div>
               </div>
 
-              {/* Dynamic Tab Content */}
               <div className="">{renderTabContent()}</div>
             </div>
           </div>
