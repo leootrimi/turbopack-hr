@@ -1,4 +1,4 @@
-import { CompensationInfo, CURRENCIES } from "./types";
+import { useFormContext, Controller } from "react-hook-form";
 import {
   Field,
   Input,
@@ -7,16 +7,12 @@ import {
   Toggle,
 } from "../../../components/components/FormFields";
 import { DollarSign, Landmark } from "lucide-react";
+import { EmployeeForm, CURRENCIES } from "@repo/types";
 
-interface Props {
-  data: CompensationInfo;
-  onChange: <K extends keyof CompensationInfo>(
-    key: K,
-    value: CompensationInfo[K],
-  ) => void;
-}
+export function StepCompensation() {
+  const { register, control, watch, formState: { errors } } = useFormContext<EmployeeForm>();
+  const data = watch("compensation");
 
-export function StepCompensation({ data, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
@@ -31,7 +27,7 @@ export function StepCompensation({ data, onChange }: Props) {
       {/* Salary amount + currency */}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2">
-          <Field label="Salary Amount" required>
+          <Field label="Salary Amount" required error={errors.compensation?.salaryAmount?.message}>
             <div className="relative">
               <DollarSign
                 size={14}
@@ -40,23 +36,14 @@ export function StepCompensation({ data, onChange }: Props) {
               <Input
                 type="number"
                 placeholder="e.g. 3500"
-                value={data.salaryAmount}
-                onChange={(e) => onChange("salaryAmount", e.target.value as CompensationInfo["salaryAmount"])}
+                {...register("compensation.salaryAmount")}
                 className="pl-9"
               />
             </div>
           </Field>
         </div>
-        <Field label="Currency">
-          <Select
-            value={data.currency}
-            onChange={(e) =>
-              onChange(
-                "currency",
-                e.target.value as CompensationInfo["currency"],
-              )
-            }
-          >
+        <Field label="Currency" error={errors.compensation?.currency?.message}>
+          <Select {...register("compensation.currency")}>
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -70,27 +57,33 @@ export function StepCompensation({ data, onChange }: Props) {
       <Field
         label="Salary Type"
         hint="Gross is before tax deductions, Net is take-home pay"
+        error={errors.compensation?.salaryType?.message}
       >
-        <SegmentControl
-          options={["Gross", "Net"]}
-          value={data.salaryType}
-          onChange={(v) =>
-            onChange("salaryType", v as CompensationInfo["salaryType"])
-          }
+        <Controller
+          name="compensation.salaryType"
+          control={control}
+          render={({ field }) => (
+            <SegmentControl
+              options={["Gross", "Net"]}
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
         />
       </Field>
 
       {/* Payment frequency */}
-      <Field label="Payment Frequency">
-        <SegmentControl
-          options={["Monthly", "Weekly"]}
-          value={data.paymentFrequency}
-          onChange={(v) =>
-            onChange(
-              "paymentFrequency",
-              v as CompensationInfo["paymentFrequency"],
-            )
-          }
+      <Field label="Payment Frequency" error={errors.compensation?.paymentFrequency?.message}>
+        <Controller
+          name="compensation.paymentFrequency"
+          control={control}
+          render={({ field }) => (
+            <SegmentControl
+              options={["Monthly", "Weekly"]}
+              value={field.value}
+              onChange={field.onChange}
+            />
+          )}
         />
       </Field>
 
@@ -98,6 +91,8 @@ export function StepCompensation({ data, onChange }: Props) {
       <Field
         label="Bank Account Number"
         hint="IBAN or local account number for payroll processing"
+        required
+        error={errors.compensation?.bankAccount?.message}
       >
         <div className="relative">
           <Landmark
@@ -106,19 +101,24 @@ export function StepCompensation({ data, onChange }: Props) {
           />
           <Input
             placeholder="RS35 1234 0078 0000 0001 00"
-            value={data.bankAccount}
-            onChange={(e) => onChange("bankAccount", e.target.value)}
+            {...register("compensation.bankAccount")}
             className="pl-9"
           />
         </div>
       </Field>
 
       {/* Bonus eligible toggle */}
-      <Toggle
-        label="Bonus Eligible"
-        description="Employee is eligible for performance-based bonuses"
-        checked={data.bonusEligible}
-        onChange={(v) => onChange("bonusEligible", v)}
+      <Controller
+        name="compensation.bonusEligible"
+        control={control}
+        render={({ field }) => (
+          <Toggle
+            label="Bonus Eligible"
+            description="Employee is eligible for performance-based bonuses"
+            checked={field.value}
+            onChange={field.onChange}
+          />
+        )}
       />
 
       {/* Summary preview */}

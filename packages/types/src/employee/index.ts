@@ -76,34 +76,34 @@ export const CreateEmployeeDtoSchema = z.object({
 export type CreateEmployeeDto = z.infer<typeof CreateEmployeeDtoSchema>;
 
 export const PersonalInfoSchema = z.object({
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.string(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
   personalEmail: z.union([z.string().email(), z.literal("")]).optional(),
-  phone: z.string(),
-  dateOfBirth: z.string(),
-  personalNumber: z.string(),
-  address: z.string(),
-  emergencyContact: z.string(),
+  phone: z.string().min(1, "Phone number is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  personalNumber: z.string().min(1, "Personal number is required"),
+  address: z.string().min(1, "Address is required"),
+  emergencyContact: z.string().min(1, "Emergency contact is required"),
 });
 
 export const JobInfoSchema = z.object({
-  jobTitle: z.string(),
-  department: z.string(),
-  team: z.string(),
-  manager: z.string(),
+  jobTitle: z.string().min(1, "Job title is required"),
+  department: z.string().min(1, "Department is required"),
+  team: z.string().min(1, "Team is required"),
+  manager: z.string().min(1, "Manager is required"),
   employmentType: EmploymentTypeSchema,
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().optional(),
   workLocation: WorkLocationSchema,
 });
 
 export const CompensationInfoSchema = z.object({
-  salaryAmount: z.string(),
+  salaryAmount: z.string().min(1, "Salary amount is required"),
   salaryType: SalaryTypeSchema,
   currency: CurrencySchema,
   paymentFrequency: PaymentFrequencySchema,
-  bankAccount: z.string(),
+  bankAccount: z.string().min(1, "Bank account is required"),
   bonusEligible: z.boolean(),
 });
 

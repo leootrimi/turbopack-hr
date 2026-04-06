@@ -4,18 +4,25 @@ interface FieldProps {
   label: string;
   required?: boolean;
   hint?: string;
+  error?: string;
   children: ReactNode;
 }
 
-export function Field({ label, required, hint, children }: FieldProps) {
+export function Field({ label, required, hint, error, children }: FieldProps) {
   return (
     <div className="space-y-1.5">
-      <label className="text-xs font-semibold text-slate-600">
-        {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
-      </label>
+      <div className="flex justify-between items-center">
+        <label className="text-xs font-semibold text-slate-600">
+          {label}
+          {required && <span className="text-red-400 ml-0.5">*</span>}
+        </label>
+      </div>
       {children}
-      {hint && <p className="text-[11px] text-slate-400">{hint}</p>}
+      {error ? (
+        <p className="text-[11px] text-red-500 font-medium">{error}</p>
+      ) : (
+        hint && <p className="text-[11px] text-slate-400">{hint}</p>
+      )}
     </div>
   );
 }

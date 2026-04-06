@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, UserPlus, CheckCircle2 } from "lucide-react";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { StepIndicator } from "./components/StepIndicator";
 import { StepPersonal } from "./components/StepPersonal";
 import { StepJob } from "./components/StepJob";
@@ -9,73 +11,54 @@ import { StepCompensation } from "./components/StepCompensation";
 import { StepReview } from "./components/StepReview";
 import { postEmployee } from "./api";
 import {
-  CompensationInfo,
   EmployeeForm,
+  EmployeeFormSchema,
   INITIAL_FORM,
-  JobInfo,
-  PersonalInfo,
   STEPS,
 } from "@repo/types";
 
-function isStepValid(step: number, form: EmployeeForm): boolean {
-  if (step === 1) {
-    const { firstName, lastName, email, dateOfBirth } = form.personal;
-    return !!(
-      firstName.trim() &&
-      lastName.trim() &&
-      email.trim() &&
-      dateOfBirth
-    );
-  }
-  if (step === 2) {
-    const { jobTitle, department, startDate } = form.job;
-    return !!(jobTitle.trim() && department && startDate);
-  }
-  if (step === 3) {
-    const { salaryAmount } = form.compensation;
-    return !!salaryAmount;
-  }
-  return true;
-}
+const STEP_FIELDS: Record<number, any[]> = {
+  1: ["personal"],
+  2: ["job"],
+  3: ["compensation"],
+};
 
 export function AddEmployeePage() {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<EmployeeForm>(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
+
+  const form = useForm<EmployeeForm>({
+    resolver: zodResolver(EmployeeFormSchema),
+    defaultValues: INITIAL_FORM,
+    mode: "onChange",
+  });
+
+  const { trigger, handleSubmit: hookSubmit, getValues, watch } = form;
+  const formData = watch();
 
   const totalSteps = STEPS.length;
   const isLast = step === totalSteps;
-  const canNext = isStepValid(step, form);
 
-  function patchPersonal<K extends keyof PersonalInfo>(
-    key: K,
-    value: PersonalInfo[K],
-  ) {
-    setForm((f) => ({ ...f, personal: { ...f.personal, [key]: value } }));
-  }
-  function patchJob<K extends keyof JobInfo>(key: K, value: JobInfo[K]) {
-    setForm((f) => ({ ...f, job: { ...f.job, [key]: value } }));
-  }
-  function patchCompensation(key: keyof CompensationInfo, value: any) {
-    setForm((f) => ({
-      ...f,
-      compensation: { ...f.compensation, [key]: value },
-    }));
-  }
-
-  const handleNext = () => {
+  const handleNext = async () => {
+    const fields = STEP_FIELDS[step];
+    if (fields) {
+      const isValid = await trigger(fields as any);
+      if (!isValid) return;
+    }
     if (step <= totalSteps) setStep((s) => s + 1);
   };
+
   const handleBack = () => setStep((s) => Math.max(1, s - 1));
-  const handleSubmit = () => {
-    console.log("Submitting employee:", form);
-    postEmployee(form);
+
+  const onSubmit = (data: EmployeeForm) => {
+    console.log("Submitting employee:", data);
+    postEmployee(data);
     setSubmitted(true);
   };
 
   // ── Success screen ─────────────────────────────────────────────────────────
   if (submitted) {
-    const fullName = `${form.personal.firstName} ${form.personal.lastName}`;
+    const fullName = `${formData.personal.firstName} ${formData.personal.lastName}`;
     return (
       <div
         className="min-h-screen bg-slate-50 flex items-center justify-center p-6"
@@ -98,26 +81,26 @@ export function AddEmployeePage() {
             <div className="flex justify-between text-xs">
               <span className="text-slate-400">Role</span>
               <span className="font-semibold text-slate-700">
-                {form.job.jobTitle}
+                {formData.job.jobTitle}
               </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-400">Department</span>
               <span className="font-semibold text-slate-700">
-                {form.job.department}
+                {formData.job.department}
               </span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-slate-400">Start Date</span>
               <span className="font-semibold text-slate-700">
-                {form.job.startDate}
+                {formData.job.startDate}
               </span>
             </div>
           </div>
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => {
-                setForm(INITIAL_FORM);
+                form.reset(INITIAL_FORM);
                 setStep(1);
                 setSubmitted(false);
               }}
@@ -159,17 +142,12 @@ export function AddEmployeePage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
-          {step === 1 && (
-            <StepPersonal data={form.personal} onChange={patchPersonal} />
-          )}
-          {step === 2 && <StepJob data={form.job} onChange={patchJob} />}
-          {step === 3 && (
-            <StepCompensation
-              data={form.compensation}
-              onChange={(key, value) => patchCompensation(key, value)}
-            />
-          )}
-          {step === 4 && <StepReview form={form} />}
+          <FormProvider {...form}>
+            {step === 1 && <StepPersonal />}
+            {step === 2 && <StepJob />}
+            {step === 3 && <StepCompensation />}
+            {step === 4 && <StepReview />}
+          </FormProvider>
         </div>
 
         <div className="flex items-center justify-between">
@@ -198,14 +176,13 @@ export function AddEmployeePage() {
 
           {step <= totalSteps ? (
             <button
-              onClick={isLast ? undefined : handleNext}
-              disabled={!canNext && step !== totalSteps}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={handleNext}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors"
             >
               {isLast ? (
-                <span onClick={handleNext}>
+                <>
                   Review <ArrowRight size={15} />
-                </span>
+                </>
               ) : (
                 <>
                   Continue <ArrowRight size={15} />
@@ -214,7 +191,7 @@ export function AddEmployeePage() {
             </button>
           ) : (
             <button
-              onClick={handleSubmit}
+              onClick={hookSubmit(onSubmit)}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
             >
               <CheckCircle2 size={15} /> Create Employee

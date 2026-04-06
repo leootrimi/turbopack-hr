@@ -1,14 +1,11 @@
-import { EmployeeForm } from "./types";
+import { useFormContext } from "react-hook-form";
 import { User, Briefcase, Banknote, CheckCircle2 } from "lucide-react";
-
-interface Props {
-  form: EmployeeForm;
-}
+import { EmployeeForm } from "@repo/types";
 
 function ReviewSection({ icon: Icon, title, rows }: {
   icon: React.ElementType;
   title: string;
-  rows: { label: string; value: string }[];
+  rows: { label: string; value: string | boolean | undefined }[];
 }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -22,7 +19,7 @@ function ReviewSection({ icon: Icon, title, rows }: {
         {rows.filter((r) => r.value).map(({ label, value }) => (
           <div key={label} className="flex items-start justify-between px-5 py-3 gap-4">
             <span className="text-xs text-slate-400 shrink-0">{label}</span>
-            <span className="text-xs font-semibold text-slate-800 text-right">{value}</span>
+            <span className="text-xs font-semibold text-slate-800 text-right">{String(value)}</span>
           </div>
         ))}
       </div>
@@ -30,7 +27,9 @@ function ReviewSection({ icon: Icon, title, rows }: {
   );
 }
 
-export function StepReview({ form }: Props) {
+export function StepReview() {
+  const { getValues } = useFormContext<EmployeeForm>();
+  const form = getValues();
   const { personal, job, compensation } = form;
   const fullName = `${personal.firstName} ${personal.lastName}`.trim();
 
@@ -45,7 +44,7 @@ export function StepReview({ form }: Props) {
       {fullName && (
         <div className="flex items-center gap-4 p-4 bg-slate-900 rounded-2xl text-white">
           <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">
-            {personal.firstName[0]}{personal.lastName[0]}
+            {personal.firstName?.[0]}{personal.lastName?.[0]}
           </div>
           <div>
             <p className="font-bold text-base">{fullName}</p>
