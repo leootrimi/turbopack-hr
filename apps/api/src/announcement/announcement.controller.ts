@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AnnouncementService } from './announcement.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('announcements')
 export class AnnouncementController {

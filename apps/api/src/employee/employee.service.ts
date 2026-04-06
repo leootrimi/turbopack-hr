@@ -13,7 +13,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from '../email/email.service';
 import { CreateEmployeeDto } from '@repo/types';
 
 @Injectable()

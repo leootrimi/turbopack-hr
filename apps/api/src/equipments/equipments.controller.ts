@@ -12,7 +12,7 @@ import {
 import { EquipmentsService } from './equipments.service';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentForm } from '@repo/types';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('equipments')
 export class EquipmentsController {
