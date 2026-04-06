@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { checkinLogs, employee, jobInfo, teams } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { checkinLogs, employee, jobInfo, teams } from '../database/schema';
 import { and, eq, gte, lte } from 'drizzle-orm';
 
 @Injectable()

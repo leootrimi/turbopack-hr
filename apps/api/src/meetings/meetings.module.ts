@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DrizzleModule } from 'src/database/drizzle.module';
+import { DrizzleModule } from '../database/drizzle.module';
 import { MeetingsController } from './meetings.controller';
 import { MeetingsService } from './meetings.service';
 

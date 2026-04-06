@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentForm, EquipmentRow } from '@repo/types';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { equipment, purchaseInfo, employee, users } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { equipment, purchaseInfo, employee, users } from '../database/schema';
 import { eq, sql } from 'drizzle-orm';
 
 @Injectable()

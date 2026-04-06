@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { TeamsController } from './teams.controller';
-import { DrizzleModule } from 'src/database/drizzle.module';
+import { DrizzleModule } from '../database/drizzle.module';
 
 @Module({
   imports: [DrizzleModule],

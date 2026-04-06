@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { employee, jobInfo, teams } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { employee, jobInfo, teams } from '../database/schema';
 import { eq, sql } from 'drizzle-orm';
 import { TeamCard } from '@repo/types';
 

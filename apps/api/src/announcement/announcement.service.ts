@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { announcements, employee } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { announcements, employee } from '../database/schema';
 import { desc, eq } from 'drizzle-orm';
 
 @Injectable()

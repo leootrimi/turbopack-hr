@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { desc } from 'drizzle-orm';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { jobs } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { jobs } from '../database/schema';
 import { CreateJobDto } from './dto/create-job.dto';
 
 @Injectable()

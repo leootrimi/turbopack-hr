@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DrizzleService } from 'src/database/drizzle.provider';
+import { DrizzleService } from '../database/drizzle.provider';
 import {
   compensation,
   employee,

@@ -4,8 +4,8 @@ import { TimeOffController } from './time-off.controller';
 import { TimeOffDashboardController } from './time-off-dashboard.controller';
 import { TimeOffTypesController } from './time-off-types.controller';
 import { TimeOffTypesService } from './time-off-types.service';
-import { DrizzleModule } from 'src/database/drizzle.module';
-import { EmailModule } from 'src/email/email.module';
+import { DrizzleModule } from '../database/drizzle.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [DrizzleModule, EmailModule],

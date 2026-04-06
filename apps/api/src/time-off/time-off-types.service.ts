@@ -5,8 +5,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DrizzleService } from 'src/database/drizzle.provider';
-import { leaveRequests, timeOffTypes } from 'src/database/schema';
+import { DrizzleService } from '../database/drizzle.provider';
+import { leaveRequests, timeOffTypes } from '../database/schema';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import { CreateTimeOffTypeDto } from './dto/create-time-off-type.dto';
 import { UpdateTimeOffTypeDto } from './dto/update-time-off-type.dto';
