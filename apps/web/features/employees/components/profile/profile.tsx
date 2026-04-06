@@ -14,14 +14,17 @@ import TeamTab from "./team-tab";
 import { DocumentsTab } from "./documents/document-tab";
 import TimeOffTab from "./time-off/time-off-tab";
 import { formatDate } from "@/lib/utils";
-
 import { useEmployee } from "../../hooks/queries";
+import { useAuth } from "../../../auth/hooks/useAuth";
+import { getVisibleTabs } from "./config/tabs.config";
+import { Role } from "../../../../config/rbac";
 
 const UserProfile = ({ id }: { id: string }) => {
   const { data: employeeData, isLoading, error } = useEmployee(id);
   const [activeTab, setActiveTab] = useState("Activity");
+  const { user } = useAuth();
 
-  const tabs = ["Activity", "Team", "Time off", "Documents", "Reviews"];
+  const visibleTabs = getVisibleTabs(user?.role as Role);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading profile</div>;
@@ -141,7 +144,7 @@ const UserProfile = ({ id }: { id: string }) => {
             <div className="bg-card rounded-lg shadow-sm">
               <div className="border-b">
                 <div className="flex space-x-8 px-6 overflow-x-auto">
-                  {tabs.map((tab) => (
+                  {visibleTabs.map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
