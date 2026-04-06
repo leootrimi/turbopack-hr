@@ -29,7 +29,6 @@ export function TeamDetailSidebar({ isOpen, onClose, team }: TeamDetailSidebarPr
         className={`fixed md:relative right-0 top-0 h-screen w-full md:w-1/2 bg-white shadow-2xl border-l border-slate-100 transform transition-transform duration-300 ease-in-out z-40 overflow-y-auto ${
           isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'
         }`}
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         {/* Header Navigation */}
         <div className="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10 backdrop-blur-md">

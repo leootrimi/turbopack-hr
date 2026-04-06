@@ -84,7 +84,6 @@ export function AddEquipmentPage() {
     return (
       <div
         className="min-h-screen bg-slate-50 flex items-center justify-center p-6"
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="bg-white rounded-3xl border border-slate-100 shadow-xl p-12 max-w-md w-full text-center space-y-5">
           <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center mx-auto text-3xl">
@@ -140,7 +139,6 @@ export function AddEquipmentPage() {
   return (
     <div
       className="min-h-screen bg-slate-50"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
         <div className="flex items-center gap-3">

@@ -283,7 +283,7 @@ export function DocumentsTab({ employeeId }: { employeeId: string }) {
   };
 
   return (
-    <div className="flex gap-0 h-[600px]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex gap-0 h-[600px]">
       <aside className="w-56 shrink-0 border-r border-slate-100 px-3 py-6 flex flex-col gap-1.5 bg-slate-50/30">
         <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase px-3 mb-3">
           Categories

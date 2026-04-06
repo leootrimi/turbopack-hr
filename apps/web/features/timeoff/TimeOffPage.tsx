@@ -31,7 +31,7 @@ export function TimeOffPage() {
   const approvedCount = requestList.filter((r) => r.status === "Approved").length;
 
   return (
-    <div className="min-h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
         <div className="flex items-center justify-between flex-wrap gap-3">

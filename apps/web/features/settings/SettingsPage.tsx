@@ -34,7 +34,7 @@ export default function HRSettingsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex h-screen bg-slate-50">
       <div className="w-80 bg-white border-r border-slate-100 flex flex-col overflow-hidden">
         <div className="px-4 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">

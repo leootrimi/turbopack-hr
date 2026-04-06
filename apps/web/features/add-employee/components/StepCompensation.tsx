@@ -24,34 +24,21 @@ export function StepCompensation() {
         </p>
       </div>
 
-      {/* Salary amount + currency */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
-          <Field label="Salary Amount" required error={errors.compensation?.salaryAmount?.message}>
-            <div className="relative">
-              <DollarSign
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
-              <Input
-                type="number"
-                placeholder="e.g. 3500"
-                {...register("compensation.salaryAmount")}
-                className="pl-9"
-              />
-            </div>
-          </Field>
+      {/* Salary amount */}
+      <Field label="Salary Amount" hint="Enter the numerical value (optional)" error={errors.compensation?.salaryAmount?.message}>
+        <div className="relative">
+          <DollarSign
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          />
+          <Input
+            type="number"
+            placeholder="e.g. 3500"
+            {...register("compensation.salaryAmount")}
+            className="pl-9"
+          />
         </div>
-        <Field label="Currency" error={errors.compensation?.currency?.message}>
-          <Select {...register("compensation.currency")}>
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Select>
-        </Field>
-      </div>
+      </Field>
 
       {/* Salary type */}
       <Field
@@ -72,26 +59,10 @@ export function StepCompensation() {
         />
       </Field>
 
-      {/* Payment frequency */}
-      <Field label="Payment Frequency" error={errors.compensation?.paymentFrequency?.message}>
-        <Controller
-          name="compensation.paymentFrequency"
-          control={control}
-          render={({ field }) => (
-            <SegmentControl
-              options={["Monthly", "Weekly"]}
-              value={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
-      </Field>
-
       {/* Bank account */}
       <Field
         label="Bank Account Number"
-        hint="IBAN or local account number for payroll processing"
-        required
+        hint="IBAN or local account number (optional)"
         error={errors.compensation?.bankAccount?.message}
       >
         <div className="relative">
@@ -128,14 +99,13 @@ export function StepCompensation() {
             Salary Summary
           </p>
           <p className="text-2xl font-bold text-indigo-900">
-            {data.currency} {Number(data.salaryAmount).toLocaleString()}
+            {Number(data.salaryAmount).toLocaleString()}
             <span className="text-sm font-medium text-indigo-500 ml-2">
-              / {data.paymentFrequency === "Monthly" ? "month" : "week"}
+              / year
             </span>
           </p>
           <p className="text-xs text-indigo-500 mt-1">
-            {data.salaryType} · {data.paymentFrequency} ·{" "}
-            {data.bonusEligible ? "Bonus eligible" : "No bonus"}
+            {data.salaryType} · {data.bonusEligible ? "Bonus eligible" : "No bonus"}
           </p>
         </div>
       )}

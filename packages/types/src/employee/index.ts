@@ -57,19 +57,19 @@ export const CreateEmployeeDtoSchema = z.object({
     department: z.string(),
     teamId: z.number(),
     managerId: z.number().optional(),
-    employmentType: EmploymentTypeSchema,
+    employmentType: EmploymentTypeSchema.optional(),
     startDate: z.string(),
     endDate: z.string().optional(),
-    workLocation: WorkLocationSchema,
+    workLocation: WorkLocationSchema.optional(),
   }),
 
   compensation: z.object({
-    salaryAmount: z.number(),
-    salaryType: SalaryTypeSchema,
-    currency: CurrencySchema,
-    paymentFrequency: PaymentFrequencySchema,
-    bankAccount: z.string(),
-    bonusEligible: z.boolean(),
+    salaryAmount: z.number().optional(),
+    salaryType: SalaryTypeSchema.optional(),
+    currency: CurrencySchema.optional(),
+    paymentFrequency: PaymentFrequencySchema.optional(),
+    bankAccount: z.string().optional(),
+    bonusEligible: z.boolean().optional(),
   }),
 });
 
@@ -90,20 +90,16 @@ export const PersonalInfoSchema = z.object({
 export const JobInfoSchema = z.object({
   jobTitle: z.string().min(1, "Job title is required"),
   department: z.string().min(1, "Department is required"),
-  team: z.string().min(1, "Team is required"),
-  manager: z.string().min(1, "Manager is required"),
-  employmentType: EmploymentTypeSchema,
+  teamId: z.string().min(1, "Team is required"),
+  managerId: z.string().min(1, "Manager is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().optional(),
-  workLocation: WorkLocationSchema,
 });
 
 export const CompensationInfoSchema = z.object({
-  salaryAmount: z.string().min(1, "Salary amount is required"),
+  salaryAmount: z.string().optional(),
   salaryType: SalaryTypeSchema,
-  currency: CurrencySchema,
-  paymentFrequency: PaymentFrequencySchema,
-  bankAccount: z.string().min(1, "Bank account is required"),
+  bankAccount: z.string().optional(),
   bonusEligible: z.boolean(),
 });
 
@@ -173,18 +169,14 @@ export const INITIAL_FORM: EmployeeForm = {
   job: {
     jobTitle: "",
     department: "",
-    team: "",
-    manager: "",
-    employmentType: "Full-time",
+    teamId: "",
+    managerId: "",
     startDate: "",
     endDate: "",
-    workLocation: "Office",
   },
   compensation: {
     salaryAmount: "",
     salaryType: "Gross",
-    currency: "EUR",
-    paymentFrequency: "Monthly",
     bankAccount: "",
     bonusEligible: false,
   },

@@ -75,7 +75,6 @@ export function AnnouncementsPage() {
   return (
     <div
       className="min-h-screen bg-slate-50 p-6"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       <div className="max-w-7xl mx-auto space-y-6">
 

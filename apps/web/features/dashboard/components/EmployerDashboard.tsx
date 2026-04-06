@@ -22,7 +22,6 @@ export function EmployerDashboard() {
   return (
     <div
       className="min-h-screen bg-slate-50 p-6"
-      style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
     >
       <div className="max-w-[1400px] mx-auto">
 

@@ -24,7 +24,6 @@ export function JobPreviewModal({ job, onClose }: Props) {
 
       <div
         className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
-        style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-indigo-50/60">
           <div className="flex items-start justify-between gap-4">

@@ -15,7 +15,6 @@ export function StepJob() {
         <p className="text-sm text-slate-500 mt-0.5">Role details, team assignment and employment terms.</p>
       </div>
 
-      {/* Job Title + Department */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Job Title" required error={errors.job?.jobTitle?.message}>
           <div className="relative">
@@ -35,59 +34,27 @@ export function StepJob() {
         </Field>
       </div>
 
-      {/* Team + Manager */}
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Team" required error={errors.job?.team?.message}>
+        <Field label="Team" required error={errors.job?.teamId?.message}>
           <div className="relative">
             <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            <Select {...register("job.team")} className="pl-9">
+            <Select {...register("job.teamId")} className="pl-9">
               <option value="">Select team…</option>
-              {teams?.map((t) => <option key={t.teamId}>{t.teamName}</option>)}
+              {teams?.map((t) => <option key={t.teamId} value={t.teamId}>{t.teamName}</option>)}
             </Select>
           </div>
         </Field>
-        <Field label="Reports To (Manager)" required error={errors.job?.manager?.message}>
+        <Field label="Reports To (Manager)" required error={errors.job?.managerId?.message}>
           <div className="relative">
             <UserCheck size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            <Select {...register("job.manager")} className="pl-9">
+            <Select {...register("job.managerId")} className="pl-9">
               <option value="">Select manager…</option>
-              {teams?.map((m) => <option key={m.leaderId}>{m.leaderName}</option>)}
+              {teams?.map((m) => <option key={m.leaderId} value={m.leaderId}>{m.leaderName}</option>)}
             </Select>
           </div>
         </Field>
       </div>
 
-      {/* Employment Type */}
-      <Field label="Employment Type" required error={errors.job?.employmentType?.message}>
-        <Controller
-          name="job.employmentType"
-          control={control}
-          render={({ field }) => (
-            <SegmentControl
-              options={["Full-time", "Part-time", "Contractor"]}
-              value={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
-      </Field>
-
-      {/* Work Location */}
-      <Field label="Work Location" required error={errors.job?.workLocation?.message}>
-        <Controller
-          name="job.workLocation"
-          control={control}
-          render={({ field }) => (
-            <SegmentControl
-              options={["Office", "Remote", "Hybrid"]}
-              value={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
-      </Field>
-
-      {/* Start + End Date */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Start Date" required error={errors.job?.startDate?.message}>
           <div className="relative">

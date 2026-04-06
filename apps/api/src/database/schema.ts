@@ -46,10 +46,10 @@ export const jobInfo = pgTable('job_info', {
   department: varchar('department', { length: 256 }),
   teamId: integer('team_id').references(() => teams.id),
   managerId: integer('manager_id').references(() => employee.id),
-  employmentType: employmentTypeEnum('employment_type').notNull(),
+  employmentType: employmentTypeEnum('employment_type'),
   startDate: timestamp('start_date').notNull(),
   endDate: timestamp('end_date'),
-  workLocation: workLocationEnum('work_location').notNull(),
+  workLocation: workLocationEnum('work_location'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

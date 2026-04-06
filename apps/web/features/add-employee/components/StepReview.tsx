@@ -77,10 +77,8 @@ export function StepReview() {
         rows={[
           { label: "Job Title",          value: job.jobTitle                 },
           { label: "Department",         value: job.department               },
-          { label: "Team",               value: job.team                     },
-          { label: "Manager",            value: job.manager                  },
-          { label: "Employment Type",    value: job.employmentType           },
-          { label: "Work Location",      value: job.workLocation             },
+          { label: "Team ID",            value: job.teamId                   },
+          { label: "Manager ID",         value: job.managerId                },
           { label: "Start Date",         value: job.startDate                },
           { label: "End Date",           value: job.endDate || "Permanent"   },
         ]}
@@ -90,8 +88,7 @@ export function StepReview() {
         icon={Banknote}
         title="Compensation & Payroll"
         rows={[
-          { label: "Salary",             value: `${compensation.currency} ${Number(compensation.salaryAmount || 0).toLocaleString()} (${compensation.salaryType})` },
-          { label: "Payment Frequency",  value: compensation.paymentFrequency },
+          { label: "Salary",             value: job.jobTitle ? `${Number(compensation.salaryAmount || 0).toLocaleString()} (${compensation.salaryType})` : undefined },
           { label: "Bank Account",       value: compensation.bankAccount      },
           { label: "Bonus Eligible",     value: compensation.bonusEligible ? "Yes" : "No" },
         ]}

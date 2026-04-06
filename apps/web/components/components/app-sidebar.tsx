@@ -184,7 +184,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar
       {...props}
       className="border-r border-slate-100 bg-white"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
       <SidebarHeader className="px-4 py-5 border-b border-slate-100">
         <div className="flex items-center gap-3">

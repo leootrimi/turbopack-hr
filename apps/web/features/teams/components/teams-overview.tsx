@@ -65,7 +65,7 @@ export function TeamsOverview() {
   );
 
   return (
-    <div className="min-h-screen bg-linear-to-br bg-background" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-linear-to-br bg-background">
       <div className="flex h-screen overflow-hidden">
         {/* Left Section - Content Area */}
         <div className={`transition-all duration-300 overflow-hidden flex flex-col ${sidebarOpen ? 'w-full md:w-1/2' : 'w-full'}`}>

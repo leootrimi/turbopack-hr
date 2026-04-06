@@ -28,7 +28,7 @@ export function PublicJobsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen bg-slate-50">
 
       {/* hero */}
       <div className="bg-slate-900 text-white px-6 py-16 text-center space-y-4">
