@@ -1,8 +1,10 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
 // Create a custom axios instance
 export const api = axios.create({
-  baseURL: 'http://localhost:3000', // Update this if API runs on a different port
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
