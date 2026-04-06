@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { LoginBody } from "@repo/types";
 import { useLoginMutation } from "../hooks/queries";
 import { useAuth } from "../hooks/useAuth";
@@ -12,6 +12,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
   const { login } = useAuth();
@@ -21,6 +22,7 @@ export function LoginForm() {
     e.preventDefault();
 
     try {
+      setError(null);
       const payload: LoginBody = { email, password };
       const data = await loginMutation(payload);
       
@@ -28,8 +30,8 @@ export function LoginForm() {
         login(data.access_token, data.refresh_token);
         router.push("/dashboard/overview");
       }
-    } catch (error) {
-      console.error("Login failed:", error);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Invalid email or password. Please try again.");
     }
   };
 
@@ -128,6 +130,13 @@ export function LoginForm() {
               Sign in to your account
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 animate-in fade-in slide-in-from-top-1">
+              <AlertCircle size={18} className="shrink-0" />
+              <p className="text-xs font-medium">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">

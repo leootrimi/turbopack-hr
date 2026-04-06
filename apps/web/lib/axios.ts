@@ -31,7 +31,12 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check if error is 401 and it's not a retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip refresh logic for login endpoint to prevent page reloads on bad credentials
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
       originalRequest._retry = true;
 
       try {
