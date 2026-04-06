@@ -9,7 +9,7 @@ import {
   timeOffBalance,
   leaveRequests,
   timeOffTypes,
-} from 'src/database/schema';
+} from '../database/schema';
 import * as bcrypt from 'bcrypt';
 import { EmployeeWithJob } from './dto/find-employee.dto';
 import { eq, sql } from 'drizzle-orm';

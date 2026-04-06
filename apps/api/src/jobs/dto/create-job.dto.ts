@@ -2,7 +2,7 @@ import {
   jobLocationTypeEnum,
   jobStatusEnum,
   jobTypeEnum,
-} from 'src/database/schema';
+} from '../../database/schema';
 
 export class CreateJobDto {
   title: string;

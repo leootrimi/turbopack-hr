@@ -10,7 +10,7 @@ import {
   meetingParticipants,
   meetings,
   users,
-} from 'src/database/schema';
+} from '../database/schema';
 import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { desc, eq, inArray } from 'drizzle-orm';
 

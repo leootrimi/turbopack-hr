@@ -10,11 +10,11 @@ import {
   employee,
   timeOffBalance,
   timeOffTypes,
-} from 'src/database/schema';
+} from '../database/schema';
 import { desc, eq, sql, and, gte, lte } from 'drizzle-orm';
 import { CreateTimeOffDto } from './dto/create-time-off.dto';
 import { TimeOffTypesService } from './time-off-types.service';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class TimeOffService {
