@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import cors from 'cors';
+import * as cors from 'cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,7 +9,8 @@ async function bootstrap() {
     cors({
       origin: [
         'https://turbopack-hr-web.vercel.app',
-        'https://turbopack-hr-web-skas.vercel.app'
+        'https://turbopack-hr-web-skas.vercel.app',
+        'http://localhost:3001'
       ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
