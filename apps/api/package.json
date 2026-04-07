@@ -36,6 +36,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@repo/types": "workspace:*",
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "drizzle-kit": "^0.31.7",
     "drizzle-orm": "^0.44.7",
     "passport": "^0.7.0",
