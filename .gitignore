@@ -57,7 +57,6 @@ node_modules
 .turbo
 
 # For google drive json file.
-*.json
 
 .localstack/
 *.pem
