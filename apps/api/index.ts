@@ -6,7 +6,6 @@ import { AppModule } from './src/app.module';
 
 const server = express();
 
-// ✅ apply CORS at express level
 server.use(cors({
   origin: 'https://turbopack-hr-web-skas.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -31,7 +30,7 @@ export default async function handler(req, res) {
   const appServer = await bootstrap();
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end(); // ✅ handle preflight
+    return res.status(200).end();
   }
 
   return appServer(req, res);
