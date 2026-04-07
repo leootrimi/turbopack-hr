@@ -7,7 +7,7 @@ import { AppModule } from './src/app.module';
 const server = express();
 
 server.use(cors({
-  origin: 'https://turbopack-hr-web-skas.vercel.app',
+  origin: ['https://turbopack-hr-web.vercel.app', 'https://turbopack-hr-web-skas.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -27,10 +27,6 @@ async function bootstrap() {
 
 export default async function handler(req, res) {
   const appServer = await bootstrap();
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
 
   return appServer(req, res);
 }
