@@ -9,8 +9,7 @@ const server = express();
 server.use(cors({
   origin: 'https://turbopack-hr-web-skas.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 let app;
