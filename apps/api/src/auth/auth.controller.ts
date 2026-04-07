@@ -9,7 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { LoginBody } from '@repo/types';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
