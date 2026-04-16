@@ -1,5 +1,5 @@
 {
-  "id": "ddaa0d59-301f-40c2-8060-de8f4ea04657",
+  "id": "d5a50172-f006-40eb-b9d2-ad5b6f988f73",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -568,7 +568,7 @@
           "type": "employment_type",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "start_date": {
           "name": "start_date",
@@ -587,7 +587,7 @@
           "type": "work_location",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

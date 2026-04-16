@@ -99,10 +99,10 @@ CREATE TABLE "job_info" (
 	"department" varchar(256),
 	"team_id" integer,
 	"manager_id" integer,
-	"employment_type" "employment_type" NOT NULL,
+	"employment_type" "employment_type",
 	"start_date" timestamp NOT NULL,
 	"end_date" timestamp,
-	"work_location" "work_location" NOT NULL,
+	"work_location" "work_location",
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
