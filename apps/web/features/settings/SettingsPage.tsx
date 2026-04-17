@@ -1,13 +1,16 @@
 'use client'
 import React, { useState } from 'react';
-import { Settings, Building2, Calendar, Users, ChevronRight, Save } from 'lucide-react';
+import { Settings, Building2, Calendar, Users, ChevronRight, Save, Mail, ClipboardList } from 'lucide-react';
 import CompanySettings from './company/CompanySettings';
 import TimeOffSettings from './timeoff/TimeOffSettings';
 import EmployeeDefaultsSettings from './employee/EmployeeDefaultsSettings';
+import { EmailTemplates } from './email-templates/EmailTemplates';
+import ReviewCyclesAdmin from '../review/admin/ReviewCyclesAdmin';
 
 export default function HRSettingsPage() {
   const [activeSection, setActiveSection] = useState('company');
   const [savedMessage, setSavedMessage] = useState('');
+  const [activeTemplate, setActiveTemplate] = useState('welcome');
 
   const handleSave = () => {
     setSavedMessage('Settings saved successfully');
@@ -18,6 +21,8 @@ export default function HRSettingsPage() {
     { id: 'company', label: 'Company', icon: Building2 },
     { id: 'timeoff', label: 'Time Off', icon: Calendar },
     { id: 'defaults', label: 'Employee Defaults', icon: Users },
+    { id: 'email', label: 'Email Templates', icon: Mail },
+    { id: 'reviews', label: 'Reviews', icon: ClipboardList },
   ];
 
   const renderContent = () => {
@@ -28,6 +33,15 @@ export default function HRSettingsPage() {
         return <TimeOffSettings />;
       case 'defaults':
         return <EmployeeDefaultsSettings />;
+            case 'email':
+      return (
+        <EmailTemplates
+          activeTemplate={activeTemplate}
+          setActiveTemplate={setActiveTemplate}
+        />
+      );
+      case 'reviews':
+        return <ReviewCyclesAdmin />;
       default:
         return <CompanySettings />;
     }
@@ -93,7 +107,7 @@ export default function HRSettingsPage() {
         </div>
 
         <div className="flex-1 overflow-auto">
-          <div className="max-w-3xl mx-auto p-8">
+          <div className="max-w-full mx-auto p-8">
             {renderContent()}
           </div>
         </div>

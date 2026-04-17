@@ -14,6 +14,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MeetingsModule } from './meetings/meetings.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ApplicationsModule } from './applications/applications.module';
     JobsModule,
     MeetingsModule,
     ApplicationsModule,
+    ReviewsModule,
   ],
   controllers: [],
   providers: [],

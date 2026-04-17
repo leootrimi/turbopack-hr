@@ -409,3 +409,15 @@ export const applicationTimelines = pgTable('application_timelines', {
   action: varchar('action', { length: 256 }).notNull(),
   date: timestamp('date').defaultNow().notNull(),
 });
+
+export const reviewCycles = pgTable('review_cycles', {
+  id: serial('id').primaryKey(),
+  title: varchar('title', { length: 256 }).notNull(),
+  description: varchar('description', { length: 1024 }),
+  enabled: boolean('enabled').default(false).notNull(),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  createdById: integer('created_by_id').references(() => employee.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});

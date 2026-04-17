@@ -18,6 +18,7 @@ import { useEmployee } from "../../hooks/queries";
 import { useAuth } from "../../../auth/hooks/useAuth";
 import { getVisibleTabs } from "./config/tabs.config";
 import { Role } from "../../../../config/rbac";
+import ReviewsTab from "../../../review/components/ReviewsTab";
 
 const UserProfile = ({ id }: { id: string }) => {
   const { data: employeeData, isLoading, error } = useEmployee(id);
@@ -42,6 +43,8 @@ const UserProfile = ({ id }: { id: string }) => {
         return <DocumentsTab employeeId={id} />;
       case "Time off":
         return <TimeOffTab timeOffBalance={timeOffBalance} leaveRequests={leaveRequests} />;
+      case "Reviews":
+          return <ReviewsTab employeeId={id} />
       default:
         return <ActivityContent activityData={[]} />;
     }
