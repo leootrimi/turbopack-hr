@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, MapPin, Clock, Wifi, Building2, Send, CheckCircle2 } from "lucide-react";
 import { JobPost } from "./mock";
 import { DeptBadge, TypeBadge, formatDate } from "./shared";
+import { useApplyForJob } from "../hooks/queries";
 
 interface Props {
   job: JobPost;
@@ -24,20 +25,33 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 export function JobDetailPage({ job, onBack }: Props) {
+  const applyMutation = useApplyForJob();
   const [applied, setApplied]   = useState(false);
   const [form, setForm]         = useState({ name: "", email: "", cover: "" });
-  const [submitting, setSubmitting] = useState(false);
 
   const locationIcon =
     job.locationType === "Remote" ? <Wifi size={14} /> :
     job.locationType === "Hybrid" ? <Building2 size={14} /> :
                                      <MapPin size={14} />;
 
-  const handleApply = () => {
+  const handleApply = async () => {
     if (!form.name.trim() || !form.email.trim()) return;
-    setSubmitting(true);
-    setTimeout(() => { setSubmitting(false); setApplied(true); }, 1000);
+    
+    try {
+      await applyMutation.mutateAsync({
+        jobId: job.id,
+        name: form.name,
+        email: form.email,
+        notes: form.cover,
+      });
+      setApplied(true);
+    } catch (error) {
+      console.error("Failed to submit application:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
+
+  const submitting = applyMutation.isPending;
 
   return (
     <div className="min-h-screen bg-slate-50">

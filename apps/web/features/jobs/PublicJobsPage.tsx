@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Search, Briefcase, Sparkles } from "lucide-react";
-import { JobPost, MOCK_JOBS, DEPARTMENTS, JOB_TYPES, LOCATION_TYPES, JobType, JobLocation } from "./components/mock";
+import { JobPost, DEPARTMENTS, JOB_TYPES, LOCATION_TYPES, JobType, JobLocation } from "./components/mock";
 import { PublicJobCard }  from "./components/PublicJobCard";
 import { JobDetailPage }  from "./components/JobDetailPage";
-
-const openJobs = MOCK_JOBS.filter((j) => j.status === "Open");
+import { useJobs } from "./hooks/queries";
 
 export function PublicJobsPage() {
+  const { data: jobsData, isLoading } = useJobs();
+  const jobs = jobsData || [];
+  const openJobs = jobs.filter((j) => j.status === "Open");
+
   const [selected, setSelected]       = useState<JobPost | null>(null);
   const [query, setQuery]             = useState("");
   const [deptFilter, setDeptFilter]   = useState("All");
@@ -16,6 +19,14 @@ export function PublicJobsPage() {
   const [modeFilter, setModeFilter]   = useState<"All" | JobLocation>("All");
 
   if (selected) return <JobDetailPage job={selected} onBack={() => setSelected(null)} />;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-500">Loading positions...</p>
+      </div>
+    );
+  }
 
   const filtered = openJobs.filter((j) => {
     const q = query.toLowerCase();

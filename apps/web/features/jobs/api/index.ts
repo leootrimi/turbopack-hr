@@ -79,3 +79,11 @@ export const rejectApplication = async (id: string) => {
     method: "PATCH",
   });
 };
+
+export const applyForJob = async (data: { jobId: string; name: string; email: string; notes?: string }) => {
+  return await makeRequest({
+    url: "api/applications",
+    method: "POST",
+    data,
+  });
+};

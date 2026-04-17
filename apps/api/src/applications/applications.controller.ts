@@ -12,6 +12,16 @@ export class ApplicationsController {
     return this.applicationsService.findAll();
   }
 
+  @Post()
+  async create(@Body() data: any) {
+    return this.applicationsService.create({
+      jobId: +data.jobId,
+      name: data.name,
+      email: data.email,
+      notes: data.notes,
+    });
+  }
+
   @UseGuards(JwtAuthGuard)
   @Patch(':id/stage')
   async updateStage(@Param('id') id: string, @Body('stage') stage: string) {

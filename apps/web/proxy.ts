@@ -25,12 +25,12 @@ export function proxy(request: NextRequest) {
     }
 
     if (!canAccess(role, pathname)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/dashboard/overview', request.url));
     }
   }
 
   if (pathname === '/' && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/dashboard/overview', request.url));
   }
 
   return NextResponse.next();

@@ -56,3 +56,24 @@ export function useRejectApplication() {
     },
   });
 }
+
+export function useApplyForJob() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      jobId: string;
+      name: string;
+      email: string;
+      notes?: string;
+    }) => {
+      const { applyForJob } = await import("../api/index");
+      return applyForJob(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    },
+  });
+}
+

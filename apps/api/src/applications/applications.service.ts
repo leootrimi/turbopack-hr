@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { DrizzleService } from '../database/drizzle.provider';
 import { jobApplications, applicationTimelines, jobs } from '../database/schema';
 
@@ -26,9 +26,12 @@ export class ApplicationsService {
     // Grouping
     return apps.map(({ app, jobTitle, jobDepartment }) => {
       const timelineInfo = timelines
-        .filter(t => t.applicationId === app.id)
-        .map(t => ({ action: t.action, date: t.date.toISOString().split('T')[0] }));
-      
+        .filter((t) => t.applicationId === app.id)
+        .map((t) => ({
+          action: t.action,
+          date: t.date.toISOString().split('T')[0],
+        }));
+
       return {
         id: app.id.toString(),
         name: app.name,
@@ -41,12 +44,65 @@ export class ApplicationsService {
         location: app.location || '',
         cvUrl: app.cvUrl || '',
         notes: app.notes || '',
-        timeline: timelineInfo.length > 0 ? timelineInfo.reverse() : [{ action: 'Application submitted', date: app.appliedDate.toISOString().split('T')[0] }]
+        timeline:
+          timelineInfo.length > 0
+            ? timelineInfo.reverse()
+            : [
+                {
+                  action: 'Application submitted',
+                  date: app.appliedDate.toISOString().split('T')[0],
+                },
+              ],
       };
     });
   }
 
-  async updateStage(id: number, stage: 'Applied' | 'Screening' | 'Interview' | 'Offer' | 'Hired' | 'Rejected') {
+  async create(data: {
+    jobId: number;
+    name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    notes?: string;
+  }) {
+    const [app] = await this.drizzle.db
+      .insert(jobApplications)
+      .values({
+        jobId: data.jobId,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        location: data.location,
+        notes: data.notes,
+        stage: 'Applied',
+      })
+      .returning();
+
+    await this.drizzle.db.insert(applicationTimelines).values({
+      applicationId: app.id,
+      action: 'Application submitted',
+      date: new Date(),
+    });
+
+    // Increment applicants count
+    await this.drizzle.db
+      .update(jobs)
+      .set({ applicants: sql`${jobs.applicants} + 1` })
+      .where(eq(jobs.id, data.jobId));
+
+    return app;
+  }
+
+  async updateStage(
+    id: number,
+    stage:
+      | 'Applied'
+      | 'Screening'
+      | 'Interview'
+      | 'Offer'
+      | 'Hired'
+      | 'Rejected',
+  ) {
     const [updated] = await this.drizzle.db
       .update(jobApplications)
       .set({ stage })

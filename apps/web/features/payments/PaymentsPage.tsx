@@ -13,7 +13,7 @@ export default function PaymentsPage() {
   const limit = 10;
   const { data: paymentsData, isLoading } = usePayments(page, limit);
   const { mutateAsync: uploadPayment, isPending: isUploading } = useUploadFile();
-  const [activeTab, setActiveTab ] = useState<'upload' | 'manual'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'manual'>('upload');
 
   // Map backend record to frontend interface
   const payments: PaymentRecord[] = paymentsData?.data.map((p: any) => ({
@@ -98,11 +98,10 @@ export default function PaymentsPage() {
             <button
               onClick={() => setActiveTab('upload')}
               disabled={isUploading}
-              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${
-                activeTab === 'upload'
+              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'upload'
                   ? 'text-indigo-600 border-indigo-600'
                   : 'text-slate-600 border-transparent hover:text-slate-900'
-              } ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <div className="flex items-center gap-2">
                 {isUploading ? <Loader2 size={16} className="animate-spin text-indigo-600" /> : <UploadIcon size={16} />}
@@ -111,11 +110,10 @@ export default function PaymentsPage() {
             </button>
             <button
               onClick={() => setActiveTab('manual')}
-              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${
-                activeTab === 'manual'
+              className={`px-4 py-3 font-medium text-sm transition-colors border-b-2 ${activeTab === 'manual'
                   ? 'text-indigo-600 border-indigo-600'
                   : 'text-slate-600 border-transparent hover:text-slate-900'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2">
                 <span>+</span>
@@ -124,23 +122,24 @@ export default function PaymentsPage() {
             </button>
           </div>
 
-          {/* Tab Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Upload Section */}
-            <div className={`${activeTab === 'upload' ? '' : 'hidden lg:block'}`}>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-full">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">Upload Receipt / Document</h2>
+          <div className="grid grid-cols-1 gap-8">
+            {activeTab === 'upload' && (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">
+                  Upload Receipt / Document
+                </h2>
                 <DragDropUpload onFileSelect={handleFileUpload} />
               </div>
-            </div>
+            )}
 
-            {/* Manual Entry Section */}
-            <div className={`${activeTab === 'manual' ? '' : 'hidden lg:block'}`}>
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-full">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">Add Payment Manually</h2>
+            {activeTab === 'manual' && (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-3xl">
+                <h2 className="text-lg font-bold text-slate-900 mb-4">
+                  Add Payment Manually
+                </h2>
                 <ManualPaymentForm onSubmit={handleManualSubmit} isLoading={isUploading} />
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -161,7 +160,7 @@ export default function PaymentsPage() {
                   onDelete={handleDelete}
                   onViewDocument={handleViewDocument}
                 />
-                
+
                 {/* Pagination Controls */}
                 <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                   <p className="text-sm text-slate-500">
@@ -182,11 +181,10 @@ export default function PaymentsPage() {
                           <button
                             key={pageNum}
                             onClick={() => setPage(pageNum)}
-                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
-                              page === pageNum
+                            className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${page === pageNum
                                 ? 'bg-indigo-600 text-white'
                                 : 'text-slate-600 hover:bg-white hover:border-slate-200 border border-transparent'
-                            }`}
+                              }`}
                           >
                             {pageNum}
                           </button>
