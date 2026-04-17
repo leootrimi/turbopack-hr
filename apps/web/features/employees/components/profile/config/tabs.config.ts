@@ -5,7 +5,7 @@ export const TAB_CONFIG = [
   { key: "Team", roles: ["admin", "manager", "employee"] },
   { key: "Time off", roles: ["admin", "manager"] },
   { key: "Documents", roles: ["admin", "manager"] },
-  { key: "Reviews", roles: ["admin", "manager"] },
+  { key: "Reviews", roles: ["admin", "manager", "employee"] },
 ];
 
 export const getVisibleTabs = (role: Role) => {

@@ -48,7 +48,7 @@ const aiSuggestions: Record<SectionId, string[]> = {
 // Quality indicator based on length and keyword presence
 const getQuality = (text: string): { label: string; color: string } => {
   const len = text.trim().length;
-  if (len < 20) return { label: 'Too short', color: 'text-rose-500' };
+  if (len < 20) return { label: 'Required — add more detail', color: 'text-rose-500' };
   if (len < 80) return { label: 'Good start', color: 'text-amber-500' };
   if (len < 200) return { label: 'Good detail', color: 'text-emerald-500' };
   return { label: 'Excellent detail', color: 'text-emerald-600' };
@@ -58,7 +58,7 @@ const getQuality = (text: string): { label: string; color: string } => {
 const computeScore = (data: ReviewData): number => {
   const fields = Object.values(data);
   const totalLength = fields.reduce((sum, val) => sum + val.trim().length, 0);
-  const nonEmptyCount = fields.filter((val) => val.trim().length > 20).length;
+  const nonEmptyCount = fields.filter((val) => val.trim().length >= 20).length;
   // Score: 50% based on total length (up to 500 chars), 50% based on number of substantial sections
   const lengthScore = Math.min(100, (totalLength / 500) * 100);
   const sectionScore = (nonEmptyCount / 5) * 100;
@@ -80,6 +80,7 @@ export default function SelfReviewPage() {
   const [showReuseMenu, setShowReuseMenu] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState('');
   const [score, setScore] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
   const autoSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Sections definition
@@ -146,10 +147,26 @@ export default function SelfReviewPage() {
     return reviewData[sectionId].trim().length < 20;
   };
 
+  const isAllComplete = Object.keys(reviewData).every(key => !isIncomplete(key as SectionId));
+
   // Character count and quality
   const currentText = reviewData[currentSection];
   const charCount = currentText.length;
   const quality = getQuality(currentText);
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+          <CheckCircle2 size={32} className="text-emerald-600" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Self-review submitted!</h2>
+        <p className="text-sm text-slate-500 max-w-xs">
+          Your self-reflection has been recorded. Your manager will be able to see it once they start their part of the review.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className=" bg-gradient-to-br from-slate-50 via-white to-slate-100 py-4 px-4">
@@ -192,10 +209,9 @@ export default function SelfReviewPage() {
                         {section.icon}
                       </span>
                       <span className="flex-1 text-sm">{section.label}</span>
-                      {incomplete && !isActive && (
-                        <div className="w-2 h-2 rounded-full bg-amber-400" title="Incomplete" />
-                      )}
-                      {!incomplete && reviewData[section.id].trim().length > 20 && !isActive && (
+                      {incomplete ? (
+                        <AlertCircle size={14} className="text-rose-400" title="Incomplete" />
+                      ) : (
                         <CheckCircle2 size={14} className="text-emerald-500" />
                       )}
                     </button>
@@ -205,7 +221,7 @@ export default function SelfReviewPage() {
 
               {/* Review Score Preview */}
               <div className="mt-6 pt-4 border-t border-slate-200">
-                <div className="text-xs font-medium text-slate-500 mb-2">Review score</div>
+                <div className="text-xs font-medium text-slate-500 mb-2">Completion score</div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-bold text-slate-800">{score}</span>
                   <span className="text-sm text-slate-400">/100</span>
@@ -230,6 +246,7 @@ export default function SelfReviewPage() {
                   <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
                     {current.icon}
                     {current.label}
+                    <span className="text-rose-500 text-sm">*</span>
                   </h2>
                   <p className="text-sm text-slate-500 mt-1">{current.prompt}</p>
                 </div>
@@ -254,7 +271,11 @@ export default function SelfReviewPage() {
                   onChange={(e) => handleContentChange(e.target.value)}
                   placeholder={current.placeholder}
                   rows={6}
-                  className="w-full px-4 py-3 text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 resize-y transition-all placeholder:text-slate-400"
+                  className={`w-full px-4 py-3 text-slate-700 border rounded-xl focus:outline-none focus:ring-2 resize-y transition-all placeholder:text-slate-400 ${
+                    isIncomplete(currentSection)
+                      ? 'border-rose-200 focus:ring-rose-500/20 focus:border-rose-400'
+                      : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-400'
+                  }`}
                 />
                 {aiSuggestion && (
                   <div className="absolute bottom-2 left-2 right-2 bg-indigo-50 border border-indigo-200 rounded-lg p-2 text-xs text-indigo-700 flex items-center justify-between animate-in slide-in-from-bottom-2">
@@ -277,9 +298,9 @@ export default function SelfReviewPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-slate-400">{charCount} characters</span>
                   <span className={`font-medium ${quality.color}`}>{quality.label}</span>
-                  {quality.label === 'Too short' && (
-                    <span className="text-amber-600 flex items-center gap-1">
-                      <Lightbulb size={12} /> {current.tip}
+                  {isIncomplete(currentSection) && (
+                    <span className="text-rose-600 flex items-center gap-1 font-medium bg-rose-50 px-2 py-0.5 rounded-full">
+                      Required
                     </span>
                   )}
                 </div>
@@ -334,25 +355,39 @@ export default function SelfReviewPage() {
                 >
                   ← Previous
                 </button>
-                <button
-                  onClick={() => {
-                    const idx = sections.findIndex(s => s.id === currentSection);
-                    if (idx < sections.length - 1) setCurrentSection(sections[idx + 1].id);
-                  }}
-                  disabled={sections.findIndex(s => s.id === currentSection) === sections.length - 1}
-                  className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-1 disabled:opacity-50"
-                >
-                  Next <ChevronRight size={14} />
-                </button>
+                {sections.findIndex(s => s.id === currentSection) === sections.length - 1 ? (
+                  <button
+                    disabled={!isAllComplete}
+                    onClick={() => setSubmitted(true)}
+                    className={`px-6 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-2 ${
+                      isAllComplete
+                        ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Submit Self-Review <CheckCircle2 size={14} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const idx = sections.findIndex(s => s.id === currentSection);
+                      if (idx < sections.length - 1) setCurrentSection(sections[idx + 1].id);
+                    }}
+                    className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-1"
+                  >
+                    Next Section <ChevronRight size={14} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Gentle reminder for incomplete sections */}
-        {Object.values(reviewData).every(v => v.trim().length < 20) && (
-          <div className="mt-4 text-center text-xs text-amber-600 bg-amber-50 w-fit mx-auto px-3 py-1.5 rounded-full">
-            ✍️ Try adding a few more details – your reflection helps your manager understand your impact.
+        {/* Global incomplete warning */}
+        {!isAllComplete && (
+          <div className="mt-4 text-center text-xs text-rose-600 bg-rose-50 w-fit mx-auto px-4 py-2 rounded-full border border-rose-100 flex items-center gap-2">
+            <AlertCircle size={14} />
+            <span>Please complete all sections with at least 20 characters to enable submission.</span>
           </div>
         )}
       </div>

@@ -3,19 +3,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  User,
   Star,
   Target,
   Trophy,
-  Users,
   MessageSquare,
   TrendingUp,
   Save,
   ChevronRight,
-  ChevronLeft,
   CheckCircle2,
   Lightbulb,
-  Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 
 // ---------- Types ----------
@@ -37,15 +34,6 @@ interface ReviewData {
   competencies: Competency[];
 }
 
-// Mock teammate data
-const teammate = {
-  id: '1',
-  name: 'Alex Morgan',
-  role: 'Senior Frontend Engineer',
-  avatar: 'AM',
-  department: 'Engineering',
-};
-
 // Mock competencies
 const defaultCompetencies: Competency[] = [
   { id: 'c1', name: 'Technical skills', description: 'Quality of code, problem‑solving, architecture', rating: null, comment: '' },
@@ -65,10 +53,27 @@ const computeOverallScore = (competencies: Competency[]): number => {
 // Quality indicator for text length
 const getQuality = (text: string): { label: string; color: string } => {
   const len = text.trim().length;
-  if (len < 20) return { label: 'Add more detail', color: 'text-amber-500' };
+  if (len < 20) return { label: 'Required — add more detail', color: 'text-rose-500' };
   if (len < 80) return { label: 'Good start', color: 'text-emerald-500' };
   return { label: 'Excellent', color: 'text-emerald-600' };
 };
+
+// Validation helpers
+const TEXT_MIN = 20;
+const isTextValid = (text: string) => text.trim().length >= TEXT_MIN;
+
+function getValidationSummary(data: ReviewData): { overviewDone: boolean; competenciesDone: boolean; allDone: boolean } {
+  const overviewDone =
+    isTextValid(data.strengths) &&
+    isTextValid(data.improvements) &&
+    isTextValid(data.goals) &&
+    isTextValid(data.feedback);
+
+  const competenciesDone =
+    data.competencies.every(c => c.rating !== null && isTextValid(c.comment));
+
+  return { overviewDone, competenciesDone, allDone: overviewDone && competenciesDone };
+}
 
 // ---------- Main Component ----------
 export default function ManagerReviewPage() {
@@ -83,6 +88,7 @@ export default function ManagerReviewPage() {
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [overallScore, setOverallScore] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
   const autoSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Update overall score when competencies change
@@ -97,7 +103,6 @@ export default function ManagerReviewPage() {
     autoSaveTimeout.current = setTimeout(() => {
       setSavedStatus('saved');
       setLastSaved(new Date());
-      // In real app: API call here
     }, 800);
   }, []);
 
@@ -126,66 +131,74 @@ export default function ManagerReviewPage() {
     return { len, quality };
   };
 
+  const validation = getValidationSummary(reviewData);
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center px-6">
+        <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+          <CheckCircle2 size={32} className="text-emerald-600" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Review submitted!</h2>
+        <p className="text-sm text-slate-500 max-w-xs">
+          Thank you for completing this performance review. Your feedback has been recorded.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-8 px-4">
+    <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 py-6 px-4">
       <div className="max-w-5xl mx-auto">
-        {/* Header with teammate info */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-lg shadow-md">
-              {teammate.avatar}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">{teammate.name}</h1>
-              <p className="text-sm text-slate-500">
-                 {teammate.role} • {teammate.department}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 text-xs">
-            {savedStatus === 'saving' && (
-              <span className="text-slate-400 flex items-center gap-1">
-                <Save size={12} className="animate-pulse" /> Saving...
-              </span>
-            )}
-            {savedStatus === 'saved' && lastSaved && (
-              <span className="text-emerald-600 flex items-center gap-1">
-                <CheckCircle2 size={12} /> Saved just now
-              </span>
-            )}
-          </div>
+
+        {/* Required fields notice */}
+        <div className="mb-4 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+          <AlertCircle size={14} className="shrink-0 text-amber-500" />
+          <span>All fields are <strong>required</strong>. Every section must have at least 20 characters and all competencies must be rated before you can submit.</span>
+        </div>
+
+        {/* Completion status bar */}
+        <div className="mb-4 flex items-center gap-3 flex-wrap">
+          <StatusPill done={validation.overviewDone} label="Overview complete" onClick={() => setActiveTab('overview')} />
+          <StatusPill done={validation.competenciesDone} label="Competencies complete" onClick={() => setActiveTab('competencies')} />
         </div>
 
         {/* Main card */}
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
           {/* Tabs */}
-          <div className="flex border-b border-slate-200 px-6 pt-4">
-            <button
+          <div className="flex border-b border-slate-200 px-6 pt-4 gap-1">
+            <TabButton
+              active={activeTab === 'overview'}
+              done={validation.overviewDone}
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${
-                activeTab === 'overview'
-                  ? 'bg-white text-indigo-600 border-b-2 border-indigo-500'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
             >
               Overview
-            </button>
-            <button
+            </TabButton>
+            <TabButton
+              active={activeTab === 'competencies'}
+              done={validation.competenciesDone}
               onClick={() => setActiveTab('competencies')}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${
-                activeTab === 'competencies'
-                  ? 'bg-white text-indigo-600 border-b-2 border-indigo-500'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
             >
               Competencies & Rating
-            </button>
+            </TabButton>
+            {/* Auto-save status */}
+            <div className="ml-auto flex items-center text-xs pb-2 self-end">
+              {savedStatus === 'saving' && (
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Save size={12} className="animate-pulse" /> Saving...
+                </span>
+              )}
+              {savedStatus === 'saved' && lastSaved && (
+                <span className="text-emerald-600 flex items-center gap-1">
+                  <CheckCircle2 size={12} /> Saved just now
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="p-6 md:p-8">
             {activeTab === 'overview' ? (
               <div className="space-y-8">
-                {/* Strengths */}
                 <Section
                   icon={<Trophy size={18} />}
                   title="Strengths"
@@ -194,7 +207,6 @@ export default function ManagerReviewPage() {
                   value={reviewData.strengths}
                   onChange={(val) => updateTextField('strengths', val)}
                 />
-                {/* Areas for improvement */}
                 <Section
                   icon={<Target size={18} />}
                   title="Areas for improvement"
@@ -203,7 +215,6 @@ export default function ManagerReviewPage() {
                   value={reviewData.improvements}
                   onChange={(val) => updateTextField('improvements', val)}
                 />
-                {/* Goals for next period */}
                 <Section
                   icon={<TrendingUp size={18} />}
                   title="Goals for next quarter"
@@ -212,7 +223,6 @@ export default function ManagerReviewPage() {
                   value={reviewData.goals}
                   onChange={(val) => updateTextField('goals', val)}
                 />
-                {/* Additional feedback */}
                 <Section
                   icon={<MessageSquare size={18} />}
                   title="Additional feedback"
@@ -240,14 +250,33 @@ export default function ManagerReviewPage() {
 
                 {reviewData.competencies.map((comp) => {
                   const { len, quality } = getCharCountQuality(comp.comment);
+                  const ratingMissing = comp.rating === null;
+                  const commentMissing = !isTextValid(comp.comment);
                   return (
-                    <div key={comp.id} className="border border-slate-200 rounded-xl p-4">
+                    <div
+                      key={comp.id}
+                      className={`border rounded-xl p-4 transition-colors ${
+                        ratingMissing || commentMissing
+                          ? 'border-rose-200 bg-rose-50/30'
+                          : 'border-slate-200'
+                      }`}
+                    >
                       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                         <div>
-                          <h4 className="font-medium text-slate-800">{comp.name}</h4>
+                          <h4 className="font-medium text-slate-800 flex items-center gap-1.5">
+                            {comp.name}
+                            {(ratingMissing || commentMissing) && (
+                              <span className="text-[10px] font-semibold text-rose-500 bg-rose-100 px-1.5 py-0.5 rounded-full">
+                                Required
+                              </span>
+                            )}
+                          </h4>
                           <p className="text-xs text-slate-500">{comp.description}</p>
                         </div>
                         <div className="flex items-center gap-1">
+                          {ratingMissing && (
+                            <span className="text-xs text-rose-400 mr-1">Rate →</span>
+                          )}
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
@@ -266,9 +295,13 @@ export default function ManagerReviewPage() {
                       <textarea
                         value={comp.comment}
                         onChange={(e) => updateCompetency(comp.id, { comment: e.target.value })}
-                        placeholder="Add a comment to support your rating..."
+                        placeholder="Add a comment to support your rating (required)..."
                         rows={2}
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-y"
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 resize-y transition-colors ${
+                          commentMissing
+                            ? 'border-rose-200 focus:ring-rose-500/20 bg-white'
+                            : 'border-slate-200 focus:ring-indigo-500/20'
+                        }`}
                       />
                       {len > 0 && (
                         <div className="flex justify-end mt-1">
@@ -284,28 +317,94 @@ export default function ManagerReviewPage() {
             )}
           </div>
 
-          {/* Submit button */}
-          <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 flex justify-end">
+          {/* Submit footer */}
+          <div className="border-t border-slate-200 px-6 py-4 bg-slate-50 flex items-center justify-between gap-4 flex-wrap">
+            <div className="text-xs text-slate-500">
+              {!validation.allDone && (
+                <span className="flex items-center gap-1 text-rose-500">
+                  <AlertCircle size={12} />
+                  {!validation.overviewDone && !validation.competenciesDone
+                    ? 'Complete all overview fields and rate all competencies to submit.'
+                    : !validation.overviewDone
+                    ? 'Fill in all overview fields to submit.'
+                    : 'Rate all competencies and add comments to submit.'}
+                </span>
+              )}
+              {validation.allDone && (
+                <span className="flex items-center gap-1 text-emerald-600">
+                  <CheckCircle2 size={12} />
+                  All sections complete — ready to submit!
+                </span>
+              )}
+            </div>
             <button
-              onClick={() => alert('Review submitted (mock)')}
-              className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition flex items-center gap-2"
+              disabled={!validation.allDone}
+              onClick={() => setSubmitted(true)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
+                validation.allDone
+                  ? 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
             >
               Submit Review
               <ChevronRight size={14} />
             </button>
           </div>
         </div>
-
-        {/* Gentle reminder */}
-        <div className="mt-4 text-center text-xs text-slate-400">
-          Your feedback helps {teammate.name} grow. Be specific and kind.
-        </div>
       </div>
     </div>
   );
 }
 
-// Reusable section component for text fields
+// ── Tab button with completion indicator ──
+function TabButton({
+  children,
+  active,
+  done,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  done: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 text-sm font-medium rounded-t-lg transition flex items-center gap-1.5 ${
+        active
+          ? 'bg-white text-indigo-600 border-b-2 border-indigo-500'
+          : 'text-slate-500 hover:text-slate-700'
+      }`}
+    >
+      {done ? (
+        <CheckCircle2 size={13} className="text-emerald-500" />
+      ) : (
+        <AlertCircle size={13} className="text-rose-400" />
+      )}
+      {children}
+    </button>
+  );
+}
+
+// ── Status pill ──
+function StatusPill({ done, label, onClick }: { done: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+        done
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          : 'bg-rose-50 border-rose-200 text-rose-600'
+      }`}
+    >
+      {done ? <CheckCircle2 size={11} /> : <AlertCircle size={11} />}
+      {label}
+    </button>
+  );
+}
+
+// ── Reusable section component for text fields ──
 function Section({
   icon,
   title,
@@ -322,19 +421,30 @@ function Section({
   onChange: (val: string) => void;
 }) {
   const quality = getQuality(value);
+  const invalid = value.trim().length < 20;
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <span className="text-indigo-500">{icon}</span>
         <h3 className="font-semibold text-slate-800">{title}</h3>
+        <span className="text-rose-500 text-xs font-semibold">*</span>
+        {invalid && (
+          <span className="ml-auto text-[10px] font-semibold text-rose-500 bg-rose-100 px-1.5 py-0.5 rounded-full">
+            Required
+          </span>
+        )}
       </div>
       <p className="text-sm text-slate-500">{prompt}</p>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={4}
-        className="w-full px-4 py-3 text-slate-700 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 resize-y transition"
-        placeholder="Write your feedback here..."
+        className={`w-full px-4 py-3 text-slate-700 border rounded-xl focus:outline-none focus:ring-2 resize-y transition ${
+          invalid
+            ? 'border-rose-200 focus:ring-rose-500/20 focus:border-rose-400'
+            : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-400'
+        }`}
+        placeholder="Write your feedback here... (minimum 20 characters)"
       />
       <div className="flex justify-between text-xs">
         <div className="flex items-center gap-1 text-slate-400">
