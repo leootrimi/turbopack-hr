@@ -82,6 +82,7 @@ const navItems = [
       { title: "Payments",    url: `${BASE_PATH}/admin/payments`},
       { title: "Announcements",    url: `${BASE_PATH}/admin/announcements`},
       { title: "Positions/Jobs",    url: `${BASE_PATH}/admin/jobs`},
+      { title: "Applications",    url: `${BASE_PATH}/admin/applications`},
     ],
   },
 ];

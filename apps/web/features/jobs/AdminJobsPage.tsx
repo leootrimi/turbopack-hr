@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus, Search, Briefcase } from "lucide-react";
 import { JobPost, JobStatus, DEPARTMENTS } from "./components/mock";
 import { AdminJobRow }   from "./components/AdminJobRow";
@@ -33,17 +33,13 @@ function SectionPanel({ title, jobs, onEdit, onDelete, onView, accent }: {
 export function AdminJobsPage() {
   const { data: serverJobs = [], isLoading } = useJobs();
   const { mutate: createJob } = useCreateJob();
-  const [jobs, setJobs] = useState<JobPost[]>(serverJobs);
+  const jobs = serverJobs;
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<JobPost | null>(null);
   const [preview, setPreview] = useState<JobPost | null>(null);
   const [query, setQuery]     = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState<"All" | JobStatus>("All");
-
-  useEffect(() => {
-    setJobs(serverJobs);
-  }, [serverJobs]);
 
   const filtered = jobs.filter((j) => {
     const q = query.toLowerCase();
@@ -60,7 +56,6 @@ export function AdminJobsPage() {
 
   const handleSave = (data: Omit<JobPost, "id" | "postedAt" | "applicants" | "closedAt">) => {
     if (editing) {
-      setJobs((prev) => prev.map((j) => j.id === editing.id ? { ...j, ...data } : j));
     } else {
       createJob(data);
     }
@@ -139,9 +134,9 @@ export function AdminJobsPage() {
         )}
 
         {/* sections */}
-        <SectionPanel title="Open Positions" jobs={open}   accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => setJobs((p) => p.filter((j) => j.id !== id))} onView={setPreview} />
-        <SectionPanel title="Drafts"          jobs={drafts} accent="#94a3b8" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => setJobs((p) => p.filter((j) => j.id !== id))} onView={setPreview} />
-        <SectionPanel title="Closed / Past"   jobs={closed} accent="#ef4444" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => setJobs((p) => p.filter((j) => j.id !== id))} onView={setPreview} />
+        <SectionPanel title="Open Positions" jobs={open}   accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
+        <SectionPanel title="Drafts"          jobs={drafts} accent="#94a3b8" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
+        <SectionPanel title="Closed / Past"   jobs={closed} accent="#ef4444" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
 
       </div>
 
