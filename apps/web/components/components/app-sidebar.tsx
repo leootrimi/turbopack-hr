@@ -174,12 +174,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     router.push("/");
   };
 
-  const filteredNavItems = navItems.map((group) => {
-    return {
-      ...group,
-      items: group.items.filter((item) => canAccess(user?.role, item.url)),
-    };
-  }).filter((group) => group.items.length > 0);
+  const filteredNavItems = React.useMemo(() => {
+    return navItems.map((group) => {
+      return {
+        ...group,
+        items: group.items.filter((item) => canAccess(user?.role, item.url)),
+      };
+    }).filter((group) => group.items.length > 0);
+  }, [user?.role, pathname]);
 
   return (
     <Sidebar

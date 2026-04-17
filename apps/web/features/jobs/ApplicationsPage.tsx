@@ -230,8 +230,7 @@ export default function ApplicationsDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6 p-4 md:p-6 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -306,8 +305,8 @@ export default function ApplicationsDashboard() {
 
         {/* Main Content */}
         {viewMode === 'pipeline' ? (
-          <div className="overflow-x-auto pb-4">
-            <div className="flex gap-4 min-w-[1000px]">
+          <div className="w-full overflow-x-auto">
+            <div className="flex gap-4 w-max min-w-max">
               {stages.map((stage) => (
                 <PipelineColumn
                   key={stage}
@@ -363,7 +362,6 @@ export default function ApplicationsDashboard() {
             </div>
           </div>
         )}
-      </div>
 
       {/* Detail Modal */}
       {selectedApp && (

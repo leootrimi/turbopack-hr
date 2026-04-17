@@ -30,7 +30,7 @@ export function ApplicationTableRow({
         <td className="px-4 py-3">
           <StageBadge stage={app.stage} />
         </td>
-        <td className="px-4 py-3 text-sm text-slate-500">{new Date(app.appliedDate).toLocaleDateString()}</td>
+        <td className="px-4 py-3 text-sm text-slate-500" suppressHydrationWarning>{new Date(app.appliedDate).toLocaleDateString()}</td>
         <td className="px-4 py-3">
           <div className="flex items-center gap-1">
             <button

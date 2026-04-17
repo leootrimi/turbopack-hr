@@ -24,7 +24,7 @@ export function ApplicationCard({
         </div>
         <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
           <Calendar size={12} />
-          <span>{new Date(app.appliedDate).toLocaleDateString()}</span>
+          <span suppressHydrationWarning>{new Date(app.appliedDate).toLocaleDateString()}</span>
         </div>
         <div className="mt-2 flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-slate-500">

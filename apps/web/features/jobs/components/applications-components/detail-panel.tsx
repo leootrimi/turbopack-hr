@@ -59,7 +59,7 @@ const DetailPanel = ({
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Calendar size={14} className="text-slate-400" />
-              <span className="text-slate-700">Applied: {new Date(application.appliedDate).toLocaleDateString()}</span>
+              <span className="text-slate-700" suppressHydrationWarning>Applied: {new Date(application.appliedDate).toLocaleDateString()}</span>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ const DetailPanel = ({
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5" />
                   <div className="flex-1">
                     <p className="text-slate-700">{item.action}</p>
-                    <p className="text-xs text-slate-400">{new Date(item.date).toLocaleDateString()}</p>
+                      <p className="text-xs text-slate-400" suppressHydrationWarning>{new Date(item.date).toLocaleDateString()}</p>
                   </div>
                 </div>
               ))}

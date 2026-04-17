@@ -13,6 +13,8 @@ export const ROUTE_ACCESS: RouteConfig[] = [
   { path: '/dashboard/equipment/add', roles: ['admin', 'hr'] },
   { path: '/dashboard/equipment/assigned', roles: ['admin', 'hr'] },
   { path: '/dashboard/equipment/archived', roles: ['admin', 'hr'] },
+  { path: '/dashboard/admin/jobs', roles: ['admin', 'hr'] },
+  { path: '/dashboard/admin/applications', roles: ['admin', 'hr'] },
 ];
 
 export function canAccess(role: string | undefined, path: string): boolean {
