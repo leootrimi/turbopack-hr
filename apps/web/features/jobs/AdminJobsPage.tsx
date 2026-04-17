@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Plus, Search, Briefcase } from "lucide-react";
 import { JobPost, JobStatus, DEPARTMENTS } from "./components/mock";
-import { AdminJobRow }   from "./components/AdminJobRow";
-import { JobFormModal }  from "./components/JobFormModal";
+import { AdminJobRow } from "./components/AdminJobRow";
+import { JobFormModal } from "./components/JobFormModal";
 import { JobPreviewModal } from "./components/JobPreviewModal";
 import { useCreateJob, useJobs } from "./hooks/queries";
+import Link from "next/link";
 
 const STATUSES: JobStatus[] = ["Open", "Draft", "Closed"];
 
@@ -37,7 +38,7 @@ export function AdminJobsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<JobPost | null>(null);
   const [preview, setPreview] = useState<JobPost | null>(null);
-  const [query, setQuery]     = useState("");
+  const [query, setQuery] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState<"All" | JobStatus>("All");
 
@@ -45,12 +46,12 @@ export function AdminJobsPage() {
     const q = query.toLowerCase();
     return (
       (j.title.toLowerCase().includes(q) || j.department.toLowerCase().includes(q)) &&
-      (deptFilter   === "All" || j.department === deptFilter) &&
-      (statusFilter === "All" || j.status     === statusFilter)
+      (deptFilter === "All" || j.department === deptFilter) &&
+      (statusFilter === "All" || j.status === statusFilter)
     );
   });
-  
-  const open   = filtered.filter((j) => j.status === "Open");
+
+  const open = filtered.filter((j) => j.status === "Open");
   const drafts = filtered.filter((j) => j.status === "Draft");
   const closed = filtered.filter((j) => j.status === "Closed");
 
@@ -63,10 +64,10 @@ export function AdminJobsPage() {
   };
 
   const kpis = [
-    { label: "Open Positions", value: jobs.filter((j) => j.status === "Open").length,   color: "#22c55e" },
-    { label: "Draft",          value: jobs.filter((j) => j.status === "Draft").length,  color: "#94a3b8" },
-    { label: "Closed",         value: jobs.filter((j) => j.status === "Closed").length, color: "#ef4444" },
-    { label: "Total Applicants", value: jobs.reduce((s, j) => s + j.applicants, 0),      color: "#6366f1" },
+    { label: "Open Positions", value: jobs.filter((j) => j.status === "Open").length, color: "#22c55e" },
+    { label: "Draft", value: jobs.filter((j) => j.status === "Draft").length, color: "#94a3b8" },
+    { label: "Closed", value: jobs.filter((j) => j.status === "Closed").length, color: "#ef4444" },
+    { label: "Total Applicants", value: jobs.reduce((s, j) => s + j.applicants, 0), color: "#6366f1" },
   ];
 
   return (
@@ -84,12 +85,21 @@ export function AdminJobsPage() {
               <p className="text-sm text-slate-500">{jobs.length} positions total</p>
             </div>
           </div>
-          <button
-            onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
-          >
-            <Plus size={15} /> Post Position
-          </button>
+          <div className="flex items-center gap-2">
+            <Link href="applications">
+              <button
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
+              >
+                View Applications
+            </button>
+            </Link>
+            <button
+              onClick={() => { setEditing(null); setModalOpen(true); }}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
+            >
+              <Plus size={15} /> Post Position
+            </button>
+          </div>
         </div>
 
         {/* KPI row */}
@@ -134,9 +144,9 @@ export function AdminJobsPage() {
         )}
 
         {/* sections */}
-        <SectionPanel title="Open Positions" jobs={open}   accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
-        <SectionPanel title="Drafts"          jobs={drafts} accent="#94a3b8" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
-        <SectionPanel title="Closed / Past"   jobs={closed} accent="#ef4444" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) =>{}} onView={setPreview} />
+        <SectionPanel title="Open Positions" jobs={open} accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
+        <SectionPanel title="Drafts" jobs={drafts} accent="#94a3b8" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
+        <SectionPanel title="Closed / Past" jobs={closed} accent="#ef4444" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
 
       </div>
 

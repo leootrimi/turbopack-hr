@@ -57,3 +57,25 @@ export const createJob = async (data: CreateJobDTO) => {
 
   return mapJob(job);
 };
+
+export const getApplications = async () => {
+  return await makeRequest<any[]>({
+    url: "api/applications",
+    method: "GET",
+  });
+};
+
+export const updateApplicationStage = async (id: string, stage: string) => {
+  return await makeRequest({
+    url: `api/applications/${id}/stage`,
+    method: "PATCH",
+    data: { stage },
+  });
+};
+
+export const rejectApplication = async (id: string) => {
+  return await makeRequest({
+    url: `api/applications/${id}/reject`,
+    method: "PATCH",
+  });
+};

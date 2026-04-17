@@ -13,6 +13,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MeetingsModule } from './meetings/meetings.module';
+import { ApplicationsModule } from './applications/applications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MeetingsModule } from './meetings/meetings.module';
     DashboardModule,
     JobsModule,
     MeetingsModule,
+    ApplicationsModule,
   ],
   controllers: [],
   providers: [],

@@ -376,3 +376,36 @@ export const meetingParticipants = pgTable(
     ),
   }),
 );
+
+export const applicationStageEnum = pgEnum('application_stage', [
+  'Applied',
+  'Screening',
+  'Interview',
+  'Offer',
+  'Hired',
+  'Rejected'
+]);
+
+export const jobApplications = pgTable('job_applications', {
+  id: serial('id').primaryKey(),
+  jobId: integer('job_id').references(() => jobs.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 256 }).notNull(),
+  email: varchar('email', { length: 256 }).notNull(),
+  phone: varchar('phone', { length: 64 }),
+  location: varchar('location', { length: 256 }),
+  cvUrl: varchar('cv_url', { length: 1024 }),
+  notes: varchar('notes', { length: 2048 }),
+  stage: applicationStageEnum('stage').default('Applied').notNull(),
+  appliedDate: timestamp('applied_date').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const applicationTimelines = pgTable('application_timelines', {
+  id: serial('id').primaryKey(),
+  applicationId: integer('application_id')
+    .notNull()
+    .references(() => jobApplications.id, { onDelete: 'cascade' }),
+  action: varchar('action', { length: 256 }).notNull(),
+  date: timestamp('date').defaultNow().notNull(),
+});

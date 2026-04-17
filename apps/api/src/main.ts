@@ -12,7 +12,7 @@ async function bootstrap() {
         'https://turbopack-hr-web-skas.vercel.app',
         'http://localhost:3001'
       ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true
     })

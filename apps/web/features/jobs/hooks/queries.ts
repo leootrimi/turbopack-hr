@@ -18,3 +18,41 @@ export function useCreateJob() {
     },
   });
 }
+
+export function useApplications() {
+  return useQuery({
+    queryKey: ["applications"],
+    queryFn: async () => {
+      const { getApplications } = await import("../api/index");
+      return getApplications();
+    },
+  });
+}
+
+export function useUpdateApplicationStage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, stage }: { id: string; stage: string }) => {
+      const { updateApplicationStage } = await import("../api/index");
+      return updateApplicationStage(id, stage);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+    },
+  });
+}
+
+export function useRejectApplication() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { rejectApplication } = await import("../api/index");
+      return rejectApplication(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+    },
+  });
+}

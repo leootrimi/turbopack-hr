@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import * as bcrypt from 'bcrypt';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import 'dotenv/config';
 import {
   teams,
   employee,
@@ -19,6 +20,7 @@ import {
   payments,
   jobs,
   timeOffTypes,
+  jobApplications,
 } from './schema';
 import { eq } from 'drizzle-orm';
 
@@ -784,7 +786,7 @@ async function seed() {
 
     console.log('🟢 Seeding Job Postings (Open & Closed)...');
 
-    await db.insert(jobs).values([
+    const insertedJobs = await db.insert(jobs).values([
       {
         title: 'Senior Software Engineer',
         department: 'Engineering',
@@ -920,6 +922,67 @@ async function seed() {
         ],
         applicants: 15,
         postedAt: getDateWithOffset(-20, 10, 0),
+      },
+    ]).returning();
+
+    console.log('🟢 Seeding Job Applications...');
+
+    const [seniorSoftwareEngineer, marketingManager, operationsAssociate] = insertedJobs;
+
+    await db.insert(jobApplications).values([
+      {
+        jobId: seniorSoftwareEngineer.id,
+        name: 'Alice Johnson Candidate',
+        email: 'alice.candidate@example.com',
+        phone: '+1 234 567 8901',
+        location: 'Berlin, Germany',
+        stage: 'Applied',
+        notes: 'Strong backend skills, applied recently.',
+      },
+      {
+        jobId: seniorSoftwareEngineer.id,
+        name: 'Bob Smith Candidate',
+        email: 'bob.candidate@example.com',
+        phone: '+1 234 567 8902',
+        location: 'Remote',
+        stage: 'Screening',
+        notes: 'Good experience, needs a technical test.',
+      },
+      {
+        jobId: marketingManager.id,
+        name: 'Carol Davis Candidate',
+        email: 'carol.candidate@example.com',
+        phone: '+1 234 567 8903',
+        location: 'London, UK',
+        stage: 'Interview',
+        notes: 'Previous PM experience, transitioning to Marketing.',
+      },
+      {
+        jobId: operationsAssociate.id,
+        name: 'David Lee Candidate',
+        email: 'david.candidate@example.com',
+        phone: '+1 234 567 8904',
+        location: 'Munich, Germany',
+        stage: 'Offer',
+        notes: 'Strong candidate, great references.',
+      },
+      {
+        jobId: marketingManager.id,
+        name: 'Eva Green Candidate',
+        email: 'eva.candidate@example.com',
+        phone: '+1 234 567 8905',
+        location: 'Berlin, Germany',
+        stage: 'Hired',
+        notes: 'Accept offer, starting next month.',
+      },
+      {
+        jobId: seniorSoftwareEngineer.id,
+        name: 'Frank Miller Candidate',
+        email: 'frank.candidate@example.com',
+        phone: '+1 234 567 8906',
+        location: 'Remote',
+        stage: 'Rejected',
+        notes: 'Not a good fit at this time.',
       },
     ]);
 

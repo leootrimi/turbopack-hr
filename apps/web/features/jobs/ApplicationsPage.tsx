@@ -31,116 +31,14 @@ import { PipelineColumn } from './components/applications-components/pipeline-co
 import { ApplicationTableRow } from './components/applications-components/application-table-row';
 import { KPICard } from './components/applications-components/kpi-cards';
 import { DetailPanel } from './components/applications-components/detail-panel';
-
-
-// ---------- Mock Data ----------
-const mockApplications: Application[] = [
-  {
-    id: '1',
-    name: 'Alice Johnson',
-    position: 'Frontend Developer',
-    department: 'Engineering',
-    stage: 'Applied',
-    appliedDate: '2025-03-20',
-    email: 'alice@example.com',
-    phone: '+1 234 567 8901',
-    location: 'New York, NY',
-    cvUrl: '#',
-    notes: 'Strong portfolio, good React experience.',
-    timeline: [
-      { action: 'Application submitted', date: '2025-03-20' },
-      { action: 'Email sent to candidate', date: '2025-03-21' },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Bob Smith',
-    position: 'Backend Engineer',
-    department: 'Engineering',
-    stage: 'Screening',
-    appliedDate: '2025-03-18',
-    email: 'bob@example.com',
-    phone: '+1 234 567 8902',
-    location: 'Remote',
-    cvUrl: '#',
-    notes: 'Strong Go and Python skills.',
-    timeline: [{ action: 'Application submitted', date: '2025-03-18' }],
-  },
-  {
-    id: '3',
-    name: 'Carol Davis',
-    position: 'Product Manager',
-    department: 'Product',
-    stage: 'Interview',
-    appliedDate: '2025-03-15',
-    email: 'carol@example.com',
-    phone: '+1 234 567 8903',
-    location: 'San Francisco, CA',
-    cvUrl: '#',
-    notes: 'Previous PM at Google.',
-    timeline: [
-      { action: 'Application submitted', date: '2025-03-15' },
-      { action: 'Screening completed', date: '2025-03-18' },
-      { action: 'Interview scheduled', date: '2025-03-20' },
-    ],
-  },
-  {
-    id: '4',
-    name: 'David Lee',
-    position: 'UX Designer',
-    department: 'Design',
-    stage: 'Offer',
-    appliedDate: '2025-03-10',
-    email: 'david@example.com',
-    phone: '+1 234 567 8904',
-    location: 'Austin, TX',
-    cvUrl: '#',
-    notes: 'Excellent portfolio, strong references.',
-    timeline: [
-      { action: 'Application submitted', date: '2025-03-10' },
-      { action: 'Interview passed', date: '2025-03-15' },
-      { action: 'Offer extended', date: '2025-03-18' },
-    ],
-  },
-  {
-    id: '5',
-    name: 'Eva Green',
-    position: 'Marketing Lead',
-    department: 'Marketing',
-    stage: 'Hired',
-    appliedDate: '2025-03-05',
-    email: 'eva@example.com',
-    phone: '+1 234 567 8905',
-    location: 'Chicago, IL',
-    cvUrl: '#',
-    notes: 'Started on April 1.',
-    timeline: [
-      { action: 'Application submitted', date: '2025-03-05' },
-      { action: 'Offer accepted', date: '2025-03-12' },
-      { action: 'Onboarding completed', date: '2025-04-01' },
-    ],
-  },
-  {
-    id: '6',
-    name: 'Frank Miller',
-    position: 'Sales Executive',
-    department: 'Sales',
-    stage: 'Rejected',
-    appliedDate: '2025-03-01',
-    email: 'frank@example.com',
-    phone: '+1 234 567 8906',
-    location: 'Miami, FL',
-    cvUrl: '#',
-    notes: 'Not a culture fit.',
-    timeline: [
-      { action: 'Application submitted', date: '2025-03-01' },
-      { action: 'Rejected after screening', date: '2025-03-05' },
-    ],
-  },
-];
+import { useApplications, useRejectApplication, useUpdateApplicationStage } from './hooks/queries';
 
 export default function ApplicationsDashboard() {
-  const [applications, setApplications] = useState<Application[]>(mockApplications);
+  const { data: applicationsData, isLoading } = useApplications();
+  const applications = applicationsData || [];
+
+  const updateStageMutation = useUpdateApplicationStage();
+  const rejectMutation = useRejectApplication();
   const [viewMode, setViewMode] = useState<'pipeline' | 'list'>('pipeline');
   const [search, setSearch] = useState('');
   const [department, setDepartment] = useState('all');
@@ -176,37 +74,23 @@ export default function ApplicationsDashboard() {
 
   // Move stage function
   const moveStage = (appId: string, direction: 'next' | 'prev') => {
-    setApplications((prev) =>
-      prev.map((app) => {
-        if (app.id !== appId) return app;
-        const currentIdx = stages.indexOf(app.stage);
-        let newStage = app.stage;
-        if (direction === 'next' && currentIdx < stages.length - 1) {
-          newStage = stages[currentIdx + 1];
-        } else if (direction === 'prev' && currentIdx > 0) {
-          newStage = stages[currentIdx - 1];
-        }
-        // Add timeline entry
-        const newTimeline = [
-          ...app.timeline,
-          { action: `Moved to ${newStage}`, date: new Date().toISOString().split('T')[0] },
-        ];
-        return { ...app, stage: newStage, timeline: newTimeline };
-      })
-    );
+    const app = applications.find((a) => a.id === appId);
+    if (!app) return;
+    const currentIdx = stages.indexOf(app.stage);
+    let newStage = app.stage;
+    if (direction === 'next' && currentIdx < stages.length - 1) {
+      newStage = stages[currentIdx + 1];
+    } else if (direction === 'prev' && currentIdx > 0) {
+      newStage = stages[currentIdx - 1];
+    }
+    
+    if (newStage !== app.stage) {
+      updateStageMutation.mutate({ id: appId, stage: newStage });
+    }
   };
 
   const rejectApplication = (appId: string) => {
-    setApplications((prev) =>
-      prev.map((app) => {
-        if (app.id !== appId) return app;
-        const newTimeline = [
-          ...app.timeline,
-          { action: 'Application rejected', date: new Date().toISOString().split('T')[0] },
-        ];
-        return { ...app, stage: 'Rejected', timeline: newTimeline };
-      })
-    );  
+    rejectMutation.mutate(appId);
   };
 
   const handleViewDetails = (app: Application) => {
@@ -228,6 +112,14 @@ export default function ApplicationsDashboard() {
     rejectApplication(appId);
     setSelectedApp(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto space-y-6 p-4 md:p-6 overflow-x-hidden flex items-center justify-center">
+        <p className="text-slate-500">Loading applications...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 p-4 md:p-6 overflow-x-hidden">
