@@ -8,7 +8,13 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ReviewsService, CreateReviewCycleDto, UpdateReviewCycleDto } from './reviews.service';
+import {
+  ReviewsService,
+  CreateReviewCycleDto,
+  UpdateReviewCycleDto,
+  SubmitSelfReviewDto,
+  SubmitManagerReviewDto,
+} from './reviews.service';
 
 @Controller('api/reviews')
 export class ReviewsController {
@@ -45,5 +51,38 @@ export class ReviewsController {
   @Delete('cycles/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.reviewsService.remove(id);
+  }
+
+  // --- Submissions ---
+
+  @Post('submissions/self')
+  submitSelf(@Body() dto: SubmitSelfReviewDto) {
+    return this.reviewsService.submitSelfReview(dto);
+  }
+
+  @Post('submissions/manager')
+  submitManager(@Body() dto: SubmitManagerReviewDto) {
+    return this.reviewsService.submitManagerReview(dto);
+  }
+
+  @Get('submissions/self/:cycleId/:employeeId')
+  getSelfSubmission(
+    @Param('cycleId', ParseIntPipe) cycleId: number,
+    @Param('employeeId', ParseIntPipe) employeeId: number,
+  ) {
+    return this.reviewsService.getSelfReviewSubmission(cycleId, employeeId);
+  }
+
+  @Get('submissions/manager/:cycleId/:employeeId')
+  getManagerSubmission(
+    @Param('cycleId', ParseIntPipe) cycleId: number,
+    @Param('employeeId', ParseIntPipe) employeeId: number,
+  ) {
+    return this.reviewsService.getManagerReviewSubmission(cycleId, employeeId);
+  }
+
+  @Get('history/:employeeId')
+  getHistory(@Param('employeeId', ParseIntPipe) employeeId: number) {
+    return this.reviewsService.getReviewHistory(employeeId);
   }
 }

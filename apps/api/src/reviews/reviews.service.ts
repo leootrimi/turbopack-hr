@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { DrizzleService } from '../database/drizzle.provider';
-import { reviewCycles, type ReviewCycleQuestionJson } from '../database/schema';
-import { eq, desc } from 'drizzle-orm';
+import { reviewCycles, selfReviews, managerReviews, type ReviewCycleQuestionJson } from '../database/schema';
+import { eq, desc, and, or, isNotNull } from 'drizzle-orm';
 
 function parseQuestions(input: unknown): ReviewCycleQuestionJson[] | null {
   if (input === undefined || input === null) return null;
@@ -44,6 +44,21 @@ export interface UpdateReviewCycleDto {
   endDate?: string | null;
   selfReviewQuestions?: ReviewCycleQuestionJson[] | null;
   managerReviewQuestions?: ReviewCycleQuestionJson[] | null;
+}
+
+export interface SubmitSelfReviewDto {
+  employeeId: number;
+  reviewCycleId: number;
+  answers: Record<string, string>;
+  status?: 'draft' | 'submitted';
+}
+
+export interface SubmitManagerReviewDto {
+  employeeId: number;
+  managerId: number;
+  reviewCycleId: number;
+  answers: Record<string, any>;
+  status?: 'draft' | 'submitted';
 }
 
 @Injectable()
@@ -137,5 +152,144 @@ export class ReviewsService {
 
     if (!deleted) throw new NotFoundException(`Review cycle ${id} not found`);
     return deleted;
+  }
+
+  // --- Submissions ---
+
+  async submitSelfReview(dto: SubmitSelfReviewDto) {
+    const [existing] = await this.drizzle.db
+      .select()
+      .from(selfReviews)
+      .where(
+        and(
+          eq(selfReviews.employeeId, dto.employeeId),
+          eq(selfReviews.reviewCycleId, dto.reviewCycleId),
+        ),
+      )
+      .limit(1);
+
+    if (existing) {
+      const [updated] = await this.drizzle.db
+        .update(selfReviews)
+        .set({
+          answers: dto.answers,
+          status: dto.status ?? 'submitted',
+          updatedAt: new Date(),
+        })
+        .where(eq(selfReviews.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await this.drizzle.db
+      .insert(selfReviews)
+      .values({
+        employeeId: dto.employeeId,
+        reviewCycleId: dto.reviewCycleId,
+        answers: dto.answers,
+        status: dto.status ?? 'submitted',
+      })
+      .returning();
+    return created;
+  }
+
+  async submitManagerReview(dto: SubmitManagerReviewDto) {
+    const [existing] = await this.drizzle.db
+      .select()
+      .from(managerReviews)
+      .where(
+        and(
+          eq(managerReviews.employeeId, dto.employeeId),
+          eq(managerReviews.managerId, dto.managerId),
+          eq(managerReviews.reviewCycleId, dto.reviewCycleId),
+        ),
+      )
+      .limit(1);
+
+    if (existing) {
+      const [updated] = await this.drizzle.db
+        .update(managerReviews)
+        .set({
+          answers: dto.answers,
+          status: dto.status ?? 'submitted',
+          updatedAt: new Date(),
+        })
+        .where(eq(managerReviews.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await this.drizzle.db
+      .insert(managerReviews)
+      .values({
+        employeeId: dto.employeeId,
+        managerId: dto.managerId,
+        reviewCycleId: dto.reviewCycleId,
+        answers: dto.answers,
+        status: dto.status ?? 'submitted',
+      })
+      .returning();
+    return created;
+  }
+
+  async getSelfReviewSubmission(cycleId: number, employeeId: number) {
+    const [result] = await this.drizzle.db
+      .select()
+      .from(selfReviews)
+      .where(
+        and(
+          eq(selfReviews.reviewCycleId, cycleId),
+          eq(selfReviews.employeeId, employeeId),
+        ),
+      )
+      .limit(1);
+    return result ?? null;
+  }
+
+  async getManagerReviewSubmission(cycleId: number, employeeId: number) {
+    const [result] = await this.drizzle.db
+      .select()
+      .from(managerReviews)
+      .where(
+        and(
+          eq(managerReviews.reviewCycleId, cycleId),
+          eq(managerReviews.employeeId, employeeId),
+        ),
+      )
+      .limit(1);
+    return result ?? null;
+  }
+
+  async getReviewHistory(employeeId: number) {
+    const history = await this.drizzle.db
+      .select({
+        cycleId: reviewCycles.id,
+        title: reviewCycles.title,
+        startDate: reviewCycles.startDate,
+        endDate: reviewCycles.endDate,
+        selfStatus: selfReviews.status,
+        managerStatus: managerReviews.status,
+      })
+      .from(reviewCycles)
+      .leftJoin(
+        selfReviews,
+        and(
+          eq(selfReviews.reviewCycleId, reviewCycles.id),
+          eq(selfReviews.employeeId, employeeId),
+        ),
+      )
+      .leftJoin(
+        managerReviews,
+        and(
+          eq(managerReviews.reviewCycleId, reviewCycles.id),
+          eq(managerReviews.employeeId, employeeId),
+        ),
+      )
+      .where(
+        or(isNotNull(selfReviews.id), isNotNull(managerReviews.id)),
+      )
+      .orderBy(desc(reviewCycles.endDate));
+
+    return history;
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Loader2, User, Users } from "lucide-react";
+import { Loader2, User, Users, History } from "lucide-react";
 import { useActiveReviewCycle } from "../hooks/queries";
 import ManagerReviewPage from "../manager/manager-review";
 import SelfReviewPage from "../employee/employee-review";
@@ -17,7 +17,7 @@ export default function ReviewsTab({ employeeId }: ReviewsTabProps) {
   const { user } = useAuth();
 
   const isSelf = user?.employeeId === parseInt(employeeId);
-  const [activeSubTab, setActiveSubTab] = useState<"self" | "manager">("self");
+  const [activeSubTab, setActiveSubTab] = useState<"self" | "manager" | "past">("self");
 
   // Set initial sub-tab once auth and context are loaded
   useEffect(() => {
@@ -83,17 +83,34 @@ export default function ReviewsTab({ employeeId }: ReviewsTabProps) {
                 <Users size={14} />
                 Manager Evaluation
               </button>
+              <button
+                onClick={() => setActiveSubTab("past")}
+                className={`flex items-center gap-2 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  activeSubTab === "past"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <History size={14} />
+                History
+              </button>
             </div>
           </div>
         </div>
 
         {/* Form Content */}
         <div className="flex-1">
-          {activeSubTab === "self" ? (
-            <SelfReviewPage />
-          ) : (
-            <ManagerReviewPage />
+          {activeSubTab === "self" && (
+            <SelfReviewPage employeeId={employeeId} cycleId={activeCycle.id} />
           )}
+          {activeSubTab === "manager" && (
+            <ManagerReviewPage
+              employeeId={employeeId}
+              managerId={user?.employeeId?.toString() ?? ""}
+              cycleId={activeCycle.id}
+            />
+          )}
+          {activeSubTab === "past" && <PastReviews employeeId={employeeId} hideBanner={true} />}
         </div>
       </div>
     );

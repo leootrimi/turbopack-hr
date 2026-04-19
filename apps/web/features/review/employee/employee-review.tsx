@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   Lightbulb,
 } from 'lucide-react';
-import { useActiveReviewCycle } from '../hooks/queries';
+import { useActiveReviewCycle, useSubmitSelfReview, useSelfReviewSubmission } from '../hooks/queries';
 import {
   DEFAULT_SELF_REVIEW_QUESTIONS,
   normalizeReviewQuestions,
@@ -68,7 +68,12 @@ const computeScore = (data: Record<string, string>, sectionCount: number): numbe
 const SELF_ICONS = [Target, Trophy, AlertCircle, MessageSquare, FileText, Sparkles] as const;
 
 // ---------- Main Component ----------
-export default function SelfReviewPage() {
+interface SelfReviewPageProps {
+  employeeId: string;
+  cycleId: number;
+}
+
+export default function SelfReviewPage({ employeeId, cycleId }: SelfReviewPageProps) {
   const { data: activeCycle } = useActiveReviewCycle();
 
   const sections: Section[] = useMemo(() => {
@@ -99,6 +104,32 @@ export default function SelfReviewPage() {
   const [submitted, setSubmitted] = useState(false);
   const autoSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const { data: existingSubmission, isLoading: isLoadingSubmission } = useSelfReviewSubmission(cycleId, parseInt(employeeId));
+  const submitMutation = useSubmitSelfReview();
+
+  useEffect(() => {
+    if (existingSubmission?.answers) {
+      setReviewData(existingSubmission.answers);
+      if (existingSubmission.status === 'submitted') {
+        setSubmitted(true);
+      }
+    }
+  }, [existingSubmission]);
+
+  const handleSubmit = async () => {
+    try {
+      await submitMutation.mutateAsync({
+        employeeId: parseInt(employeeId),
+        reviewCycleId: cycleId,
+        answers: reviewData,
+        status: 'submitted'
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Failed to submit review', err);
+    }
+  };
+
   useEffect(() => {
     setReviewData((prev) => {
       const next: Record<string, string> = {};
@@ -128,10 +159,21 @@ export default function SelfReviewPage() {
     setReviewData((prev) => ({ ...prev, [currentSection]: value }));
     setSavedStatus('saving');
     if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
-    autoSaveTimeout.current = setTimeout(() => {
-      setSavedStatus('saved');
-      setLastSaved(new Date());
-    }, 800);
+    if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+    autoSaveTimeout.current = setTimeout(async () => {
+      try {
+        await submitMutation.mutateAsync({
+          employeeId: parseInt(employeeId),
+          reviewCycleId: cycleId,
+          answers: { ...reviewData, [currentSection]: value },
+          status: 'draft'
+        });
+        setSavedStatus('saved');
+        setLastSaved(new Date());
+      } catch (err) {
+        setSavedStatus('error');
+      }
+    }, 1000);
   };
 
   // AI suggestion (mock)
@@ -181,7 +223,7 @@ export default function SelfReviewPage() {
   const charCount = currentText.length;
   const quality = getQuality(currentText);
 
-  if (!current) {
+  if (!current || isLoadingSubmission) {
     return (
       <div className="flex items-center justify-center py-24 text-sm text-slate-500">
         Loading review form…
@@ -395,15 +437,15 @@ export default function SelfReviewPage() {
                 </button>
                 {sections.findIndex(s => s.id === currentSection) === sections.length - 1 ? (
                   <button
-                    disabled={!isAllComplete}
-                    onClick={() => setSubmitted(true)}
+                    disabled={!isAllComplete || submitMutation.isPending}
+                    onClick={handleSubmit}
                     className={`px-6 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-2 ${
                       isAllComplete
                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200'
                         : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                     }`}
                   >
-                    Submit Self-Review <CheckCircle2 size={14} />
+                    {submitMutation.isPending ? 'Submitting...' : 'Submit Self-Review'} <CheckCircle2 size={14} />
                   </button>
                 ) : (
                   <button

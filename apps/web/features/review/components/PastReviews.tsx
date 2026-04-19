@@ -1,31 +1,44 @@
 "use client";
 
 import React from "react";
-import { ClipboardList, CalendarRange, Info } from "lucide-react";
+import { ClipboardList, CalendarRange, Info, Loader2, CheckCircle2, Clock } from "lucide-react";
+import { useReviewHistory } from "../hooks/queries";
 
 interface PastReviewsProps {
   employeeId: string;
+  hideBanner?: boolean;
 }
 
-export default function PastReviews({ employeeId: _employeeId }: PastReviewsProps) {
-  // In the future this would fetch completed review submissions for the employee.
-  // For now we show a clear "no active cycle" state with past-cycle placeholders.
-  const pastCycles: { title: string; period: string; score: number }[] = [];
+export default function PastReviews({ employeeId, hideBanner = false }: PastReviewsProps) {
+  const { data: history, isLoading } = useReviewHistory(parseInt(employeeId));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 gap-2 text-slate-400 text-sm">
+        <Loader2 size={18} className="animate-spin" />
+        Loading review history…
+      </div>
+    );
+  }
+
+  const pastCycles = history || [];
 
   return (
     <div className="p-6 space-y-5">
       {/* Info banner */}
-      <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
-        <Info size={16} className="mt-0.5 shrink-0 text-amber-500" />
-        <div>
-          <p className="text-xs font-semibold">No active review cycle</p>
-          <p className="text-xs mt-0.5 text-amber-700">
-            An admin needs to create and enable a review cycle in{" "}
-            <strong>Settings → Reviews</strong> before the review form appears
-            here.
-          </p>
+      {!hideBanner && (
+        <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+          <Info size={16} className="mt-0.5 shrink-0 text-amber-500" />
+          <div>
+            <p className="text-xs font-semibold">No active review cycle</p>
+            <p className="text-xs mt-0.5 text-amber-700">
+              An admin needs to create and enable a review cycle in{" "}
+              <strong>Settings → Reviews</strong> before the review form appears
+              here.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Past cycles */}
       {pastCycles.length === 0 ? (
@@ -53,12 +66,39 @@ export default function PastReviews({ employeeId: _employeeId }: PastReviewsProp
                 <p className="text-sm font-medium text-slate-800">{c.title}</p>
                 <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
                   <CalendarRange size={11} />
-                  {c.period}
+                  {c.startDate ? new Date(c.startDate).toLocaleDateString() : 'N/A'} - {c.endDate ? new Date(c.endDate).toLocaleDateString() : 'Present'}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-slate-800">{c.score}</p>
-                <p className="text-[10px] text-slate-400">/ 100</p>
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Self</span>
+                    <div className="flex items-center gap-1">
+                      {c.selfStatus === 'submitted' ? (
+                        <CheckCircle2 size={12} className="text-emerald-500" />
+                      ) : (
+                        <Clock size={12} className="text-amber-400" />
+                      )}
+                      <span className={`text-[11px] font-medium ${c.selfStatus === 'submitted' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {c.selfStatus === 'submitted' ? 'Done' : c.selfStatus === 'draft' ? 'Draft' : 'Missing'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-px h-6 bg-slate-100 mx-1" />
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Manager</span>
+                    <div className="flex items-center gap-1">
+                      {c.managerStatus === 'submitted' ? (
+                        <CheckCircle2 size={12} className="text-emerald-500" />
+                      ) : (
+                        <Clock size={12} className="text-amber-400" />
+                      )}
+                      <span className={`text-[11px] font-medium ${c.managerStatus === 'submitted' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {c.managerStatus === 'submitted' ? 'Done' : c.managerStatus === 'draft' ? 'Draft' : 'Pending'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

@@ -435,3 +435,52 @@ export const reviewCycles = pgTable('review_cycles', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const reviewStatusEnum = pgEnum('review_status', ['draft', 'submitted']);
+
+export const selfReviews = pgTable(
+  'self_reviews',
+  {
+    id: serial('id').primaryKey(),
+    employeeId: integer('employee_id')
+      .notNull()
+      .references(() => employee.id, { onDelete: 'cascade' }),
+    reviewCycleId: integer('review_cycle_id')
+      .notNull()
+      .references(() => reviewCycles.id, { onDelete: 'cascade' }),
+    answers: jsonb('answers').notNull(),
+    submittedAt: timestamp('submitted_at').defaultNow(),
+    updatedAt: timestamp('updated_at'),
+    status: reviewStatusEnum('status').default('submitted').notNull(),
+  },
+  (t) => ({
+    employeeCycleUnique: uniqueIndex('self_reviews_emp_cycle_idx').on(t.employeeId, t.reviewCycleId),
+  }),
+);
+
+export const managerReviews = pgTable(
+  'manager_reviews',
+  {
+    id: serial('id').primaryKey(),
+    employeeId: integer('employee_id')
+      .notNull()
+      .references(() => employee.id, { onDelete: 'cascade' }),
+    managerId: integer('manager_id')
+      .notNull()
+      .references(() => employee.id, { onDelete: 'cascade' }),
+    reviewCycleId: integer('review_cycle_id')
+      .notNull()
+      .references(() => reviewCycles.id, { onDelete: 'cascade' }),
+    answers: jsonb('answers').notNull(),
+    submittedAt: timestamp('submitted_at').defaultNow(),
+    updatedAt: timestamp('updated_at'),
+    status: reviewStatusEnum('status').default('submitted').notNull(),
+  },
+  (t) => ({
+    managerEmpCycleUnique: uniqueIndex('manager_reviews_mgr_emp_cycle_idx').on(
+      t.employeeId,
+      t.managerId,
+      t.reviewCycleId,
+    ),
+  }),
+);
