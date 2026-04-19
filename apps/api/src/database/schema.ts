@@ -8,6 +8,7 @@ import {
   boolean,
   numeric,
   uniqueIndex,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const employee = pgTable('employee', {
@@ -410,6 +411,15 @@ export const applicationTimelines = pgTable('application_timelines', {
   date: timestamp('date').defaultNow().notNull(),
 });
 
+/** Custom prompts for self / manager overview sections (stored as JSON arrays). */
+export type ReviewCycleQuestionJson = {
+  id: string;
+  label: string;
+  prompt: string;
+  placeholder?: string;
+  tip?: string;
+};
+
 export const reviewCycles = pgTable('review_cycles', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 256 }).notNull(),
@@ -417,6 +427,10 @@ export const reviewCycles = pgTable('review_cycles', {
   enabled: boolean('enabled').default(false).notNull(),
   startDate: timestamp('start_date'),
   endDate: timestamp('end_date'),
+  /** Employee self-reflection form sections */
+  selfReviewQuestions: jsonb('self_review_questions').$type<ReviewCycleQuestionJson[] | null>(),
+  /** Manager written overview sections (excludes competency matrix) */
+  managerReviewQuestions: jsonb('manager_review_questions').$type<ReviewCycleQuestionJson[] | null>(),
   createdById: integer('created_by_id').references(() => employee.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

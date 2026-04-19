@@ -1,4 +1,5 @@
 import { makeRequest } from "../../../lib/axios";
+import type { ReviewFormQuestion } from "../review-form-defaults";
 
 export interface ReviewCycle {
   id: number;
@@ -7,6 +8,8 @@ export interface ReviewCycle {
   enabled: boolean;
   startDate: string | null;
   endDate: string | null;
+  selfReviewQuestions: ReviewFormQuestion[] | null;
+  managerReviewQuestions: ReviewFormQuestion[] | null;
   createdById: number | null;
   createdAt: string;
   updatedAt: string;
@@ -18,6 +21,8 @@ export interface CreateReviewCycleDTO {
   enabled?: boolean;
   startDate?: string;
   endDate?: string;
+  selfReviewQuestions?: ReviewFormQuestion[] | null;
+  managerReviewQuestions?: ReviewFormQuestion[] | null;
 }
 
 export interface UpdateReviewCycleDTO {
@@ -26,6 +31,8 @@ export interface UpdateReviewCycleDTO {
   enabled?: boolean;
   startDate?: string | null;
   endDate?: string | null;
+  selfReviewQuestions?: ReviewFormQuestion[] | null;
+  managerReviewQuestions?: ReviewFormQuestion[] | null;
 }
 
 export async function getReviewCycles(): Promise<ReviewCycle[]> {

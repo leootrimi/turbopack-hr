@@ -11,6 +11,7 @@ import {
   Circle,
   CalendarRange,
   Loader2,
+  GripVertical,
 } from "lucide-react";
 import {
   useReviewCycles,
@@ -19,6 +20,12 @@ import {
   useDeleteReviewCycle,
 } from "../../review/hooks/queries";
 import { ReviewCycle } from "../../review/api";
+import {
+  DEFAULT_MANAGER_OVERVIEW_QUESTIONS,
+  DEFAULT_SELF_REVIEW_QUESTIONS,
+  normalizeReviewQuestions,
+  type ReviewFormQuestion,
+} from "../review-form-defaults";
 
 type ModalMode = "create" | "edit" | null;
 
@@ -28,6 +35,19 @@ interface FormState {
   startDate: string;
   endDate: string;
   enabled: boolean;
+  selfQuestions: ReviewFormQuestion[];
+  managerQuestions: ReviewFormQuestion[];
+}
+
+function cloneQuestions(qs: ReviewFormQuestion[]): ReviewFormQuestion[] {
+  return qs.map((q) => ({ ...q }));
+}
+
+function newQuestionId(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `q_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+  }
+  return `q_${Date.now()}`;
 }
 
 const emptyForm = (): FormState => ({
@@ -36,6 +56,8 @@ const emptyForm = (): FormState => ({
   startDate: "",
   endDate: "",
   enabled: false,
+  selfQuestions: cloneQuestions(DEFAULT_SELF_REVIEW_QUESTIONS),
+  managerQuestions: cloneQuestions(DEFAULT_MANAGER_OVERVIEW_QUESTIONS),
 });
 
 function formatDate(d: string | null) {
@@ -68,9 +90,18 @@ export default function ReviewCyclesAdmin() {
     setForm({
       title: cycle.title,
       description: cycle.description ?? "",
-      startDate: cycle.startDate ? cycle.startDate.split("T")[0] : "",
-      endDate: cycle.endDate ? cycle.endDate.split("T")[0] : "",
+      startDate: cycle.startDate?.split("T")[0] ?? "",
+      endDate: cycle.endDate?.split("T")[0] ?? "",
       enabled: cycle.enabled,
+      selfQuestions: cloneQuestions(
+        normalizeReviewQuestions(cycle.selfReviewQuestions, DEFAULT_SELF_REVIEW_QUESTIONS),
+      ),
+      managerQuestions: cloneQuestions(
+        normalizeReviewQuestions(
+          cycle.managerReviewQuestions,
+          DEFAULT_MANAGER_OVERVIEW_QUESTIONS,
+        ),
+      ),
     });
     setEditingId(cycle.id);
     setModalMode("edit");
@@ -82,12 +113,30 @@ export default function ReviewCyclesAdmin() {
   };
 
   const handleSave = async () => {
+    const selfReviewQuestions = form.selfQuestions.filter(
+      (q) => q.label.trim() && q.prompt.trim(),
+    );
+    const managerReviewQuestions = form.managerQuestions.filter(
+      (q) => q.label.trim() && q.prompt.trim(),
+    );
+
+    if (!selfReviewQuestions.length) {
+      alert("Add at least one self-reflection question (label and prompt).");
+      return;
+    }
+    if (!managerReviewQuestions.length) {
+      alert("Add at least one manager overview question (label and prompt).");
+      return;
+    }
+
     const payload = {
       title: form.title.trim(),
       description: form.description.trim() || undefined,
       enabled: form.enabled,
       startDate: form.startDate || undefined,
       endDate: form.endDate || undefined,
+      selfReviewQuestions,
+      managerReviewQuestions,
     };
 
     if (!payload.title) {
@@ -287,7 +336,7 @@ export default function ReviewCyclesAdmin() {
       {/* ── Modal ── */}
       {modalMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 border border-slate-100">
             {/* Modal header */}
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-bold text-slate-900">
@@ -384,6 +433,231 @@ export default function ReviewCyclesAdmin() {
                   }`}
                 />
               </button>
+            </div>
+
+            {/* Custom questions */}
+            <div className="space-y-4 pt-2 border-t border-slate-100">
+              <p className="text-xs font-semibold text-slate-800">
+                Review questions
+              </p>
+              <p className="text-[11px] text-slate-500 -mt-2">
+                These prompts appear in the employee self-reflection flow and in
+                the manager overview tab. Competency ratings stay the same.
+              </p>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wide">
+                  Self-reflection sections
+                </label>
+                {form.selfQuestions.map((row, idx) => (
+                  <div
+                    key={row.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-2"
+                  >
+                    <div className="flex items-center gap-1 text-slate-400">
+                      <GripVertical size={14} className="shrink-0" />
+                      <span className="text-[10px] font-medium uppercase tracking-wide">
+                        Section {idx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={form.selfQuestions.length <= 1}
+                        onClick={() =>
+                          setForm((p) => ({
+                            ...p,
+                            selfQuestions: p.selfQuestions.filter((_, i) => i !== idx),
+                          }))
+                        }
+                        className="ml-auto text-rose-500 hover:text-rose-700 disabled:opacity-30 p-1"
+                        title="Remove section"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <input
+                      value={row.label}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.selfQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, label: e.target.value };
+                          return { ...p, selfQuestions: next };
+                        })
+                      }
+                      placeholder="Short label (sidebar)"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                    <textarea
+                      value={row.prompt}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.selfQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, prompt: e.target.value };
+                          return { ...p, selfQuestions: next };
+                        })
+                      }
+                      placeholder="Question shown to the employee"
+                      rows={2}
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg resize-y"
+                    />
+                    <input
+                      value={row.placeholder ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.selfQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, placeholder: e.target.value };
+                          return { ...p, selfQuestions: next };
+                        })
+                      }
+                      placeholder="Placeholder (optional)"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                    <input
+                      value={row.tip ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.selfQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, tip: e.target.value };
+                          return { ...p, selfQuestions: next };
+                        })
+                      }
+                      placeholder="Tip for the employee (optional)"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((p) => ({
+                      ...p,
+                      selfQuestions: [
+                        ...p.selfQuestions,
+                        {
+                          id: newQuestionId(),
+                          label: "",
+                          prompt: "",
+                          placeholder: "",
+                          tip: "",
+                        },
+                      ],
+                    }))
+                  }
+                  className="w-full py-2 text-xs font-semibold text-indigo-600 border border-dashed border-indigo-200 rounded-xl hover:bg-indigo-50/50"
+                >
+                  + Add self-reflection section
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wide">
+                  Manager overview sections
+                </label>
+                {form.managerQuestions.map((row, idx) => (
+                  <div
+                    key={row.id}
+                    className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-2"
+                  >
+                    <div className="flex items-center gap-1 text-slate-400">
+                      <GripVertical size={14} className="shrink-0" />
+                      <span className="text-[10px] font-medium uppercase tracking-wide">
+                        Section {idx + 1}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={form.managerQuestions.length <= 1}
+                        onClick={() =>
+                          setForm((p) => ({
+                            ...p,
+                            managerQuestions: p.managerQuestions.filter((_, i) => i !== idx),
+                          }))
+                        }
+                        className="ml-auto text-rose-500 hover:text-rose-700 disabled:opacity-30 p-1"
+                        title="Remove section"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <input
+                      value={row.label}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.managerQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, label: e.target.value };
+                          return { ...p, managerQuestions: next };
+                        })
+                      }
+                      placeholder="Short label"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                    <textarea
+                      value={row.prompt}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.managerQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, prompt: e.target.value };
+                          return { ...p, managerQuestions: next };
+                        })
+                      }
+                      placeholder="Question for the manager"
+                      rows={2}
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg resize-y"
+                    />
+                    <input
+                      value={row.placeholder ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.managerQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, placeholder: e.target.value };
+                          return { ...p, managerQuestions: next };
+                        })
+                      }
+                      placeholder="Placeholder (optional)"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                    <input
+                      value={row.tip ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => {
+                          const next = [...p.managerQuestions];
+                          const cur = next[idx]!;
+                          next[idx] = { ...cur, tip: e.target.value };
+                          return { ...p, managerQuestions: next };
+                        })
+                      }
+                      placeholder="Tip for the manager (optional)"
+                      className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg"
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((p) => ({
+                      ...p,
+                      managerQuestions: [
+                        ...p.managerQuestions,
+                        {
+                          id: newQuestionId(),
+                          label: "",
+                          prompt: "",
+                          placeholder: "",
+                          tip: "",
+                        },
+                      ],
+                    }))
+                  }
+                  className="w-full py-2 text-xs font-semibold text-indigo-600 border border-dashed border-indigo-200 rounded-xl hover:bg-indigo-50/50"
+                >
+                  + Add manager section
+                </button>
+              </div>
             </div>
 
             {/* Footer buttons */}

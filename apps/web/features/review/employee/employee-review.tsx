@@ -1,7 +1,15 @@
 // app/review/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  createElement,
+  type ComponentType,
+} from 'react';
 import {
   Target,
   Trophy,
@@ -15,35 +23,27 @@ import {
   CheckCircle2,
   Lightbulb,
 } from 'lucide-react';
+import { useActiveReviewCycle } from '../hooks/queries';
+import {
+  DEFAULT_SELF_REVIEW_QUESTIONS,
+  normalizeReviewQuestions,
+  type ReviewFormQuestion,
+} from '../review-form-defaults';
 
 // ---------- Types ----------
-type SectionId = 'goals' | 'achievements' | 'challenges' | 'feedback' | 'summary';
-
-interface Section {
-  id: SectionId;
-  label: string;
+interface Section extends ReviewFormQuestion {
   icon: React.ReactNode;
-  prompt: string;
-  placeholder: string;
-  tip: string;
 }
 
-interface ReviewData {
-  goals: string;
-  achievements: string;
-  challenges: string;
-  feedback: string;
-  summary: string;
-}
-
-// ---------- Mock AI Suggestions ----------
-const aiSuggestions: Record<SectionId, string[]> = {
-  goals: ['Exceeded quarterly KPIs by 15%', 'Launched a new feature that improved retention', 'Mentored two junior developers'],
-  achievements: ['Reduced bug rate by 30%', 'Led cross‑team initiative to redesign onboarding'],
-  challenges: ['Time management across multiple projects', 'Legacy code migration complexity'],
-  feedback: ['More frequent 1:1s would help alignment', 'Great at unblocking team members'],
-  summary: ['Ready for promotion next cycle', 'Consistently exceeds expectations'],
-};
+// ---------- Mock AI Suggestions (generic pool for any section) ----------
+const aiSuggestionPool: string[] = [
+  'Exceeded quarterly KPIs with measurable outcomes',
+  'Launched a feature that improved retention or engagement',
+  'Mentored teammates or led a cross‑team initiative',
+  'Reduced defects or improved reliability in production',
+  'Balanced competing priorities while keeping stakeholders aligned',
+  'Suggested a process improvement that saved time',
+];
 
 // Quality indicator based on length and keyword presence
 const getQuality = (text: string): { label: string; color: string } => {
@@ -55,26 +55,42 @@ const getQuality = (text: string): { label: string; color: string } => {
 };
 
 // Calculate a simple completeness score (0-100)
-const computeScore = (data: ReviewData): number => {
+const computeScore = (data: Record<string, string>, sectionCount: number): number => {
   const fields = Object.values(data);
   const totalLength = fields.reduce((sum, val) => sum + val.trim().length, 0);
   const nonEmptyCount = fields.filter((val) => val.trim().length >= 20).length;
-  // Score: 50% based on total length (up to 500 chars), 50% based on number of substantial sections
+  const n = Math.max(1, sectionCount);
   const lengthScore = Math.min(100, (totalLength / 500) * 100);
-  const sectionScore = (nonEmptyCount / 5) * 100;
+  const sectionScore = (nonEmptyCount / n) * 100;
   return Math.floor((lengthScore + sectionScore) / 2);
 };
 
+const SELF_ICONS = [Target, Trophy, AlertCircle, MessageSquare, FileText, Sparkles] as const;
+
 // ---------- Main Component ----------
 export default function SelfReviewPage() {
-  const [currentSection, setCurrentSection] = useState<SectionId>('goals');
-  const [reviewData, setReviewData] = useState<ReviewData>({
-    goals: '',
-    achievements: '',
-    challenges: '',
-    feedback: '',
-    summary: '',
-  });
+  const { data: activeCycle } = useActiveReviewCycle();
+
+  const sections: Section[] = useMemo(() => {
+    const qs = normalizeReviewQuestions(
+      activeCycle?.selfReviewQuestions,
+      DEFAULT_SELF_REVIEW_QUESTIONS,
+    );
+    return qs.map((q, i) => {
+      const IconComp = SELF_ICONS[i % SELF_ICONS.length];
+      return {
+        ...q,
+        placeholder: q.placeholder ?? '',
+        tip: q.tip ?? '',
+        icon: createElement(IconComp as ComponentType<{ size?: number }>, {
+          size: 18,
+        }),
+      };
+    });
+  }, [activeCycle?.selfReviewQuestions]);
+
+  const [currentSection, setCurrentSection] = useState<string>('');
+  const [reviewData, setReviewData] = useState<Record<string, string>>({});
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showReuseMenu, setShowReuseMenu] = useState(false);
@@ -83,24 +99,32 @@ export default function SelfReviewPage() {
   const [submitted, setSubmitted] = useState(false);
   const autoSaveTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Sections definition
-  const sections: Section[] = [
-    { id: 'goals', label: 'Goals', icon: <Target size={18} />, prompt: 'What were your main objectives this quarter?', placeholder: 'E.g., Increase user engagement by 20%...', tip: 'Managers love specific, measurable goals.' },
-    { id: 'achievements', label: 'Achievements', icon: <Trophy size={18} />, prompt: 'What impact did you have?', placeholder: 'Describe outcomes, not just activities.', tip: 'Highlight results – numbers speak louder.' },
-    { id: 'challenges', label: 'Challenges', icon: <AlertCircle size={18} />, prompt: 'What obstacles did you face?', placeholder: 'Be honest – how did you overcome them?', tip: 'Showing growth from challenges is valuable.' },
-    { id: 'feedback', label: 'Feedback', icon: <MessageSquare size={18} />, prompt: 'How can we improve collaboration?', placeholder: 'Constructive feedback for team/process.', tip: 'Focus on systems, not people.' },
-    { id: 'summary', label: 'Summary', icon: <FileText size={18} />, prompt: 'Overall reflection and next steps.', placeholder: 'What do you want to achieve next?', tip: 'This helps leadership plan development.' },
-  ];
+  useEffect(() => {
+    setReviewData((prev) => {
+      const next: Record<string, string> = {};
+      for (const s of sections) {
+        next[s.id] = prev[s.id] ?? '';
+      }
+      return next;
+    });
+  }, [sections]);
 
-  const current = sections.find((s) => s.id === currentSection)!;
+  useEffect(() => {
+    if (!sections.length) return;
+    const firstId = sections[0]!.id;
+    setCurrentSection((cur) => (cur && sections.some((s) => s.id === cur) ? cur : firstId));
+  }, [sections]);
+
+  const current = sections.find((s) => s.id === currentSection);
 
   // Update score whenever data changes
   useEffect(() => {
-    setScore(computeScore(reviewData));
-  }, [reviewData]);
+    setScore(computeScore(reviewData, sections.length));
+  }, [reviewData, sections.length]);
 
   // Auto-save simulation
   const handleContentChange = (value: string) => {
+    if (!currentSection) return;
     setReviewData((prev) => ({ ...prev, [currentSection]: value }));
     setSavedStatus('saving');
     if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
@@ -112,47 +136,58 @@ export default function SelfReviewPage() {
 
   // AI suggestion (mock)
   const fetchAiSuggestion = useCallback(() => {
-    const suggestions = aiSuggestions[currentSection];
-    const random = suggestions[Math.floor(Math.random() * suggestions.length)];
+    const random =
+      aiSuggestionPool[Math.floor(Math.random() * aiSuggestionPool.length)] ?? '';
     setAiSuggestion(random);
-    // Auto-clear after 3 seconds or allow click to insert
     setTimeout(() => setAiSuggestion(''), 5000);
-  }, [currentSection]);
+  }, []);
 
   const insertSuggestion = () => {
-    if (aiSuggestion) {
-      const newText = reviewData[currentSection]
-        ? `${reviewData[currentSection]} ${aiSuggestion}`
-        : aiSuggestion;
-      handleContentChange(newText);
-      setAiSuggestion('');
-    }
+    if (!currentSection || !aiSuggestion) return;
+    const existing = reviewData[currentSection] ?? '';
+    const newText = existing ? `${existing} ${aiSuggestion}` : aiSuggestion;
+    handleContentChange(newText);
+    setAiSuggestion('');
   };
 
   // Reuse past answers (mock)
-  const reusePastAnswer = (section: SectionId) => {
-    const pastAnswers: Record<SectionId, string> = {
-      goals: 'Achieved 100% of OKRs last quarter.',
-      achievements: 'Launched two major features on time.',
-      challenges: 'Handled tight deadlines with team support.',
-      feedback: 'Improve documentation process.',
-      summary: 'Ready for more responsibility.',
-    };
-    handleContentChange(pastAnswers[section]);
+  const reusePastAnswer = (sectionId: string) => {
+    const snippets = [
+      'Achieved agreed objectives and supported team priorities.',
+      'Delivered key milestones on time with clear communication.',
+      'Learned from blockers and applied improvements in the next iteration.',
+    ];
+    const pick = snippets[Math.floor(Math.random() * snippets.length)] ?? snippets[0]!;
+    setReviewData((prev) => ({ ...prev, [sectionId]: pick }));
+    setSavedStatus('saving');
+    if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+    autoSaveTimeout.current = setTimeout(() => {
+      setSavedStatus('saved');
+      setLastSaved(new Date());
+    }, 800);
     setShowReuseMenu(false);
   };
 
   // Helper to check if a section is incomplete (too short)
-  const isIncomplete = (sectionId: SectionId) => {
-    return reviewData[sectionId].trim().length < 20;
+  const isIncomplete = (sectionId: string) => {
+    return (reviewData[sectionId] ?? '').trim().length < 20;
   };
 
-  const isAllComplete = Object.keys(reviewData).every(key => !isIncomplete(key as SectionId));
+  const isAllComplete =
+    sections.length > 0 && sections.every((s) => !isIncomplete(s.id));
 
   // Character count and quality
-  const currentText = reviewData[currentSection];
+  const currentText = currentSection ? (reviewData[currentSection] ?? '') : '';
   const charCount = currentText.length;
   const quality = getQuality(currentText);
+
+  if (!current) {
+    return (
+      <div className="flex items-center justify-center py-24 text-sm text-slate-500">
+        Loading review form…
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -210,7 +245,7 @@ export default function SelfReviewPage() {
                       </span>
                       <span className="flex-1 text-sm">{section.label}</span>
                       {incomplete ? (
-                        <AlertCircle size={14} className="text-rose-400" title="Incomplete" />
+                        <AlertCircle size={14} className="text-rose-400" aria-label="Incomplete" />
                       ) : (
                         <CheckCircle2 size={14} className="text-emerald-500" />
                       )}
@@ -269,7 +304,7 @@ export default function SelfReviewPage() {
                 <textarea
                   value={currentText}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  placeholder={current.placeholder}
+                  placeholder={current.placeholder || 'Write your reflection…'}
                   rows={6}
                   className={`w-full px-4 py-3 text-slate-700 border rounded-xl focus:outline-none focus:ring-2 resize-y transition-all placeholder:text-slate-400 ${
                     isIncomplete(currentSection)
@@ -340,7 +375,7 @@ export default function SelfReviewPage() {
               {/* Contextual tip always visible */}
               <div className="mt-5 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 flex items-start gap-2">
                 <Lightbulb size={14} className="text-indigo-400 shrink-0 mt-0.5" />
-                <span>{current.tip}</span>
+                <span>{current.tip || 'Add enough detail so your manager can give useful feedback.'}</span>
               </div>
 
               {/* Navigation between sections */}
@@ -348,7 +383,10 @@ export default function SelfReviewPage() {
                 <button
                   onClick={() => {
                     const idx = sections.findIndex(s => s.id === currentSection);
-                    if (idx > 0) setCurrentSection(sections[idx - 1].id);
+                    if (idx > 0) {
+                      const prev = sections[idx - 1];
+                      if (prev) setCurrentSection(prev.id);
+                    }
                   }}
                   disabled={sections.findIndex(s => s.id === currentSection) === 0}
                   className="px-4 py-2 text-sm text-slate-500 disabled:opacity-30 hover:text-slate-700 transition"
@@ -371,7 +409,10 @@ export default function SelfReviewPage() {
                   <button
                     onClick={() => {
                       const idx = sections.findIndex(s => s.id === currentSection);
-                      if (idx < sections.length - 1) setCurrentSection(sections[idx + 1].id);
+                      if (idx < sections.length - 1) {
+                        const nxt = sections[idx + 1];
+                        if (nxt) setCurrentSection(nxt.id);
+                      }
                     }}
                     className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-1"
                   >

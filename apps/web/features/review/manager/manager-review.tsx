@@ -1,7 +1,15 @@
 // app/team/review/[id]/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  createElement,
+  type ComponentType,
+} from 'react';
 import {
   Star,
   Target,
@@ -14,6 +22,11 @@ import {
   Lightbulb,
   AlertCircle,
 } from 'lucide-react';
+import { useActiveReviewCycle } from '../hooks/queries';
+import {
+  DEFAULT_MANAGER_OVERVIEW_QUESTIONS,
+  normalizeReviewQuestions,
+} from '../review-form-defaults';
 
 // ---------- Types ----------
 type Rating = 1 | 2 | 3 | 4 | 5;
@@ -27,10 +40,7 @@ interface Competency {
 }
 
 interface ReviewData {
-  strengths: string;
-  improvements: string;
-  goals: string;
-  feedback: string;
+  overview: Record<string, string>;
   competencies: Competency[];
 }
 
@@ -62,29 +72,50 @@ const getQuality = (text: string): { label: string; color: string } => {
 const TEXT_MIN = 20;
 const isTextValid = (text: string) => text.trim().length >= TEXT_MIN;
 
-function getValidationSummary(data: ReviewData): { overviewDone: boolean; competenciesDone: boolean; allDone: boolean } {
-  const overviewDone =
-    isTextValid(data.strengths) &&
-    isTextValid(data.improvements) &&
-    isTextValid(data.goals) &&
-    isTextValid(data.feedback);
+function getValidationSummary(
+  data: ReviewData,
+  overviewQuestionIds: string[],
+): { overviewDone: boolean; competenciesDone: boolean; allDone: boolean } {
+  const overviewDone = overviewQuestionIds.every((id) =>
+    isTextValid(data.overview[id] ?? ''),
+  );
 
-  const competenciesDone =
-    data.competencies.every(c => c.rating !== null && isTextValid(c.comment));
+  const competenciesDone = data.competencies.every(
+    (c) => c.rating !== null && isTextValid(c.comment),
+  );
 
   return { overviewDone, competenciesDone, allDone: overviewDone && competenciesDone };
 }
 
+const OVERVIEW_ICONS = [Trophy, Target, TrendingUp, MessageSquare, Star] as const;
+
 // ---------- Main Component ----------
 export default function ManagerReviewPage() {
+  const { data: activeCycle } = useActiveReviewCycle();
+  const overviewQuestions = useMemo(
+    () =>
+      normalizeReviewQuestions(
+        activeCycle?.managerReviewQuestions,
+        DEFAULT_MANAGER_OVERVIEW_QUESTIONS,
+      ),
+    [activeCycle?.managerReviewQuestions],
+  );
+
   const [activeTab, setActiveTab] = useState<'overview' | 'competencies'>('overview');
   const [reviewData, setReviewData] = useState<ReviewData>({
-    strengths: '',
-    improvements: '',
-    goals: '',
-    feedback: '',
+    overview: {},
     competencies: defaultCompetencies,
   });
+
+  useEffect(() => {
+    setReviewData((prev) => {
+      const overview: Record<string, string> = {};
+      for (const q of overviewQuestions) {
+        overview[q.id] = prev.overview[q.id] ?? '';
+      }
+      return { ...prev, overview };
+    });
+  }, [overviewQuestions]);
   const [savedStatus, setSavedStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [overallScore, setOverallScore] = useState(0);
@@ -106,9 +137,12 @@ export default function ManagerReviewPage() {
     }, 800);
   }, []);
 
-  const updateTextField = (field: keyof Omit<ReviewData, 'competencies'>, value: string) => {
-    setReviewData(prev => {
-      const updated = { ...prev, [field]: value };
+  const updateOverviewField = (id: string, value: string) => {
+    setReviewData((prev) => {
+      const updated = {
+        ...prev,
+        overview: { ...prev.overview, [id]: value },
+      };
       handleAutoSave(updated);
       return updated;
     });
@@ -131,7 +165,8 @@ export default function ManagerReviewPage() {
     return { len, quality };
   };
 
-  const validation = getValidationSummary(reviewData);
+  const overviewQuestionIds = overviewQuestions.map((q) => q.id);
+  const validation = getValidationSummary(reviewData, overviewQuestionIds);
 
   if (submitted) {
     return (
@@ -199,38 +234,27 @@ export default function ManagerReviewPage() {
           <div className="p-6 md:p-8">
             {activeTab === 'overview' ? (
               <div className="space-y-8">
-                <Section
-                  icon={<Trophy size={18} />}
-                  title="Strengths"
-                  prompt="What did they do exceptionally well?"
-                  tip="Highlight specific achievements or behaviors."
-                  value={reviewData.strengths}
-                  onChange={(val) => updateTextField('strengths', val)}
-                />
-                <Section
-                  icon={<Target size={18} />}
-                  title="Areas for improvement"
-                  prompt="What could they develop further?"
-                  tip="Be constructive and actionable."
-                  value={reviewData.improvements}
-                  onChange={(val) => updateTextField('improvements', val)}
-                />
-                <Section
-                  icon={<TrendingUp size={18} />}
-                  title="Goals for next quarter"
-                  prompt="What should they focus on in the coming months?"
-                  tip="Set SMART goals together."
-                  value={reviewData.goals}
-                  onChange={(val) => updateTextField('goals', val)}
-                />
-                <Section
-                  icon={<MessageSquare size={18} />}
-                  title="Additional feedback"
-                  prompt="Any other comments or context?"
-                  tip="This is confidential between you and HR."
-                  value={reviewData.feedback}
-                  onChange={(val) => updateTextField('feedback', val)}
-                />
+                {overviewQuestions.map((q, i) => {
+                  const IconComp = OVERVIEW_ICONS[i % OVERVIEW_ICONS.length];
+                  return (
+                    <Section
+                      key={q.id}
+                      icon={createElement(
+                        IconComp as ComponentType<{ size?: number }>,
+                        { size: 18 },
+                      )}
+                      title={q.label}
+                      prompt={q.prompt}
+                      tip={q.tip ?? ''}
+                      placeholder={
+                        q.placeholder ??
+                        'Write your feedback here... (minimum 20 characters)'
+                      }
+                      value={reviewData.overview[q.id] ?? ''}
+                      onChange={(val) => updateOverviewField(q.id, val)}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="space-y-6">
@@ -410,6 +434,7 @@ function Section({
   title,
   prompt,
   tip,
+  placeholder,
   value,
   onChange,
 }: {
@@ -417,6 +442,7 @@ function Section({
   title: string;
   prompt: string;
   tip: string;
+  placeholder: string;
   value: string;
   onChange: (val: string) => void;
 }) {
@@ -444,7 +470,7 @@ function Section({
             ? 'border-rose-200 focus:ring-rose-500/20 focus:border-rose-400'
             : 'border-slate-200 focus:ring-indigo-500/20 focus:border-indigo-400'
         }`}
-        placeholder="Write your feedback here... (minimum 20 characters)"
+        placeholder={placeholder}
       />
       <div className="flex justify-between text-xs">
         <div className="flex items-center gap-1 text-slate-400">
