@@ -43,6 +43,7 @@ const navItems = [
       { title: "Former Employees",    url: `${BASE_PATH}/employees/former` },
       { title: "Teams & Departments", url: `${BASE_PATH}/employees/teams`  },
       { title: "Add New Employee",    url: `${BASE_PATH}/admin/add-employer`},
+      { title: "Organization Chart",  url: `${BASE_PATH}//org`},
     ],
   },
   {

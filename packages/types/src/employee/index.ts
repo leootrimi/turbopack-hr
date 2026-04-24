@@ -35,7 +35,20 @@ export const EmployeeRowSchema = z.object({
   department: z.string(),
 });
 
+export const OrgChartEmployeeSchema = z.object({
+  id: z.number(),
+  firstName: z.string(),
+  lastName: z.string(),
+  jobTitle: z.string(),
+  department: z.string(),
+  managerId: z.number().nullable(),
+  avatar: z.string().optional(),
+});
+
+export type OrgChartEmployee = z.infer<typeof OrgChartEmployeeSchema>;
+
 export type EmployeeRow = z.infer<typeof EmployeeRowSchema>;
+
 
 export const CreateEmployeeDtoSchema = z.object({
   personal: z.object({

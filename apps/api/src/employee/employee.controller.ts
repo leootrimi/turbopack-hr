@@ -11,6 +11,11 @@ export class EmployeeController {
     return this.employeeService.create(createEmployeeDto);
   }
 
+  @Get('org-chart')
+  getOrgChart() {
+    return this.employeeService.getOrgChart();
+  }
+
   @Get()
   findAll() {
     return this.employeeService.findAll();

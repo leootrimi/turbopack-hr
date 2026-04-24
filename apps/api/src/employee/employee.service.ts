@@ -231,4 +231,20 @@ export class EmployeeService {
 
     return this.getEmployeeTeam(employeeId);
   }
+
+  async getOrgChart() {
+    const results = await this.drizzle.db
+      .select({
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        jobTitle: jobInfo.jobTitle,
+        department: jobInfo.department,
+        managerId: jobInfo.managerId,
+      })
+      .from(employee)
+      .leftJoin(jobInfo, eq(jobInfo.employeeId, employee.id));
+
+    return results;
+  }
 }
