@@ -3,6 +3,7 @@
 import React from "react";
 import { ClipboardList, CalendarRange, Info, Loader2, CheckCircle2, Clock } from "lucide-react";
 import { useReviewHistory } from "../hooks/queries";
+import { formatDate } from "@/lib/utils";
 
 interface PastReviewsProps {
   employeeId: string;
@@ -66,7 +67,7 @@ export default function PastReviews({ employeeId, hideBanner = false }: PastRevi
                 <p className="text-sm font-medium text-slate-800">{c.title}</p>
                 <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-400">
                   <CalendarRange size={11} />
-                  {c.startDate ? new Date(c.startDate).toLocaleDateString() : 'N/A'} - {c.endDate ? new Date(c.endDate).toLocaleDateString() : 'Present'}
+                  {c.startDate ? formatDate(c.startDate) : 'N/A'} - {c.endDate ? formatDate(c.endDate) : 'Present'}
                 </div>
               </div>
               <div className="flex flex-col items-end gap-1">

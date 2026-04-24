@@ -91,7 +91,7 @@ export function AdminJobsPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
               >
                 View Applications
-            </button>
+              </button>
             </Link>
             <button
               onClick={() => { setEditing(null); setModalOpen(true); }}
@@ -143,11 +143,38 @@ export function AdminJobsPage() {
           </div>
         )}
 
-        {/* sections */}
-        <SectionPanel title="Open Positions" jobs={open} accent="#22c55e" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
-        <SectionPanel title="Drafts" jobs={drafts} accent="#94a3b8" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
-        <SectionPanel title="Closed / Past" jobs={closed} accent="#ef4444" onEdit={(j) => { setEditing(j); setModalOpen(true); }} onDelete={(id) => { }} onView={setPreview} />
+        {(statusFilter === "All" || statusFilter === "Open") && (
+          <SectionPanel
+            title="Open Positions"
+            jobs={open}
+            accent="#22c55e"
+            onEdit={(j) => { setEditing(j); setModalOpen(true); }}
+            onDelete={(id) => { }}
+            onView={setPreview}
+          />
+        )}
 
+        {(statusFilter === "All" || statusFilter === "Draft") && (
+          <SectionPanel
+            title="Drafts"
+            jobs={drafts}
+            accent="#94a3b8"
+            onEdit={(j) => { setEditing(j); setModalOpen(true); }}
+            onDelete={(id) => { }}
+            onView={setPreview}
+          />
+        )}
+
+        {(statusFilter === "All" || statusFilter === "Closed") && (
+          <SectionPanel
+            title="Closed / Past"
+            jobs={closed}
+            accent="#ef4444"
+            onEdit={(j) => { setEditing(j); setModalOpen(true); }}
+            onDelete={(id) => { }}
+            onView={setPreview}
+          />
+        )}
       </div>
 
       <JobFormModal open={modalOpen} onClose={() => { setModalOpen(false); setEditing(null); }} onSave={handleSave} editing={editing} />

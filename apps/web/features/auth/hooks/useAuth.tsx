@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 
-interface User {
+export interface User {
   id: string;
   email?: string;
   role?: string;
@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(decoded);
         setIsAuthenticated(true);
       } catch (err) {
-        console.error("Invalid token on startup", err);
         localStorage.removeItem("auth_token");
         localStorage.removeItem("refresh_token");
       }

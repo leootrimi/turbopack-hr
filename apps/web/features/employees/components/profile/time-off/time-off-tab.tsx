@@ -29,7 +29,7 @@ export default function TimeOffTab({ timeOffBalance, leaveRequests }: TimeOffTab
   const balances = Array.isArray(timeOffBalance) ? timeOffBalance : [];
 
   const cardStates = balances
-    .filter(b => Number(b.total) < 9999) // exclude untracked or unlimited
+    .filter(b => Number(b.total) < 9999)
     .map(b => ({
       days: Number(b.total) - Number(b.used),
       title: b.typeName,

@@ -14,12 +14,11 @@ interface ReviewsTabProps {
 
 export default function ReviewsTab({ employeeId }: ReviewsTabProps) {
   const { data: activeCycle, isLoading, error } = useActiveReviewCycle();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const isSelf = user?.employeeId === parseInt(employeeId);
   const [activeSubTab, setActiveSubTab] = useState<"self" | "manager" | "past">("self");
 
-  // Set initial sub-tab once auth and context are loaded
   useEffect(() => {
     if (isSelf) {
       setActiveSubTab("self");
@@ -45,10 +44,13 @@ export default function ReviewsTab({ employeeId }: ReviewsTabProps) {
     );
   }
 
+  if (isAdmin) {
+    return <PastReviews employeeId={employeeId} hideBanner={true} />;
+  }
+
   if (activeCycle && activeCycle.enabled) {
     return (
       <div className="flex flex-col min-h-[600px]">
-        {/* Sub-navigation Tabs */}
         <div className="bg-white border-b border-slate-100 px-6 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
@@ -98,7 +100,6 @@ export default function ReviewsTab({ employeeId }: ReviewsTabProps) {
           </div>
         </div>
 
-        {/* Form Content */}
         <div className="flex-1">
           {activeSubTab === "self" && (
             <SelfReviewPage employeeId={employeeId} cycleId={activeCycle.id} />
