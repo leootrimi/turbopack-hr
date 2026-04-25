@@ -15,6 +15,7 @@ import { EquipmentForm } from '@repo/types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('equipments')
+@UseGuards(JwtAuthGuard)
 export class EquipmentsController {
   constructor(private readonly equipmentsService: EquipmentsService) {}
 

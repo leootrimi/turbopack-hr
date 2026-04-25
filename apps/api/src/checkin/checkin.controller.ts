@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CheckinService } from './checkin.service';
 import { CreateCheckinDto } from './dto/create-checkin.dto';
 import { UpdateCheckinDto } from './dto/update-checkin.dto';
 
 @Controller('api/checkin')
+@UseGuards(JwtAuthGuard)
 export class CheckinController {
   constructor(private readonly checkinService: CheckinService) {}
 

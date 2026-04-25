@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { AnnouncementService } from './announcement.service';
+import { Controller, Get, Post, Body, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AnnouncementService } from './announcement.service';
 
 @Controller('announcements')
+@UseGuards(JwtAuthGuard)
 export class AnnouncementController {
   constructor(private readonly announcementService: AnnouncementService) {}
 
@@ -11,7 +12,6 @@ export class AnnouncementController {
     return this.announcementService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Request() req: any, @Body() data: any) {
     return this.announcementService.create({

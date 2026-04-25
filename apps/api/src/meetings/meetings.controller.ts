@@ -13,16 +13,15 @@ import { CreateMeetingDto } from './dto/create-meeting.dto';
 import { MeetingsService } from './meetings.service';
 
 @Controller('meetings')
+@UseGuards(JwtAuthGuard)
 export class MeetingsController {
   constructor(private readonly meetingsService: MeetingsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Request() req: { user: { id: number } }) {
     return this.meetingsService.findAllForUser(req.user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Request() req: { user: { id: number } },
@@ -31,7 +30,6 @@ export class MeetingsController {
     return this.meetingsService.create(req.user.id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(
     @Request() req: { user: { id: number } },

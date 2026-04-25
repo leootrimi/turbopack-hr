@@ -7,7 +7,6 @@ import { JobsService } from './jobs.service';
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     return this.jobsService.findAll();

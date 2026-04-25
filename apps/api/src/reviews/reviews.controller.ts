@@ -7,7 +7,9 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ReviewsService,
   CreateReviewCycleDto,
@@ -17,6 +19,7 @@ import {
 } from './reviews.service';
 
 @Controller('api/reviews')
+@UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 

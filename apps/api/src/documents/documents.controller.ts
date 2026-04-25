@@ -8,11 +8,14 @@ import {
   UploadedFile,
   UseInterceptors,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DocumentsService } from './documents.service';
 
 @Controller('employees/:employeeId/documents')
+@UseGuards(JwtAuthGuard)
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
