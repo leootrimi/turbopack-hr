@@ -66,6 +66,7 @@ export function useApplyForJob() {
       name: string;
       email: string;
       notes?: string;
+      cvUrl?: string;
     }) => {
       const { applyForJob } = await import("../api/index");
       return applyForJob(data);

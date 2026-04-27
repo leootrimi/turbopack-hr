@@ -70,15 +70,24 @@ const DetailPanel = ({
           </div>
 
           {/* CV Link */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-1">Resume/CV</h4>
-            <a
-              href={application.cvUrl}
-              className="text-sm text-indigo-600 hover:underline flex items-center gap-1"
-            >
-              View attached CV →
-            </a>
-          </div>
+          {application.cvUrl ? (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-1">Resume/CV</h4>
+              <a
+                href={application.cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-indigo-600 hover:underline flex items-center gap-1"
+              >
+                View attached CV →
+              </a>
+            </div>
+          ) : (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-1">Resume/CV</h4>
+              <p className="text-sm text-slate-400">No CV attached</p>
+            </div>
+          )}
 
           {/* Timeline */}
           <div>

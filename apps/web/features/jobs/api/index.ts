@@ -80,7 +80,24 @@ export const rejectApplication = async (id: string) => {
   });
 };
 
-export const applyForJob = async (data: { jobId: string; name: string; email: string; notes?: string }) => {
+export const uploadCv = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to upload CV");
+  }
+
+  const data = await response.json();
+  return data.url;
+};
+
+export const applyForJob = async (data: { jobId: string; name: string; email: string; notes?: string; cvUrl?: string }) => {
   return await makeRequest({
     url: "api/applications",
     method: "POST",

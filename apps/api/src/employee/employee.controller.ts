@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { EmployeeService } from './employee.service';
@@ -32,17 +33,28 @@ export class EmployeeController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.employeeService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.employeeService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: Partial<CreateEmployeeDto>,
+  ) {
+    return this.employeeService.update(id, data);
   }
 
   @Get(':id/team')
-  getTeam(@Param('id') id: string) {
-    return this.employeeService.getEmployeeTeam(+id);
+  getTeam(@Param('id', ParseIntPipe) id: number) {
+    return this.employeeService.getEmployeeTeam(id);
   }
 
   @Patch(':id/team')
-  updateTeam(@Param('id') id: string, @Body() body: { teamId: number | null }) {
-    return this.employeeService.updateEmployeeTeam(+id, body.teamId);
+  updateTeam(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { teamId: number | null },
+  ) {
+    return this.employeeService.updateEmployeeTeam(id, body.teamId);
   }
 }

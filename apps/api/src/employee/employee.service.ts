@@ -232,6 +232,114 @@ export class EmployeeService {
     return this.getEmployeeTeam(employeeId);
   }
 
+  async update(id: number, dto: Partial<CreateEmployeeDto>) {
+    const existing = await this.drizzle.db
+      .select()
+      .from(employee)
+      .where(eq(employee.id, id))
+      .limit(1);
+
+    if (!existing[0]) {
+      throw new NotFoundException(`Employee with ID ${id} not found`);
+    }
+
+    await this.drizzle.db.transaction(async (tx) => {
+      if (dto.personal) {
+        const personalData = dto.personal;
+        await tx
+          .update(employee)
+          .set({
+            firstName: personalData.firstName,
+            lastName: personalData.lastName,
+            email: personalData.email,
+            personalEmail: personalData.personalEmail,
+            phone: personalData.phone,
+            dateOfBirth: personalData.dateOfBirth
+              ? new Date(personalData.dateOfBirth)
+              : undefined,
+            personalNumber: personalData.personalNumber,
+            address: personalData.address,
+            emergencyContact: personalData.emergencyContact,
+          })
+          .where(eq(employee.id, id));
+      }
+
+      if (dto.job) {
+        const jobData = dto.job;
+        const existingJob = await tx
+          .select()
+          .from(jobInfo)
+          .where(eq(jobInfo.employeeId, id))
+          .limit(1);
+
+        if (existingJob[0]) {
+          await tx
+            .update(jobInfo)
+            .set({
+              jobTitle: jobData.jobTitle,
+              department: jobData.department,
+              teamId: jobData.teamId,
+              managerId: jobData.managerId ?? null,
+              employmentType: jobData.employmentType,
+              startDate: jobData.startDate
+                ? new Date(jobData.startDate)
+                : undefined,
+              endDate: jobData.endDate ? new Date(jobData.endDate) : undefined,
+              workLocation: jobData.workLocation,
+            })
+            .where(eq(jobInfo.employeeId, id));
+        } else if (jobData.jobTitle || jobData.department) {
+          await tx.insert(jobInfo).values({
+            employeeId: id,
+            jobTitle: jobData.jobTitle,
+            department: jobData.department,
+            teamId: jobData.teamId,
+            managerId: jobData.managerId ?? null,
+            employmentType: jobData.employmentType,
+            startDate: jobData.startDate ? new Date(jobData.startDate) : new Date(),
+            endDate: jobData.endDate ? new Date(jobData.endDate) : null,
+            workLocation: jobData.workLocation,
+          });
+        }
+      }
+
+      if (dto.compensation) {
+        const compData = dto.compensation;
+        const existingComp = await tx
+          .select()
+          .from(compensation)
+          .where(eq(compensation.employeeId, id))
+          .limit(1);
+
+        if (existingComp[0]) {
+          await tx
+            .update(compensation)
+            .set({
+              salaryAmount: compData.salaryAmount,
+              salaryType: compData.salaryType,
+              currency: compData.currency,
+              paymentFrequency: compData.paymentFrequency,
+              bankAccount: compData.bankAccount,
+              bonusEligible: compData.bonusEligible,
+            })
+            .where(eq(compensation.employeeId, id));
+        } else if (compData.salaryAmount) {
+          await tx.insert(compensation).values({
+            employeeId: id,
+            salaryAmount: compData.salaryAmount,
+            salaryType: compData.salaryType,
+            currency: compData.currency,
+            paymentFrequency: compData.paymentFrequency,
+            bankAccount: compData.bankAccount,
+            bonusEligible: compData.bonusEligible,
+          });
+        }
+      }
+    });
+
+    return this.findOne(id);
+  }
+
   async getOrgChart() {
     const results = await this.drizzle.db
       .select({

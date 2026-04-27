@@ -19,6 +19,7 @@ export class ApplicationsController {
       name: data.name,
       email: data.email,
       notes: data.notes,
+      cvUrl: data.cvUrl,
     });
   }
 

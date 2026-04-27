@@ -33,11 +33,11 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check if error is 401 and it's not a retry
-    // Skip refresh logic for login endpoint to prevent page reloads on bad credentials
+    // Skip refresh logic for auth endpoints to prevent infinite loops
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/login')
+      !originalRequest.url?.includes('/api/auth')
     ) {
       originalRequest._retry = true;
 
@@ -48,7 +48,7 @@ api.interceptors.response.use(
         }
 
         // Attempt to refresh the token
-        const response = await axios.post(`${BASE_URL}/auth/refresh`, {
+        const response = await axios.post(`${BASE_URL}/api/auth/refresh`, {
           refresh_token: refreshToken,
         });
 
@@ -62,11 +62,11 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, clear tokens and redirect to default
+        // If refresh fails, clear tokens and redirect to login
         localStorage.removeItem('auth_token');
         localStorage.removeItem('refresh_token');
         if (typeof window !== 'undefined') {
-          window.location.href = 'http://localhost:3001/';
+          window.location.href = '/';
         }
         return Promise.reject(refreshError);
       }

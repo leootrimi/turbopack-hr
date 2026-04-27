@@ -50,3 +50,16 @@ export async function updateEmployeeTeam(id: string, teamId: number | null) {
     throw error;
   }
 }
+
+export async function updateEmployee(id: string, data: any) {
+  try {
+    const result = await makeRequest<any>({
+      url: `/api/employee/${id}`,
+      method: "PATCH",
+      data,
+    });
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

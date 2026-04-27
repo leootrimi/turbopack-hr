@@ -4,9 +4,10 @@ import React from "react";
 interface ProfileHeaderProps {
   name: string;
   jobTitle: string;
+  onEdit?: () => void;
 }
 
-const ProfileHeader = ({ name, jobTitle }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, jobTitle, onEdit }: ProfileHeaderProps) => {
   const initials = name
     .split(" ")
     .map((n) => n[0])
@@ -33,9 +34,14 @@ const ProfileHeader = ({ name, jobTitle }: ProfileHeaderProps) => {
         </div>
       </div>
       <div className="flex space-x-2">
-        <button className="p-2 hover:bg-gray-100 rounded-lg">
-          <Edit2 className="w-4 h-4 text-gray-600" />
-        </button>
+        {onEdit && (
+          <button 
+            className="p-2 hover:bg-gray-100 rounded-lg"
+            onClick={onEdit}
+          >
+            <Edit2 className="w-4 h-4 text-gray-600" />
+          </button>
+        )}
         <button className="p-2 hover:bg-gray-100 rounded-lg">
           <Share className="w-4 h-4 text-gray-600" />
         </button>

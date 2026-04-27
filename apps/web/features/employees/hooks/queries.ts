@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getEmployees, getEmployee, getEmployeeTeam, updateEmployeeTeam } from "../api";
+import { getEmployees, getEmployee, getEmployeeTeam, updateEmployeeTeam, updateEmployee } from "../api";
 import { EmployeeRow } from "@repo/types";
 
 export function useEmployees() {
@@ -34,6 +34,16 @@ export function useUpdateEmployeeTeam(employeeId: string) {
     mutationFn: (teamId: number | null) => updateEmployeeTeam(employeeId, teamId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employee", employeeId, "team"] });
+      queryClient.invalidateQueries({ queryKey: ["employee", employeeId] });
+    },
+  });
+}
+
+export function useUpdateEmployee(employeeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: any) => updateEmployee(employeeId, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employee", employeeId] });
     },
   });

@@ -64,6 +64,7 @@ export class ApplicationsService {
     phone?: string;
     location?: string;
     notes?: string;
+    cvUrl?: string;
   }) {
     const [app] = await this.drizzle.db
       .insert(jobApplications)
@@ -74,6 +75,7 @@ export class ApplicationsService {
         phone: data.phone,
         location: data.location,
         notes: data.notes,
+        cvUrl: data.cvUrl,
         stage: 'Applied',
       })
       .returning();

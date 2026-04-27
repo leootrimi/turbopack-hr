@@ -16,7 +16,7 @@ import { UpdateTeamDto } from './dto/update-team.dto';
 @Controller('api/teams')
 @UseGuards(JwtAuthGuard)
 export class TeamsController {
-  constructor(private readonly teamsService: TeamsService) {}
+  constructor(private readonly teamsService: TeamsService) { }
 
   @Post()
   create(@Body() createTeamDto: CreateTeamDto) {

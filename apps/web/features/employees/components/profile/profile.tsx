@@ -19,10 +19,12 @@ import { useAuth } from "../../../auth/hooks/useAuth";
 import { getVisibleTabs } from "./config/tabs.config";
 import { Role } from "../../../../config/rbac";
 import ReviewsTab from "../../../review/components/ReviewsTab";
+import { EditEmployeeModal } from "./edit-employee-modal";
 
 const UserProfile = ({ id }: { id: string }) => {
   const { data: employeeData, isLoading, error } = useEmployee(id);
   const [activeTab, setActiveTab] = useState("Activity");
+  const [showEditModal, setShowEditModal] = useState(false);
   const { user } = useAuth();
 
   const visibleTabs = getVisibleTabs(user?.role as Role);
@@ -52,6 +54,12 @@ const UserProfile = ({ id }: { id: string }) => {
 
   return (
     <div className="min-h-screen bg-background p-6">
+      <EditEmployeeModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        employee={employeeData}
+        employeeId={id}
+      />
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
@@ -59,6 +67,7 @@ const UserProfile = ({ id }: { id: string }) => {
               <ProfileHeader 
                 name={`${personal.firstName} ${personal.lastName}`}
                 jobTitle={`${job.jobTitle} - ${job.department}`}
+                onEdit={() => setShowEditModal(true)}
               />
 
               <div className="grid grid-cols-3 gap-2 mb-6">

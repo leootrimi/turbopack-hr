@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, MapPin, Clock, Wifi, Building2, Send, CheckCircle2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, MapPin, Clock, Wifi, Building2, Send, CheckCircle2, Upload, X } from "lucide-react";
 import { JobPost } from "./mock";
 import { DeptBadge, TypeBadge, formatDate } from "./shared";
 import { useApplyForJob } from "../hooks/queries";
+import { uploadCv } from "../api";
 
 interface Props {
   job: JobPost;
@@ -27,12 +28,52 @@ function BulletList({ items }: { items: string[] }) {
 export function JobDetailPage({ job, onBack }: Props) {
   const applyMutation = useApplyForJob();
   const [applied, setApplied]   = useState(false);
-  const [form, setForm]         = useState({ name: "", email: "", cover: "" });
+  const [form, setForm]         = useState({ name: "", email: "", cvUrl: "" });
+  const [uploading, setUploading] = useState(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const locationIcon =
     job.locationType === "Remote" ? <Wifi size={14} /> :
     job.locationType === "Hybrid" ? <Building2 size={14} /> :
                                      <MapPin size={14} />;
+
+  const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please upload a PDF or Word document");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    setCvFile(file);
+    setUploading(true);
+
+    try {
+      const url = await uploadCv(file);
+      setForm((f) => ({ ...f, cvUrl: url }));
+    } catch (error) {
+      console.error("Failed to upload CV:", error);
+      alert("Failed to upload CV. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeCv = () => {
+    setCvFile(null);
+    setForm((f) => ({ ...f, cvUrl: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleApply = async () => {
     if (!form.name.trim() || !form.email.trim()) return;
@@ -42,7 +83,7 @@ export function JobDetailPage({ job, onBack }: Props) {
         jobId: job.id,
         name: form.name,
         email: form.email,
-        notes: form.cover,
+        cvUrl: form.cvUrl || undefined,
       });
       setApplied(true);
     } catch (error) {
@@ -149,13 +190,35 @@ export function JobDetailPage({ job, onBack }: Props) {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-600">Cover Letter <span className="text-slate-400 font-normal">(optional)</span></label>
-                    <textarea
-                      value={form.cover}
-                      onChange={(e) => setForm((f) => ({ ...f, cover: e.target.value }))}
-                      placeholder="Tell us why you're a great fit…"
-                      rows={4}
-                      className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-slate-900/10 placeholder-slate-400 resize-none"
+                    <label className="text-xs font-semibold text-slate-600">Upload CV <span className="text-slate-400 font-normal">(PDF or Word, max 5MB)</span></label>
+                    {cvFile ? (
+                      <div className="flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                        <span className="text-sm text-slate-600 truncate">{cvFile.name}</span>
+                        <button type="button" onClick={removeCv} className="text-slate-400 hover:text-slate-600">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center cursor-pointer hover:border-slate-300 transition-colors"
+                      >
+                        {uploading ? (
+                          <span className="text-sm text-slate-400">Uploading...</span>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1">
+                            <Upload size={20} className="text-slate-400" />
+                            <span className="text-xs text-slate-400">Click to upload your CV</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleCvUpload}
+                      className="hidden"
                     />
                   </div>
                 </div>
